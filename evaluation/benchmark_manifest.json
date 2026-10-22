@@ -1,0 +1,317 @@
+{
+  "manifest_version": "1.0.0",
+  "total_cases": 15,
+  "description": "Ground-truth multi-subject benchmark manifest for evaluating EduTrace AI divergence localization and error taxonomy classification accuracy.",
+  "target_metrics": {
+    "target_localization_accuracy": 0.90,
+    "target_macro_f1": 0.85
+  },
+  "cases": [
+    {
+      "case_id": "case_calc_01",
+      "subject": "Calculus III",
+      "topic": "Integration by Parts: Repeated Iteration",
+      "archetype": "procedural",
+      "question_text": "Evaluate \\int x^2 \\cos(x) \\, dx",
+      "canonical_steps": [
+        "u = x^2, dv = cos(x)dx => du = 2x dx, v = sin(x)",
+        "= x^2 sin(x) - \\int 2x sin(x) dx",
+        "u2 = 2x, dv2 = sin(x)dx => v2 = -cos(x). Apply uv - \\int v du with outer minus: - [ -2x cos(x) - \\int -2cos(x) dx ]",
+        "= x^2 sin(x) + 2x cos(x) - 2sin(x) + C"
+      ],
+      "student_steps": [
+        "u = x^2, dv = cos(x)dx => du = 2x dx, v = sin(x)",
+        "= x^2 sin(x) - \\int 2x sin(x) dx",
+        "= x^2 sin(x) - [ -2x cos(x) - \\int -2cos(x) dx ]",
+        "= x^2 sin(x) + 2x cos(x) - 2sin(x)"
+      ],
+      "ground_truth_divergence_step": 3,
+      "ground_truth_error_taxonomy": "procedural_calculation",
+      "expected_marks": 5.0,
+      "total_marks": 10.0
+    },
+    {
+      "case_id": "case_calc_02",
+      "subject": "Calculus III",
+      "topic": "Method Selection: Substitution vs Arctan Standard Form",
+      "archetype": "procedural",
+      "question_text": "Evaluate \\int \\frac{1}{1+x^2} \\, dx",
+      "canonical_steps": [
+        "Recognize standard derivative form d/dx(arctan(x)) = 1/(1+x^2)",
+        "Write antiderivative directly: arctan(x) + C"
+      ],
+      "student_steps": [
+        "Let u = 1 + x^2 => du = 2x dx",
+        "Integral = (1/2x) \\int (1/u) du = (1/2x) ln|1+x^2| + C"
+      ],
+      "ground_truth_divergence_step": 2,
+      "ground_truth_error_taxonomy": "method_selection",
+      "expected_marks": 1.0,
+      "total_marks": 5.0
+    },
+    {
+      "case_id": "case_calc_03",
+      "subject": "Calculus III",
+      "topic": "Improper Integrals: Interior Discontinuity",
+      "archetype": "conceptual",
+      "question_text": "Evaluate \\int_{-1}^{1} \\frac{1}{x^2} \\, dx",
+      "canonical_steps": [
+        "Identify essential infinite discontinuity at x = 0",
+        "Split into improper limit integrals: lim_{t->0^-} \\int_{-1}^t x^{-2} dx + lim_{s->0^+} \\int_s^1 x^{-2} dx",
+        "Show both limits evaluate to \\infty, therefore integral diverges"
+      ],
+      "student_steps": [
+        "Antiderivative of x^{-2} is -1/x",
+        "Evaluate [-1/x] from -1 to 1 = (-1/1) - (-1/-1) = -1 - 1 = -2"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "conceptual_misunderstanding",
+      "expected_marks": 0.0,
+      "total_marks": 6.0
+    },
+    {
+      "case_id": "case_calc_04",
+      "subject": "Calculus III",
+      "topic": "First-Order Linear ODE: Integrating Factor",
+      "archetype": "procedural",
+      "question_text": "Solve 2x y' + y = x^3",
+      "canonical_steps": [
+        "Divide entire equation by 2x to put in standard form: y' + (1/(2x))y = (1/2)x^2",
+        "Compute integrating factor I(x) = e^{\\int (1/(2x))dx} = e^{(1/2)ln(x)} = \\sqrt{x}",
+        "Multiply and integrate: \\sqrt{x} y = \\int (1/2)x^{5/2} dx = (1/7)x^{7/2} + C",
+        "Divide by \\sqrt{x}: y = (1/7)x^3 + C x^{-1/2}"
+      ],
+      "student_steps": [
+        "P(x) = 1, I(x) = e^{\\int 1 dx} = e^x",
+        "e^x y = \\int e^x x^3 dx"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "method_selection",
+      "expected_marks": 1.0,
+      "total_marks": 8.0
+    },
+    {
+      "case_id": "case_calc_05",
+      "subject": "Calculus III",
+      "topic": "Integration by Parts: Constant of Integration Omission",
+      "archetype": "procedural",
+      "question_text": "Find the general antiderivative \\int x e^x \\, dx",
+      "canonical_steps": [
+        "u = x, dv = e^x dx => du = dx, v = e^x",
+        "= x e^x - \\int e^x dx",
+        "= x e^x - e^x + C"
+      ],
+      "student_steps": [
+        "u = x, dv = e^x dx => du = dx, v = e^x",
+        "= x e^x - \\int e^x dx",
+        "= x e^x - e^x"
+      ],
+      "ground_truth_divergence_step": 3,
+      "ground_truth_error_taxonomy": "rubric_omission",
+      "expected_marks": 4.0,
+      "total_marks": 5.0
+    },
+    {
+      "case_id": "case_calc_06",
+      "subject": "Calculus III",
+      "topic": "Product Rule: Nested Chain Rule",
+      "archetype": "procedural",
+      "question_text": "Differentiate f(x) = x^3 \\sin(2x)",
+      "canonical_steps": [
+        "Apply product rule: f'(x) = (x^3)' \\sin(2x) + x^3 (\\sin(2x))'",
+        "(x^3)' = 3x^2, (\\sin(2x))' = 2\\cos(2x)",
+        "f'(x) = 3x^2 \\sin(2x) + 2x^3 \\cos(2x)"
+      ],
+      "student_steps": [
+        "f'(x) = 3x^2 \\cos(2x)"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "conceptual_misunderstanding",
+      "expected_marks": 0.0,
+      "total_marks": 4.0
+    },
+    {
+      "case_id": "case_calc_07",
+      "subject": "Calculus III",
+      "topic": "Quotient Rule Denominator Omission",
+      "archetype": "procedural",
+      "question_text": "Differentiate g(x) = \\frac{\\ln(x)}{x^2}",
+      "canonical_steps": [
+        "Apply quotient rule: (u/v)' = (u'v - uv') / v^2",
+        "u = ln(x) => u' = 1/x; v = x^2 => v' = 2x",
+        "Numerator: (1/x)(x^2) - \\ln(x)(2x) = x - 2x \\ln(x)",
+        "Denominator: (x^2)^2 = x^4",
+        "g'(x) = (1 - 2\\ln(x)) / x^3"
+      ],
+      "student_steps": [
+        "u = ln(x), v = x^2",
+        "g'(x) = (1/x)(x^2) - ln(x)(2x) = x - 2x ln(x)"
+      ],
+      "ground_truth_divergence_step": 2,
+      "ground_truth_error_taxonomy": "procedural_calculation",
+      "expected_marks": 2.0,
+      "total_marks": 5.0
+    },
+    {
+      "case_id": "case_calc_08",
+      "subject": "Linear Algebra",
+      "topic": "Matrix Determinant: 3x3 Cofactor Expansion Sign Flip",
+      "archetype": "procedural",
+      "question_text": "Compute determinant of A = [[1, 2, 3], [0, 4, 5], [1, 0, 6]]",
+      "canonical_steps": [
+        "Expand along first column: 1*det([[4, 5], [0, 6]]) - 0 + 1*det([[2, 3], [4, 5]])",
+        "Minor 1: 4*6 - 0*5 = 24",
+        "Minor 2: 2*5 - 3*4 = 10 - 12 = -2",
+        "det(A) = 24 + (-2) = 22"
+      ],
+      "student_steps": [
+        "Expand along first column: 1*(24) + 1*(2*5 + 3*4)",
+        "det(A) = 24 + 22 = 46"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "procedural_calculation",
+      "expected_marks": 1.0,
+      "total_marks": 5.0
+    },
+    {
+      "case_id": "case_calc_09",
+      "subject": "Linear Algebra",
+      "topic": "Rank-Nullity Theorem Application",
+      "archetype": "conceptual",
+      "question_text": "If T: R^5 -> R^3 has dim(Ker(T)) = 2, find dim(Im(T)).",
+      "canonical_steps": [
+        "State Rank-Nullity: dim(V) = dim(Ker(T)) + dim(Im(T))",
+        "V = R^5 => dim(V) = 5",
+        "5 = 2 + dim(Im(T)) => dim(Im(T)) = 3"
+      ],
+      "student_steps": [
+        "T maps into R^3 so dim(Im(T)) must be 3 - 2 = 1"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "conceptual_misunderstanding",
+      "expected_marks": 0.0,
+      "total_marks": 4.0
+    },
+    {
+      "case_id": "case_calc_10",
+      "subject": "Calculus III",
+      "topic": "Taylor Series: Expansion Center Misalignment",
+      "archetype": "procedural",
+      "question_text": "Find first 3 non-zero terms of Taylor series for ln(x) centered at a = 1",
+      "canonical_steps": [
+        "f(1) = 0",
+        "f'(x) = 1/x => f'(1) = 1",
+        "f''(x) = -1/x^2 => f''(1) = -1",
+        "f'''(x) = 2/x^3 => f'''(1) = 2",
+        "Series: (x-1) - (1/2)(x-1)^2 + (1/3)(x-1)^3"
+      ],
+      "student_steps": [
+        "f(0) is undefined so Taylor series cannot exist"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "conceptual_misunderstanding",
+      "expected_marks": 0.0,
+      "total_marks": 6.0
+    },
+    {
+      "case_id": "case_calc_11",
+      "subject": "Calculus III",
+      "topic": "L'Hopital Rule Applicability Check",
+      "archetype": "conceptual",
+      "question_text": "Evaluate lim_{x->0} \\frac{\\cos(x)}{x}",
+      "canonical_steps": [
+        "Test direct substitution: cos(0)/0 = 1/0 (determinate infinite limit, not 0/0)",
+        "Conclude limit does not exist (approaches -\\infty from left, +\\infty from right), L'Hopital rule does NOT apply"
+      ],
+      "student_steps": [
+        "Apply L'Hopital: lim -sin(x)/1 = -sin(0)/1 = 0"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "method_selection",
+      "expected_marks": 0.0,
+      "total_marks": 5.0
+    },
+    {
+      "case_id": "case_calc_12",
+      "subject": "Calculus III",
+      "topic": "Trigonometric Substitution: Radical Root",
+      "archetype": "procedural",
+      "question_text": "Evaluate \\int \\frac{1}{\\sqrt{4-x^2}} \\, dx",
+      "canonical_steps": [
+        "Let x = 2\\sin(\\theta) => dx = 2\\cos(\\theta)d\\theta",
+        "\\sqrt{4-4\\sin^2(\\theta)} = 2\\cos(\\theta)",
+        "\\int (2\\cos(\\theta) / 2\\cos(\\theta)) d\\theta = \\int 1 d\\theta = \\theta + C",
+        "Substitute back: \\arcsin(x/2) + C"
+      ],
+      "student_steps": [
+        "Let x = 2sin(theta) => dx = 2cos(theta)dtheta",
+        "Integral = \\int (1 / 4cos^2(theta)) 2cos(theta) dtheta",
+        "= (1/2) \\ln|sec(theta) + tan(theta)|"
+      ],
+      "ground_truth_divergence_step": 2,
+      "ground_truth_error_taxonomy": "procedural_calculation",
+      "expected_marks": 2.0,
+      "total_marks": 6.0
+    },
+    {
+      "case_id": "case_calc_13",
+      "subject": "Calculus III",
+      "topic": "Partial Fraction Decomposition: Repeated Linear Factors",
+      "archetype": "procedural",
+      "question_text": "Decompose \\frac{1}{x(x-1)^2}",
+      "canonical_steps": [
+        "Setup form: A/x + B/(x-1) + C/(x-1)^2",
+        "Multiply by common denominator: 1 = A(x-1)^2 + Bx(x-1) + Cx",
+        "Solve for A, B, C: x=0 => A=1; x=1 => C=1; x=2 => 1 = 1(1) + 2B + 2 => B = -1",
+        "1/x - 1/(x-1) + 1/(x-1)^2"
+      ],
+      "student_steps": [
+        "Setup form: A/x + B/(x-1)^2",
+        "1 = A(x-1)^2 + Bx"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "conceptual_misunderstanding",
+      "expected_marks": 1.0,
+      "total_marks": 6.0
+    },
+    {
+      "case_id": "case_calc_14",
+      "subject": "Physics / Vector Calculus",
+      "topic": "Conservative Vector Field: Curl Evaluation",
+      "archetype": "procedural",
+      "question_text": "Check if F = <2xy, x^2 + z, y> is conservative",
+      "canonical_steps": [
+        "Compute curl(F) = <dF3/dy - dF2/dz, dF1/dz - dF3/dx, dF2/dx - dF1/dy>",
+        "= <1 - 1, 0 - 0, 2x - 2x> = <0, 0, 0>",
+        "Since curl is zero everywhere on simply connected domain, F is conservative"
+      ],
+      "student_steps": [
+        "curl(F) = <d(y)/dy - d(x^2+z)/dz, ...> = <1 - 1, 0, 2x - 2x> = <0,0,0>",
+        "Therefore F is conservative"
+      ],
+      "ground_truth_divergence_step": null,
+      "ground_truth_error_taxonomy": null,
+      "expected_marks": 5.0,
+      "total_marks": 5.0
+    },
+    {
+      "case_id": "case_calc_15",
+      "subject": "Calculus III",
+      "topic": "Definite Integral: Sign Flip on Bounds Inversion",
+      "archetype": "procedural",
+      "question_text": "Evaluate \\int_3^1 (2x + 1) \\, dx",
+      "canonical_steps": [
+        "Antiderivative: [x^2 + x]_3^1",
+        "= (1^2 + 1) - (3^2 + 3) = 2 - 12 = -10"
+      ],
+      "student_steps": [
+        "Antiderivative: [x^2 + x]",
+        "= (3^2 + 3) - (1^2 + 1) = 12 - 2 = 10"
+      ],
+      "ground_truth_divergence_step": 2,
+      "ground_truth_error_taxonomy": "procedural_calculation",
+      "expected_marks": 1.0,
+      "total_marks": 3.0
+    }
+  ]
+}

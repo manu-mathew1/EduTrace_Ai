@@ -94,9 +94,9 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 1.14:** Test Gemini prompt parsing handwritten student answer steps against rubric steps in `ai/forensics/step_parser.py`.
 
 #### P5: Stage 5/6 — Marks Recovery Map & Multimodal Studio
-- [ ] **Task 1.15:** Implement backend recovery and studio router stubs in `backend/api/recovery.py` and `backend/api/interventions.py`.
-- [ ] **Task 1.16:** Setup benchmark manifest in `evaluation/benchmark_manifest.json` for 15 test cases.
-- [ ] **Task 1.17:** Build initial Marks Recovery table and Multimodal Studio tab player in `frontend/src/pages/InterventionStudio.tsx`.
+- [✅ (Completed by P1)] **Task 1.15:** Implement backend recovery and studio router stubs in `backend/api/recovery.py` and `backend/api/interventions.py`.
+- [✅ (Completed by P1)] **Task 1.16:** Setup benchmark manifest in `evaluation/benchmark_manifest.json` for 15 test cases.
+- [✅ (Completed by P1)] **Task 1.17:** Build initial Marks Recovery table and Multimodal Studio tab player in `frontend/src/pages/InterventionStudio.tsx`.
 
 ---
 
