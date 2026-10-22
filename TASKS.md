@@ -74,9 +74,9 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 #### P1: Core Systems, Learning Twin & Integration Gatekeeper
 - [✅] **Task 1.1:** Initialize Git repository, create central GitHub repository (`EduTrace_Ai`), establish `main` and `dev` branches, push initial project scaffold (`contracts.py`, `schema.ts`, mock fixtures, agent instructions), and invite team members (P2–P5) as collaborators.
 - [✅] **Task 1.2:** Write master Pydantic data contracts in `backend/schemas/contracts.py` and mirror into `frontend/src/types/schema.ts`.
-- [ ] **Task 1.3:** Setup `backend/main.py` (FastAPI app, CORS, health check) and database setup in `backend/db/database.py`, `backend/db/models.py`.
-- [ ] **Task 1.4:** Setup frontend Shell layout & navigation in `frontend/src/App.tsx`, `frontend/src/components/layout/Shell.tsx`.
-- [ ] **Task 1.5:** Implement core Bayesian Learning Twin prior math in `backend/services/twin_service.py`.
+- [✅] **Task 1.3:** Setup `backend/main.py` (FastAPI app, CORS, health check) and database setup in `backend/db/database.py`, `backend/db/models.py`.
+- [✅] **Task 1.4:** Setup frontend Shell layout & navigation in `frontend/src/App.tsx`, `frontend/src/components/layout/Shell.tsx`.
+- [✅] **Task 1.5:** Implement core Bayesian Learning Twin prior math in `backend/services/twin_service.py`.
 
 #### P2: Stage 1 — Smart Ingestion & Course Knowledge RAG
 - [ ] **Task 1.6:** Implement backend document upload router stub in `backend/api/documents.py` returning `mock_triage.json`.

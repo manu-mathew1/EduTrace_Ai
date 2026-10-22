@@ -21,10 +21,10 @@
 | Thread ID | Status | From $\to$ To | Subject | Date |
 |:---:|:---:|:---:|---|:---:|
 | **#001** | `[RESOLVED]` | P1 $\to$ Team | Freeze initial Master Pydantic Contracts and TS types | Day 1 |
-| **#002** | `[PENDING]` | P2 $\to$ P1 | Register `documents.router` in `backend/main.py` | Day 1 |
-| **#003** | `[PENDING]` | P3 $\to$ P1 | Register `intake.router` in `backend/main.py` | Day 1 |
+| **#002** | `[RESOLVED]` | P2 $\to$ P1 | Register `documents.router` in `backend/main.py` | Day 1 |
+| **#003** | `[RESOLVED]` | P3 $\to$ P1 | Register `intake.router` in `backend/main.py` | Day 1 |
 | **#004** | `[PENDING]` | P4 $\to$ P2 | Citation search function signature request for Socratic co-pilot | Day 1 |
-| **#005** | `[PENDING]` | P5 $\to$ P1 | Function signature request for Bayesian Twin update | Day 1 |
+| **#005** | `[RESOLVED]` | P5 $\to$ P1 | Function signature request for Bayesian Twin update | Day 1 |
 | **#006** | `[UNDER DISCUSSION - 3/5]` | P1 $\to$ Team | Feature Proposal: Audio Waveform Visualizer in Studio | Day 1 |
 
 ---
@@ -41,16 +41,16 @@
 #### Thread #002: [P2 -> P1] Register documents.router in backend/main.py
 - **From:** P2 (Stage 1 Ingestion Lead)
 - **To:** P1 (Core Systems)
-- **Status:** `[PENDING]`
+- **Status:** `[RESOLVED]`
 - **Message:** "Hey P1, I am implementing `backend/api/documents.py`. Please make sure `app.include_router(documents.router, prefix='/api/documents')` is wired in `backend/main.py` so my upload endpoint is accessible."
-- **Response from P1:** *(Awaiting P1 implementation in Task 1.3)*
+- **Response from P1:** "Done! `backend/main.py` is configured with `app.include_router(documents.router, prefix='/api/documents')` along with fallback mock handlers so frontend and tests work immediately."
 
 #### Thread #003: [P3 -> P1] Register intake.router in backend/main.py
 - **From:** P3 (Stage 2 Intake Lead)
 - **To:** P1 (Core Systems)
-- **Status:** `[PENDING]`
+- **Status:** `[RESOLVED]`
 - **Message:** "Hey P1, when setting up `backend/main.py`, please also register `intake.router` at `/api/intake` for the consultation and diagnostic probe endpoints."
-- **Response from P1:** *(Awaiting P1 implementation in Task 1.3)*
+- **Response from P1:** "Done! `backend/main.py` is configured with `app.include_router(intake.router, prefix='/api/intake')` with fallback mock handlers for both `/consult` and `/probe`."
 
 #### Thread #004: [P4 -> P2] Citation search function signature request for Socratic co-pilot
 - **From:** P4 (Stage 3 Forensics Lead)
@@ -62,9 +62,25 @@
 #### Thread #005: [P5 -> P1] Function signature request for Bayesian Twin update
 - **From:** P5 (Stage 5/6 Recovery & Studio Lead)
 - **To:** P1 (Core Systems)
-- **Status:** `[PENDING]`
+- **Status:** `[RESOLVED]`
 - **Message:** "Hey P1, in my Reassessment verification router (`backend/api/reassessment.py`), I need to update the student's mastery once they solve the fresh question. Please share the function signature for `twin_service.py` once ready so I can call it cleanly."
-- **Response from P1:** *(Awaiting P1 response in Task 1.5)*
+- **Response from P1:** "Ready! Import `record_reassessment_outcome` from `backend.services.twin_service`:
+  ```python
+  result = await record_reassessment_outcome(
+      reassessment_id=reassessment_id,
+      student_id=student_id,
+      course_id=course_id,
+      skill_id=skill_id,
+      skill_name=skill_name,
+      marks_awarded=marks_awarded,
+      marks_possible=marks_possible,
+      potential_recoverable=potential_recoverable,
+      current_alpha=current_alpha,
+      current_beta=current_beta,
+      db_session=db
+  )
+  ```
+  Returns `ReassessmentResult` with updated mastery %, narrowed credible interval, marks secured, and celebration message!"
 
 #### 💡 Feature Proposal #006: [P1 -> Team] Audio Waveform Visualizer in Intervention Studio
 - **From:** P1 (Tech Lead)
@@ -84,6 +100,26 @@
 ---
 
 ## Section B: Detailed Technical Work Logs (Reverse Chronological)
+
+---
+
+### [Day 1 - 2026-10-22 23:00] - P1 (Tech Lead & Core Systems)
+- **Branch:** `dev`
+- **Objective / Task:** Tasks 1.3, 1.4, 1.5 — Backend Hub, Database Engine, Bayesian Twin & Frontend Shell.
+- **Context & Key Architectural Decisions:**
+  - **Backend Core Hub (`backend/main.py`):** Configured FastAPI app with CORS middleware, lifespan SQLite database initialization, health check endpoint (`/api/health`), and dynamic pod router registration with mock fallback routes for all pods.
+  - **Database Foundation (`backend/db/`):** Implemented modern SQLAlchemy 2.0 async engine (`database.py`) and full ORM models (`models.py`) for Courses, Documents, Intake Sessions, Submissions, Skill Twins, and Reassessment Logs.
+  - **Bayesian Learning Twin Engine (`backend/services/twin_service.py` & `backend/api/twin.py`):** Implemented Beta-Binomial conjugate updating math, 80% credible interval estimation with SciPy/analytic fallback, modality affinity exponential smoothing, and database persistence. Tested and validated math calculations (`calculate_beta_mastery`, `bayesian_posterior_update`).
+  - **Frontend Shell & Dashboard (`frontend/`):** Configured Vite + React + TypeScript + Tailwind CSS setup. Built top `Shell.tsx` navigation bar with real-time telemetry pills and the full `DashboardPage.tsx` Academic Mission Control view with Bayesian mastery telemetry and 7-stage interactive workflow cards. Built view switcher in `App.tsx`.
+  - **In-Repo Chat Resolutions:** Answered and marked `[RESOLVED]` for Thread #002 (P2 router registered), Thread #003 (P3 router registered), and Thread #005 (P5 Bayesian update function signature shared).
+- **Files Modified / Created:**
+  - `backend/requirements.txt`, `backend/main.py`, `backend/api/__init__.py`, `backend/api/twin.py`
+  - `backend/db/__init__.py`, `backend/db/database.py`, `backend/db/models.py`
+  - `backend/services/__init__.py`, `backend/services/twin_service.py`
+  - `frontend/package.json`, `frontend/vite.config.ts`, `frontend/tsconfig.json`, `frontend/tailwind.config.js`, `frontend/postcss.config.js`, `frontend/index.html`
+  - `frontend/src/index.css`, `frontend/src/main.tsx`, `frontend/src/App.tsx`, `frontend/src/components/layout/Shell.tsx`, `frontend/src/pages/DashboardPage.tsx`
+  - `TASKS.md` (Marked Tasks 1.3, 1.4, 1.5 as Completed)
+  - `UPDATES.md` (Resolved Threads #002, #003, #005 and appended log entry)
 
 ---
 
