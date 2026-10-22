@@ -155,8 +155,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 ### Day 4: Stage 5 (Recovery Map), Stage 6 (Studio) & Stage 7 (Reassessment & Twin)
 
 #### P1: Core Systems & Integration
-- [ ] **Task 4.1:** Merge Day 3 PRs; verify end-to-end data pipeline from Stage 1 through Stage 4.
-- [ ] **Task 4.2:** Integrate live Bayesian Learning Twin updates upon reassessment completion.
+- [✅] **Task 4.1:** Merge Day 3 PRs; verify end-to-end data pipeline from Stage 1 through Stage 4.
+- [✅] **Task 4.2:** Integrate live Bayesian Learning Twin updates upon reassessment completion.
 
 #### P2: Stage 1 Pod (Ingestion & RAG)
 - [ ] **Task 4.3:** Connect citation engine to Multimodal Studio prompts for lecture note grounding.

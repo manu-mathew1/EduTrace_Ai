@@ -123,14 +123,43 @@ async def get_learning_twin_data(
     Falls back to mock data if database session is not provided or empty.
     """
     if db_session is not None:
-        from sqlalchemy import select
-        from backend.db.models import SkillTwinModel
+        from sqlalchemy import select, func
+        from backend.db.models import SkillTwinModel, ReassessmentLogModel
         stmt = select(SkillTwinModel).where(
             SkillTwinModel.student_id == student_id,
             SkillTwinModel.course_id == course_id
         )
         result = await db_session.execute(stmt)
         skill_records = result.scalars().all()
+
+        initial_skills = [
+            ("skill_parts_sign_expansion", "Integration by Parts: Bracket Sign Distribution", 4.0, 5.0),
+            ("skill_parts_vs_sub_decision", "Method Choice: Substitution vs Parts", 4.0, 5.0),
+            ("skill_ode_integrating_factor", "First-Order Linear ODE: Integrating Factor Setup", 3.0, 6.0),
+        ]
+        existing_skill_ids = {r.skill_id for r in skill_records}
+        missing_skills = [s for s in initial_skills if s[0] not in existing_skill_ids]
+
+        if missing_skills:
+            now_iso = datetime.utcnow().isoformat() + "Z"
+            for sid, sname, a, b in missing_skills:
+                m_pct, unc_range = calculate_beta_mastery(a, b)
+                model_inst = SkillTwinModel(
+                    student_id=student_id,
+                    course_id=course_id,
+                    skill_id=sid,
+                    skill_name=sname,
+                    alpha=a,
+                    beta=b,
+                    mastery_percentage=m_pct,
+                    uncertainty_range_json=json.dumps(unc_range),
+                    last_tested_timestamp=now_iso,
+                )
+                db_session.add(model_inst)
+            await db_session.commit()
+
+            result = await db_session.execute(stmt)
+            skill_records = result.scalars().all()
 
         if skill_records:
             skills = []
@@ -151,6 +180,14 @@ async def get_learning_twin_data(
                 total_mastery += record.mastery_percentage
 
             readiness = round(total_mastery / len(skills), 1) if skills else 50.0
+
+            # Calculate total marks recovered dynamically from ReassessmentLogModel
+            log_stmt = select(func.coalesce(func.sum(ReassessmentLogModel.marks_recovered), 0.0)).where(
+                ReassessmentLogModel.student_id == student_id
+            )
+            log_res = await db_session.execute(log_stmt)
+            total_recovered = float(log_res.scalar() or 0.0)
+
             return LearningTwinResponse(
                 student_id=student_id,
                 course_id=course_id,
@@ -158,7 +195,7 @@ async def get_learning_twin_data(
                 overall_readiness_score=readiness,
                 modality_affinities=DEFAULT_MODALITY_AFFINITIES,
                 proven_optimal_technique="Visual Flowcharts + Active Spot-the-Bug Drills",
-                total_marks_recovered_to_date=8.0
+                total_marks_recovered_to_date=round(total_recovered, 1)
             )
 
     # Standard Golden Mock Fallback (Guarantees zero-block parallel execution)

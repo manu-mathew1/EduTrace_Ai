@@ -16,9 +16,11 @@ import {
   Activity,
   Layers,
   Award,
-  Zap
+  Zap,
+  RefreshCw
 } from 'lucide-react';
 import { NavTab } from '../components/layout/Shell';
+import { LearningTwinResponse, SkillMastery } from '../types/schema';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
@@ -27,10 +29,12 @@ interface DashboardPageProps {
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const [selectedCourse, setSelectedCourse] = useState<'MATH-301' | 'CS-210'>('MATH-301');
   const [readinessScore, setReadinessScore] = useState<number>(68.4);
+  const [marksRecovered, setMarksRecovered] = useState<number>(8.0);
   const [examDaysLeft, setExamDaysLeft] = useState<number>(5);
   const [backendStatus, setBackendStatus] = useState<'healthy' | 'checking'>('healthy');
+  const [twinData, setTwinData] = useState<LearningTwinResponse | null>(null);
 
-  // Live course telemetry and health fetch (Task 3.2)
+  // Live course telemetry and health fetch (Task 3.2 & 4.2)
   useEffect(() => {
     fetch('/api/courses')
       .then((res) => (res.ok ? res.json() : []))
@@ -39,10 +43,24 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           setBackendStatus('healthy');
         }
       })
-      .catch(() => {
-        // Fallback to healthy local state
-      });
-  }, []);
+      .catch(() => {});
+
+    const courseId = selectedCourse === 'MATH-301' ? 'course_calc_301' : 'course_cs_210';
+    fetch(`/api/twin/profile?course_id=${courseId}&student_id=std_rahul_99`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setTwinData(data);
+          if (data.overall_readiness_score) {
+            setReadinessScore(data.overall_readiness_score);
+          }
+          if (typeof data.total_marks_recovered_to_date === 'number') {
+            setMarksRecovered(data.total_marks_recovered_to_date);
+          }
+        }
+      })
+      .catch((e) => console.warn('Using baseline twin', e));
+  }, [selectedCourse]);
 
   return (
     <div className="space-y-8 animate-fadeIn pb-12">
@@ -128,15 +146,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-black text-white">+8.0</span>
+            <span className="text-3xl font-black text-white">+{marksRecovered.toFixed(1)}</span>
             <span className="text-xs text-slate-400">/ 25 Marks Needed</span>
           </div>
           <div className="w-full bg-slate-800/80 rounded-full h-2.5 mt-4 overflow-hidden">
-            <div className="bg-gradient-to-r from-amber-500 to-emerald-500 h-2.5 rounded-full transition-all duration-500" style={{ width: '32%' }}></div>
+            <div
+              className="bg-gradient-to-r from-amber-500 to-emerald-500 h-2.5 rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(100, Math.max(5, (marksRecovered / 25) * 100))}%` }}
+            ></div>
           </div>
           <div className="flex items-center justify-between text-[11px] text-slate-400 mt-2">
-            <span>32% Gap Closed</span>
-            <span className="text-emerald-400 font-semibold">+17 Marks Recoverable in Queue</span>
+            <span>{Math.round((marksRecovered / 25) * 100)}% Gap Closed</span>
+            <span className="text-emerald-400 font-semibold">+{Math.max(0, 25 - marksRecovered).toFixed(1)} Marks in Queue</span>
           </div>
         </div>
 
@@ -357,71 +378,119 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="space-y-3.5">
-          {/* Skill 1 */}
-          <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm font-bold text-white">Integration by Parts: Bracket Sign Distribution</span>
-              </div>
-              <p className="text-xs text-slate-400 mt-1 font-mono">
-                Beta(α=9.0, β=2.0) • 80% Credible Range: [65.2%, 94.1%] • High Confidence
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <span className="text-sm font-black text-emerald-400">81.8%</span>
-                <p className="text-[10px] text-slate-500">Remediated</p>
-              </div>
-              <div className="w-32 bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                <div className="bg-emerald-500 h-2.5 rounded-full" style={{ width: '82%' }}></div>
-              </div>
-            </div>
-          </div>
+          {twinData && twinData.skills && twinData.skills.length > 0 ? (
+            twinData.skills.map((skill: SkillMastery) => {
+              const isRemediated = skill.mastery_percentage >= 70;
+              const isInProgress = skill.mastery_percentage >= 40 && skill.mastery_percentage < 70;
+              const unc = skill.uncertainty_range || [0.2, 0.8];
 
-          {/* Skill 2 */}
-          <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center space-x-2">
-                <HelpCircle className="w-4 h-4 text-amber-400" />
-                <span className="text-sm font-bold text-white">Method Selection: Substitution vs Parts</span>
+              return (
+                <div
+                  key={skill.skill_id}
+                  className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                >
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      {isRemediated ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      ) : (
+                        <HelpCircle className={`w-4 h-4 shrink-0 ${isInProgress ? 'text-amber-400' : 'text-rose-400'}`} />
+                      )}
+                      <span className="text-sm font-bold text-white">{skill.skill_name}</span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1 font-mono">
+                      Beta(α={skill.alpha.toFixed(1)}, β={skill.beta.toFixed(1)}) • 80% Credible Range: [{(unc[0] * 100).toFixed(1)}%, {(unc[1] * 100).toFixed(1)}%] •{' '}
+                      {isRemediated ? 'High Confidence' : isInProgress ? 'Moderate Confidence' : 'Diagnostic Queue'}
+                    </p>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-right">
+                      <span className={`text-sm font-black ${isRemediated ? 'text-emerald-400' : isInProgress ? 'text-amber-400' : 'text-rose-400'}`}>
+                        {skill.mastery_percentage.toFixed(1)}%
+                      </span>
+                      <p className="text-[10px] text-slate-500">
+                        {isRemediated ? 'Remediated' : isInProgress ? 'In Progress' : 'Needs Work'}
+                      </p>
+                    </div>
+                    <div className="w-32 bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                      <div
+                        className={`h-2.5 rounded-full ${isRemediated ? 'bg-emerald-500' : isInProgress ? 'bg-amber-500' : 'bg-rose-500'}`}
+                        style={{ width: `${Math.min(100, Math.max(5, skill.mastery_percentage))}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <>
+              {/* Fallback Skill 1 */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span className="text-sm font-bold text-white">Integration by Parts: Bracket Sign Distribution</span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1 font-mono">
+                    Beta(α=9.0, β=2.0) • 80% Credible Range: [65.2%, 94.1%] • High Confidence
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <span className="text-sm font-black text-emerald-400">81.8%</span>
+                    <p className="text-[10px] text-slate-500">Remediated</p>
+                  </div>
+                  <div className="w-32 bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                    <div className="bg-emerald-500 h-2.5 rounded-full" style={{ width: '82%' }}></div>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-slate-400 mt-1 font-mono">
-                Beta(α=4.0, β=5.0) • 80% Credible Range: [22.4%, 68.1%] • Moderate Confidence
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <span className="text-sm font-black text-amber-400">44.4%</span>
-                <p className="text-[10px] text-slate-500">In Progress</p>
-              </div>
-              <div className="w-32 bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: '44%' }}></div>
-              </div>
-            </div>
-          </div>
 
-          {/* Skill 3 */}
-          <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center space-x-2">
-                <HelpCircle className="w-4 h-4 text-rose-400" />
-                <span className="text-sm font-bold text-white">First-Order Linear ODE: Integrating Factor Setup</span>
+              {/* Fallback Skill 2 */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <HelpCircle className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm font-bold text-white">Method Selection: Substitution vs Parts</span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1 font-mono">
+                    Beta(α=4.0, β=5.0) • 80% Credible Range: [22.4%, 68.1%] • Moderate Confidence
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <span className="text-sm font-black text-amber-400">44.4%</span>
+                    <p className="text-[10px] text-slate-500">In Progress</p>
+                  </div>
+                  <div className="w-32 bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                    <div className="bg-amber-500 h-2.5 rounded-full" style={{ width: '44%' }}></div>
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-slate-400 mt-1 font-mono">
-                Beta(α=3.0, β=6.0) • 80% Credible Range: [15.1%, 58.0%] • Diagnostic Queue
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <span className="text-sm font-black text-rose-400">33.3%</span>
-                <p className="text-[10px] text-slate-500">Needs Work</p>
+
+              {/* Fallback Skill 3 */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <HelpCircle className="w-4 h-4 text-rose-400" />
+                    <span className="text-sm font-bold text-white">First-Order Linear ODE: Integrating Factor Setup</span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-1 font-mono">
+                    Beta(α=3.0, β=6.0) • 80% Credible Range: [15.1%, 58.0%] • Diagnostic Queue
+                  </p>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-right">
+                    <span className="text-sm font-black text-rose-400">33.3%</span>
+                    <p className="text-[10px] text-slate-500">Needs Work</p>
+                  </div>
+                  <div className="w-32 bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                    <div className="bg-rose-500 h-2.5 rounded-full" style={{ width: '33%' }}></div>
+                  </div>
+                </div>
               </div>
-              <div className="w-32 bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                <div className="bg-rose-500 h-2.5 rounded-full" style={{ width: '33%' }}></div>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

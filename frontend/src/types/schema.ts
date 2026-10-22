@@ -235,6 +235,9 @@ export interface ReassessmentSubmission {
   reassessment_id: string;
   submitted_work: string;
   time_taken_seconds?: number;
+  skill_id?: string;
+  student_id?: string;
+  course_id?: string;
 }
 
 export interface ReassessmentResult {

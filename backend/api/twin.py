@@ -15,17 +15,28 @@ router = APIRouter(tags=["twin (P1)"])
 
 
 @router.get("/profile", response_model=LearningTwinResponse)
-@router.get("/{student_id}", response_model=LearningTwinResponse)
-async def get_twin_profile(
-    student_id: str = "std_rahul_99",
+async def get_twin_profile_default(
+    student_id: str = Query("std_rahul_99", description="Student identifier"),
     course_id: str = Query("course_calc_301", description="Course identifier"),
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Returns the real-time Metacognitive Learning Twin profile including:
+    Returns the real-time Metacognitive Learning Twin profile for a student (query-specified or default):
     - Beta(alpha, beta) parameters for each diagnosed skill
     - Bayesian credible intervals (uncertainty ranges)
     - Multimodal cognitive affinities (visual, audio, spot-the-bug, etc.)
     - Overall academic readiness score
+    """
+    return await get_learning_twin_data(student_id=student_id, course_id=course_id, db_session=db)
+
+
+@router.get("/{student_id}", response_model=LearningTwinResponse)
+async def get_twin_profile_by_id(
+    student_id: str,
+    course_id: str = Query("course_calc_301", description="Course identifier"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Returns the real-time Metacognitive Learning Twin profile for a specific student ID in path.
     """
     return await get_learning_twin_data(student_id=student_id, course_id=course_id, db_session=db)

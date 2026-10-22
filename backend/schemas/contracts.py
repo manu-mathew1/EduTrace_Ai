@@ -305,6 +305,9 @@ class ReassessmentSubmission(BaseModel):
     reassessment_id: str
     submitted_work: str
     time_taken_seconds: Optional[int] = None
+    skill_id: Optional[str] = None
+    student_id: Optional[str] = None
+    course_id: Optional[str] = None
 
 
 class ReassessmentResult(BaseModel):
