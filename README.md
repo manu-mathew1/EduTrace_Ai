@@ -13,7 +13,6 @@
 | 📘 [PROJECT_INFO.md](file:///Users/manumathew/Documents/VS_code/EduTrace_Ai/PROJECT_INFO.md) | **Master Product Blueprint:** Universal 4-archetype system, stage-by-stage workflow, judge defense | **Everyone** |
 | 📋 [TASKS.md](file:///Users/manumathew/Documents/VS_code/EduTrace_Ai/TASKS.md) | **5-Day Sprint Task Sheet:** Feature Pod tasks with exact target files for P1 to P5 | **Everyone** |
 | 📝 [UPDATES.md](file:///Users/manumathew/Documents/VS_code/EduTrace_Ai/UPDATES.md) | **Living Technical Ledger & In-Repo Chat:** Active requests, feature voting, and work logs | **Everyone & All AIs** |
-| 🤖 [.agents/](file:///Users/manumathew/Documents/VS_code/EduTrace_Ai/.agents/) | **Pre-Configured AI Instruction Files:** Self-contained master instructions for P1 through P5 | **AI Assistants** |
 
 ---
 
@@ -23,11 +22,8 @@ To ensure your AI coding assistant (Cursor, Antigravity, Claude, Copilot) automa
 
 1. **Check your assigned pod:** (P1 = Tech Lead, P2 = Ingestion/RAG, P3 = Intake/Probe, P4 = Forensics/Diff, P5 = Recovery/Studio).
 2. **Activate your role instruction:**
-   - **For P1:** Root `AGENTS.md` is already pre-configured for you!
-   - **For P2:** `cp .agents/AGENTS_P2.md AGENTS.md`
-   - **For P3:** `cp .agents/AGENTS_P3.md AGENTS.md`
-   - **For P4:** `cp .agents/AGENTS_P4.md AGENTS.md`
-   - **For P5:** `cp .agents/AGENTS_P5.md AGENTS.md`
+   - Save the private instruction file you received from the Tech Lead as **`AGENTS.md`** in your root project directory.
+   - *(Note: `AGENTS.md` is in `.gitignore`, so your instructions stay strictly private and will never get committed or overwritten!)*
 3. **Start working!** Your AI will automatically:
    - Run the pre-flight git pull check and read `UPDATES.md` from top to bottom.
    - Answer pending requests directed to your pod in `UPDATES.md` Section A.

@@ -28,3 +28,9 @@ chroma_data/
 .DS_Store
 .vscode/
 .idea/
+
+
+# Agent instructions (Private per developer)
+.agents/
+AGENTS.md
+
