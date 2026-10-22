@@ -137,8 +137,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 3.4:** Optimize vector search latency and caching for live demo.
 
 #### P3: Stage 2 Pod (Intake & Probe)
-- [ ] **Task 3.5:** Build Dual-Mode Diagnostic toggle: Mode A (Probe) vs Mode B (Exam Paper Upload with handwriting crops).
-- [ ] **Task 3.6:** Wire completed diagnostic probe submissions into Stage 3 forensics endpoint.
+- [✅ (Completed by P1)] **Task 3.5:** Build Dual-Mode Diagnostic toggle: Mode A (Probe) vs Mode B (Exam Paper Upload with handwriting crops).
+- [✅ (Completed by P1)] **Task 3.6:** Wire completed diagnostic probe submissions into Stage 3 forensics endpoint.
 
 #### P4: Stage 3 Pod (Forensics)
 - [ ] **Task 3.7:** Build live `POST /api/submissions/analyze` endpoint calling real VLM divergence detector.

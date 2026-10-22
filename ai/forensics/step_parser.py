@@ -56,16 +56,17 @@ COURSE KNOWLEDGE CONTEXT:
 
 Return a valid JSON object matching the StepDivergenceResult schema.
 """
-    try:
-        result = await ai_client.generate_structured_json(
-            prompt=prompt,
-            response_model=StepDivergenceResult,
-            system_instruction=FORENSIC_SYSTEM_PROMPT,
-        )
-        if result.submission_id and result.steps:
-            return result
-    except Exception as e:
-        logger.error(f"AI step parsing failed: {e}. Utilizing deterministic algorithmic fallback.")
+    if getattr(ai_client, "api_key", None):
+        try:
+            result = await ai_client.generate_structured_json(
+                prompt=prompt,
+                response_model=StepDivergenceResult,
+                system_instruction=FORENSIC_SYSTEM_PROMPT,
+            )
+            if result.submission_id and result.steps:
+                return result
+        except Exception as e:
+            logger.error(f"AI step parsing failed: {e}. Utilizing deterministic algorithmic fallback.")
 
     # Algorithmic deterministic fallback for zero-block execution
     return generate_deterministic_diff(submission_id, question_id, submitted_text, rubric_steps)

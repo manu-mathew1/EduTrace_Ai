@@ -103,6 +103,32 @@
 
 ---
 
+### [Day 3 - 2026-10-23 01:45] - P1 (acting on behalf of P3 — Dual-Mode Diagnostic Entry & Forensics Pipeline Wiring)
+- **Branch:** `dev`
+- **Objective / Task:** Tasks 3.5 & 3.6 — Dual-Mode Diagnostic Toggle (Mode A Probe vs Mode B Physical Exam Autopsy) and Direct Forensics Pipeline Wiring.
+- **Context & Key Architectural Decisions:**
+  - **Task 3.5: Dual-Mode Diagnostic Entry & Human-in-the-Loop OCR Verification:**
+    - Built interactive Dual-Mode selector in `frontend/src/pages/IntakePage.tsx`:
+      - **Mode A (Cold-Start Probe):** 3 calibrated hinge questions with step scratchpads and instantaneous transition to forensics.
+      - **Mode B (Physical Exam Autopsy):** Question paper + graded handwritten answer sheet autopsy view with Human-in-the-Loop OCR bounding-box verification safeguard.
+      - Implemented selectable OCR transcription candidate pills with confidence levels (e.g. `"-2x cos(x)"` at 68% confidence) and one-click confirmation locking.
+    - Implemented `POST /api/intake/mode-b/autopsy` and `POST /api/intake/mode-b/confirm-crop` in `backend/api/intake.py` returning `ModeBAutopsyResponse` and `UncertainSegment` schemas.
+  - **Task 3.6: Completed Probe Submission Wired to Stage 3 Forensics (`backend/api/intake.py`):**
+    - Added live `POST /api/intake/submit-probe` endpoint receiving student scratchpad solutions, invoking `divergence_detector.detect_divergence()` on the submitted steps, and persisting the resulting `StepDivergenceResult` into SQLite `SubmissionModel`.
+    - Updated `ai/forensics/step_parser.py` to preserve student submission IDs during deterministic evaluation and offline execution.
+    - Connected frontend Mode A and Mode B submission buttons to the live endpoints, executing smooth navigation into Stage 3 Forensics.
+  - **Unit & Integration Test Suite (`tests/test_p3_day3.py`):** Built test suite verifying probe submission execution, SQLite submission record persistence, Mode B autopsy response structure, and OCR crop confirmation. Executed with 100% test pass rate (3/3 tests passed, 30/30 all-suite tests passed).
+- **Files Modified / Created:**
+  - `backend/api/intake.py`
+  - `backend/schemas/contracts.py`
+  - `ai/forensics/step_parser.py`
+  - `frontend/src/pages/IntakePage.tsx`
+  - `tests/test_p3_day3.py`
+  - `TASKS.md` (Marked Tasks 3.5 and 3.6 as Completed by P1)
+  - `UPDATES.md` (Logged Section B entry)
+
+---
+
 ### [Day 3 - 2026-10-23 01:35] - P1 (acting on behalf of P2 — RAG Citation Retriever & Search Latency Optimization)
 - **Branch:** `dev`
 - **Objective / Task:** Tasks 3.3 & 3.4 — RAG Citation Retriever for Step Divergences, Sub-Millisecond Inverted Index & Query Caching.

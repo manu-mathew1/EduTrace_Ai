@@ -10,7 +10,11 @@ import {
   HelpCircle, 
   BrainCircuit, 
   FileCheck2, 
-  ChevronRight 
+  ChevronRight,
+  UploadCloud,
+  Check,
+  AlertTriangle,
+  FileText
 } from 'lucide-react';
 import { NavTab } from '../components/layout/Shell';
 
@@ -71,12 +75,79 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
   const [isConsultComplete, setIsConsultComplete] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState<'consultation' | 'probe'>('consultation');
+  const [diagnosticMode, setDiagnosticMode] = useState<'mode_a' | 'mode_b'>('mode_a');
+  const [confirmedCropValue, setConfirmedCropValue] = useState<string>('-2x cos(x)');
+  const [isCropConfirmed, setIsCropConfirmed] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [questions, setQuestions] = useState<Question[]>(DEFAULT_QUESTIONS);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({
     probe_q1: 'Part 1: u = 1+x^2, du = 2xdx => (1/2)ln|1+x^2|. Part 2: arctan(x) + C',
-    probe_q2: 'Step 1: u=x^2, dv=e^-x dx => -x^2 e^-x + ∫ 2x e^-x dx\nStep 2: u=2x, dv=e^-x dx => -x^2 e^-x - 2x e^-x - 2e^-x + C',
+    probe_q2: 'Step 1: u=x^2, dv=cos(x)dx => x^2 sin(x) - ∫ 2x sin(x) dx\nStep 2: = x^2 sin(x) - [ -2x cos(x) - ∫ -2cos(x) dx ]\nStep 3: = x^2 sin(x) + 2x cos(x) - 2sin(x)',
     probe_q3: '[-1/x] from -1 to 1 = -1 - (1) = -2 (Wait, is x=0 a discontinuity?)',
   });
+
+  const handleSubmitProbe = async () => {
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/intake/submit-probe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          submission_id: 'sub_live_probe_01',
+          course_id: 'course_calc_301',
+          probe_id: 'probe_calibrated_calc_01',
+          question_id: 'probe_q2',
+          submitted_work: userAnswers['probe_q2'] || 'u=x^2, dv=cos(x)dx ...',
+          all_answers: userAnswers,
+        }),
+      });
+    } catch {
+      // offline fallback
+    } finally {
+      setIsSubmitting(false);
+      onNavigateToForensics();
+    }
+  };
+
+  const handleConfirmCrop = async (val: string) => {
+    setConfirmedCropValue(val);
+    setIsCropConfirmed(true);
+    try {
+      await fetch('/api/intake/mode-b/confirm-crop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          crop_id: 'crop_q3_step3',
+          confirmed_value: val,
+        }),
+      });
+    } catch {
+      // offline fallback
+    }
+  };
+
+  const handleSubmitModeB = async () => {
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/intake/mode-b/autopsy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          course_id: 'course_calc_301',
+          question_paper_filename: 'Midterm_2024_Calc3.pdf',
+          answer_sheet_filename: 'Rahul_AnswerSheet_Scan.pdf',
+          confirmed_crops: {
+            crop_q3_step3: confirmedCropValue,
+          },
+        }),
+      });
+    } catch {
+      // offline fallback
+    } finally {
+      setIsSubmitting(false);
+      onNavigateToForensics();
+    }
+  };
 
   // Load diagnostic probe questions from backend
   useEffect(() => {
@@ -302,75 +373,207 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
           </div>
         </div>
       ) : (
-        /* Mode A Diagnostic Probe View */
+        /* Dual-Mode Diagnostic Entry View (Task 3.5 & 3.6) */
         <div className="space-y-6">
-          <div className="flex items-center justify-between p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30">
-            <div className="flex items-center space-x-3">
-              <Clock className="w-5 h-5 text-indigo-400" />
-              <div>
-                <p className="text-xs font-semibold text-white">Mode A: 10-Minute Cold-Start Diagnostic Probe</p>
-                <p className="text-[11px] text-slate-400">3 calibrated hinge questions • 20 Total Marks</p>
-              </div>
+          {/* Dual Mode Selector Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800 gap-3">
+            <div className="flex items-center space-x-2">
+              <Sliders className="w-4 h-4 text-indigo-400" />
+              <span className="text-xs font-bold text-white uppercase tracking-wider">Diagnostic Mode:</span>
             </div>
-            <button
-              onClick={onNavigateToForensics}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-all shadow-md shadow-emerald-600/25"
-            >
-              <span>Submit Probe & Run Stage 3 Forensics</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="inline-flex rounded-lg bg-slate-950 p-1 border border-slate-800">
+              <button
+                onClick={() => setDiagnosticMode('mode_a')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center space-x-1.5 ${
+                  diagnosticMode === 'mode_a'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>Mode A: 10-Min Probe (Cold-Start)</span>
+              </button>
+              <button
+                onClick={() => setDiagnosticMode('mode_b')}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center space-x-1.5 ${
+                  diagnosticMode === 'mode_b'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Mode B: Exam Paper Autopsy (OCR)</span>
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-5">
-            {DEFAULT_QUESTIONS.map((q, idx) => (
-              <div key={q.id} className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          {diagnosticMode === 'mode_a' ? (
+            /* Mode A: 10-Minute Probe Scratchpad */
+            <div className="space-y-6">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/30">
+                <div className="flex items-center space-x-3">
+                  <Clock className="w-5 h-5 text-indigo-400" />
+                  <div>
+                    <p className="text-xs font-semibold text-white">Mode A: 10-Minute Cold-Start Diagnostic Probe</p>
+                    <p className="text-[11px] text-slate-400">3 calibrated hinge questions • 20 Total Marks</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleSubmitProbe}
+                  disabled={isSubmitting}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-xs font-bold text-white transition-all shadow-md shadow-emerald-600/25"
+                >
+                  <span>{isSubmitting ? 'Evaluating...' : 'Submit Probe & Run Stage 3 Forensics'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                {questions.map((q, idx) => (
+                  <div key={q.id} className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-6 h-6 rounded-full bg-indigo-600 text-xs font-bold flex items-center justify-center text-white">
+                          {idx + 1}
+                        </span>
+                        <h3 className="font-bold text-sm text-white">{q.skill}</h3>
+                      </div>
+                      <div className="flex items-center space-x-3 text-xs text-slate-400">
+                        <span>Est: {q.time} mins</span>
+                        <span>•</span>
+                        <span className="font-semibold text-indigo-400">{q.marks} Marks</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 font-mono text-xs text-indigo-200">
+                      {q.text}
+                    </div>
+
+                    <div className="text-[11px] text-amber-400/90 flex items-center space-x-1.5">
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>Cognitive Trap Tested: {q.trap}</span>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
+                        Your Step-by-Step Scratchpad Solution:
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={userAnswers[q.id] || ''}
+                        onChange={(e) => setUserAnswers({ ...userAnswers, [q.id]: e.target.value })}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-200 focus:outline-none focus:border-indigo-500 leading-relaxed"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center pt-4">
+                <button
+                  onClick={handleSubmitProbe}
+                  disabled={isSubmitting}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 disabled:opacity-50 text-xs font-bold text-white shadow-xl shadow-indigo-600/20 transition-all inline-flex items-center space-x-2"
+                >
+                  <span>{isSubmitting ? 'Evaluating Submission...' : 'Submit All Questions & Localize Step-Divergences (Stage 3)'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Mode B: Physical Exam Autopsy (OCR Crops & Verification) */
+            <div className="space-y-6">
+              <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-500/30 flex items-start space-x-3">
+                <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                <div className="text-xs">
+                  <p className="font-bold text-amber-300">Mode B: Post-Exam Autopsy & Handwriting OCR</p>
+                  <p className="text-slate-300 mt-1 leading-relaxed">
+                    Upload your physical midterm question paper and graded handwritten answer script.
+                    EduTrace executes VLM step extraction with a Human-in-the-Loop verification safeguard for ambiguous handwriting.
+                  </p>
+                </div>
+              </div>
+
+              {/* Upload Dropzones */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center space-y-2 py-8">
+                  <FileText className="w-8 h-8 text-indigo-400" />
+                  <p className="text-xs font-bold text-white">Question Paper</p>
+                  <p className="text-[11px] text-slate-400">Midterm_2024_Calc3.pdf (Loaded)</p>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    Rubric & Scheme Ready
+                  </span>
+                </div>
+                <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center text-center space-y-2 py-8">
+                  <UploadCloud className="w-8 h-8 text-emerald-400" />
+                  <p className="text-xs font-bold text-white">Handwritten Answer Script</p>
+                  <p className="text-[11px] text-slate-400">Rahul_AnswerSheet_Scan.pdf (4 Pages)</p>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    OCR Transcription Completed
+                  </span>
+                </div>
+              </div>
+
+              {/* Human-in-the-Loop Handwriting Crop Verification Card */}
+              <div className="p-6 rounded-2xl bg-slate-900/90 border border-indigo-500/40 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                   <div className="flex items-center space-x-2">
-                    <span className="w-6 h-6 rounded-full bg-indigo-600 text-xs font-bold flex items-center justify-center text-white">
-                      {idx + 1}
-                    </span>
-                    <h3 className="font-bold text-sm text-white">{q.skill}</h3>
+                    <BrainCircuit className="w-4 h-4 text-indigo-400" />
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Human-in-the-Loop Safeguard: 1 Ambiguous Step Crop Detected
+                    </h4>
                   </div>
-                  <div className="flex items-center space-x-3 text-xs text-slate-400">
-                    <span>Est: {q.time} mins</span>
-                    <span>•</span>
-                    <span className="font-semibold text-indigo-400">{q.marks} Marks</span>
-                  </div>
+                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                    Confidence: 68% (Amber Review)
+                  </span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 font-mono text-xs text-indigo-200">
-                  {q.text}
-                </div>
-
-                <div className="text-[11px] text-amber-400/90 flex items-center space-x-1.5">
-                  <HelpCircle className="w-3.5 h-3.5" />
-                  <span>Cognitive Trap Tested: {q.trap}</span>
+                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300">
+                  <p className="text-[11px] text-slate-500 mb-1">Question 3 • Step 3 Mathematical Derivation:</p>
+                  <p>= x² sin(x) - [ <span className="px-2 py-0.5 rounded bg-indigo-500/30 text-indigo-300 border border-indigo-500/50 font-bold">{confirmedCropValue}</span> - ∫ -2cos(x) dx ]</p>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-400 mb-1.5 block">
-                    Your Step-by-Step Scratchpad Solution:
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={userAnswers[q.id] || ''}
-                    onChange={(e) => setUserAnswers({ ...userAnswers, [q.id]: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs text-slate-200 focus:outline-none focus:border-indigo-500 leading-relaxed"
-                  />
+                  <p className="text-[11px] font-semibold text-slate-400 mb-2">
+                    Select the exact character representation from the student's handwritten scan:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {['-2x cos(x)', '+2x cos(x)', '-2x sin(x)'].map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => handleConfirmCrop(option)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border ${
+                          confirmedCropValue === option
+                            ? 'bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30'
+                            : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        {option} {option === '-2x cos(x)' && '(68% Conf)'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {isCropConfirmed && (
+                  <div className="flex items-center space-x-2 text-xs text-emerald-400 pt-1">
+                    <Check className="w-4 h-4" />
+                    <span>Transcription confirmed: &ldquo;{confirmedCropValue}&rdquo; locked for Stage 3 Step-Diff.</span>
+                  </div>
+                )}
+
+                <div className="pt-2">
+                  <button
+                    onClick={handleSubmitModeB}
+                    disabled={isSubmitting}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:brightness-110 disabled:opacity-50 text-xs font-bold text-white transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center space-x-2"
+                  >
+                    <span>{isSubmitting ? 'Analyzing Autopsy...' : 'Run Stage 3 Forensic Step-Diff on Confirmed Exam Autopsy'}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-
-          <div className="text-center pt-4">
-            <button
-              onClick={onNavigateToForensics}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-xs font-bold text-white shadow-xl shadow-indigo-600/20 transition-all inline-flex items-center space-x-2"
-            >
-              <span>Submit All 3 Questions & Localize Step-Divergences (Stage 3)</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>

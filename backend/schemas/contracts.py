@@ -153,6 +153,15 @@ class DiagnosticProbeResponse(BaseModel):
     calibration_source: Optional[str] = None
 
 
+class ProbeSubmissionRequest(BaseModel):
+    submission_id: str = "sub_probe_01"
+    course_id: str = "course_calc_301"
+    probe_id: str = "probe_calibrated_calc_01"
+    question_id: str = "probe_q2"
+    submitted_work: str
+    all_answers: Optional[Dict[str, str]] = None
+
+
 # =====================================================================
 # Stage 3: Step-by-Step Forensics & Socratic Chat Contracts
 # =====================================================================
@@ -164,6 +173,23 @@ class UncertainSegment(BaseModel):
     suggested_alternatives: List[str] = []
     confidence: float
     confirmed_value: Optional[str] = None
+
+
+class ModeBAutopsyRequest(BaseModel):
+    course_id: str = "course_calc_301"
+    question_paper_filename: Optional[str] = None
+    answer_sheet_filename: Optional[str] = None
+    confirmed_crops: Optional[Dict[str, str]] = None
+
+
+class ModeBAutopsyResponse(BaseModel):
+    submission_id: str
+    course_id: str
+    mode: str = "exam_autopsy"
+    question_detected: str
+    total_steps_detected: int
+    uncertain_segments: List[UncertainSegment] = []
+    ready_for_divergence: bool = True
 
 
 class AnswerStep(BaseModel):
