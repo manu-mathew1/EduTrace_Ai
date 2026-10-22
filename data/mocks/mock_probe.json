@@ -1,0 +1,48 @@
+{
+  "probe_id": "probe_calc_001",
+  "course_id": "course_calc_301",
+  "subject_archetype": "procedural",
+  "total_estimated_minutes": 10,
+  "questions": [
+    {
+      "question_id": "probe_q1",
+      "question_text": "Evaluate the integral: \\int \\frac{x}{1 + x^2} \\, dx \\quad \\text{vs} \\quad \\int \\frac{1}{1 + x^2} \\, dx",
+      "target_skill": "Method Selection: Substitution vs Standard Arctan Form",
+      "cognitive_trap_tested": "Tests whether student impulsively applies u-substitution to both or spots standard form",
+      "estimated_minutes": 3,
+      "maximum_marks": 5,
+      "rubric_steps": [
+        "Identify degree of numerator relative to denominator",
+        "Apply u = 1+x^2 for part 1",
+        "Directly apply arctan(x) for part 2"
+      ]
+    },
+    {
+      "question_id": "probe_q2",
+      "question_text": "Evaluate using Integration by Parts: \\int x^2 e^{-x} \\, dx",
+      "target_skill": "Bracket Distribution & Sign Inversion Handling",
+      "cognitive_trap_tested": "Tests repeated minus sign distribution across brackets in second iteration",
+      "estimated_minutes": 4,
+      "maximum_marks": 10,
+      "rubric_steps": [
+        "First iteration: u = x^2, dv = e^{-x}dx",
+        "Second iteration: u = 2x, dv = e^{-x}dx with outer minus sign",
+        "Distribute negative across brackets cleanly",
+        "Add integration constant + C"
+      ]
+    },
+    {
+      "question_id": "probe_q3",
+      "question_text": "Evaluate \\int_{-1}^{1} \\frac{1}{x^2} \\, dx. Is the standard power rule directly applicable?",
+      "target_skill": "Conceptual Boundary & Discontinuity Check",
+      "cognitive_trap_tested": "Tests if student blindly computes [-1/x] or notices infinite discontinuity at x=0",
+      "estimated_minutes": 3,
+      "maximum_marks": 5,
+      "rubric_steps": [
+        "Identify discontinuity at x = 0",
+        "Express as sum of improper integrals",
+        "Conclude integral diverges"
+      ]
+    }
+  ]
+}

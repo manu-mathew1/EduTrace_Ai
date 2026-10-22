@@ -1,0 +1,77 @@
+{
+  "submission_id": "sub_math_9042",
+  "question_id": "q3_integration_by_parts",
+  "steps": [
+    {
+      "step_index": 1,
+      "submitted_work": "Let u = x^2, dv = cos(x)dx => du = 2x dx, v = sin(x)",
+      "expected_rubric_step": "Identify parts u and dv correctly: u = x^2, dv = cos(x)dx",
+      "marks_awarded": 2.0,
+      "marks_possible": 2.0,
+      "status": "satisfied",
+      "error_type": null,
+      "divergence_reason": null,
+      "cited_source_title": "Lecture Notes Module 2",
+      "cited_page_or_slide": 14
+    },
+    {
+      "step_index": 2,
+      "submitted_work": "= x^2 sin(x) - \\int 2x sin(x) dx",
+      "expected_rubric_step": "Apply integration by parts formula: uv - \\int v du",
+      "marks_awarded": 2.0,
+      "marks_possible": 2.0,
+      "status": "satisfied",
+      "error_type": null,
+      "divergence_reason": null,
+      "cited_source_title": "Lecture Notes Module 2",
+      "cited_page_or_slide": 15
+    },
+    {
+      "step_index": 3,
+      "submitted_work": "= x^2 sin(x) - [ -2x cos(x) - \\int -2cos(x) dx ]",
+      "expected_rubric_step": "Perform second iteration: u = 2x, dv = sin(x)dx => v = -cos(x). Apply uv - \\int v du with outer negative.",
+      "marks_awarded": 0.0,
+      "marks_possible": 2.0,
+      "status": "diverged",
+      "error_type": "procedural_calculation",
+      "divergence_reason": "Sign error on expanding inner bracket. Minus sign was inverted across the -\\int term.",
+      "cited_source_title": "Lecture Notes Module 2",
+      "cited_page_or_slide": 19
+    },
+    {
+      "step_index": 4,
+      "submitted_work": "= x^2 sin(x) + 2x cos(x) - 2sin(x)",
+      "expected_rubric_step": "Final simplified antiderivative with constant: x^2 sin(x) + 2x cos(x) - 2sin(x) + C",
+      "marks_awarded": 1.0,
+      "marks_possible": 4.0,
+      "status": "carried_forward_error",
+      "error_type": "rubric_omission",
+      "divergence_reason": "Omitted integration constant + C and final term sign affected by Step 3 leak.",
+      "cited_source_title": "Official Marking Scheme Midterm 2024",
+      "cited_page_or_slide": 1
+    }
+  ],
+  "first_divergence_step": 3,
+  "primary_error_type": "procedural_calculation",
+  "estimated_marks_obtained": 5.0,
+  "total_possible_marks": 10.0,
+  "uncertain_segments": [
+    {
+      "step_index": 3,
+      "character_crop_id": "crop_q3_step3_line2",
+      "raw_ocr_guess": "-2x cos(x)",
+      "suggested_alternatives": ["-2x cos(x)", "2x cos(x)"],
+      "confidence": 0.78,
+      "confirmed_value": "-2x cos(x)"
+    }
+  ],
+  "needs_human_review": false,
+  "forensic_summary": "Method selection was sound. Divergence occurred at Step 3 due to negative sign distribution across inner brackets during the 2nd iteration of Integration by Parts. Missing +C on final line.",
+  "course_citations": [
+    {
+      "title": "Prof Kapoor Lecture Notes - Module 2",
+      "slide_number": 19,
+      "quote": "Pitfall Alert: When repeating integration by parts, always enclose the entire second iteration in brackets before distributing the outer minus sign."
+    }
+  ]
+}

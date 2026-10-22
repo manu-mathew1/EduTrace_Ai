@@ -1,0 +1,42 @@
+{
+  "course_id": "course_calc_301",
+  "current_baseline_score": 52,
+  "target_score": 75,
+  "marks_gap": 23,
+  "total_study_time_minutes": 75,
+  "priorities": [
+    {
+      "rank": 1,
+      "skill_id": "skill_parts_sign_expansion",
+      "skill_name": "Integration by Parts: Bracket Sign Distribution",
+      "diagnosed_error": "procedural_calculation",
+      "exam_weight_percentage": 15.0,
+      "estimated_time_minutes": 20,
+      "potential_marks_recoverable": 8.0,
+      "rationale": "Appeared in 3 out of 5 analyzed problems. High exam weightage in Module 2. High fix ease.",
+      "recommended_modality": "spot_the_bug"
+    },
+    {
+      "rank": 2,
+      "skill_id": "skill_parts_vs_sub_decision",
+      "skill_name": "Method Choice: Substitution vs Integration by Parts",
+      "diagnosed_error": "method_selection",
+      "exam_weight_percentage": 12.0,
+      "estimated_time_minutes": 25,
+      "potential_marks_recoverable": 6.0,
+      "rationale": "Hesitation observed when choosing between u-sub and parts in Q1 and Q4. 12% of total exam marks.",
+      "recommended_modality": "visual_flowchart"
+    },
+    {
+      "rank": 3,
+      "skill_id": "skill_ode_integrating_factor",
+      "skill_name": "First-Order Linear ODE: Integrating Factor Setup",
+      "diagnosed_error": "conceptual_misunderstanding",
+      "exam_weight_percentage": 10.0,
+      "estimated_time_minutes": 30,
+      "potential_marks_recoverable": 5.0,
+      "rationale": "Missing division by leading coefficient before computing e^{\\int P(x)dx}.",
+      "recommended_modality": "real_world_analogy"
+    }
+  ]
+}

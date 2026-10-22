@@ -1,0 +1,43 @@
+{
+  "student_id": "std_rahul_99",
+  "course_id": "course_calc_301",
+  "skills": [
+    {
+      "skill_id": "skill_parts_sign_expansion",
+      "skill_name": "Integration by Parts: Bracket Sign Distribution",
+      "alpha": 9.0,
+      "beta": 2.0,
+      "mastery_percentage": 81.8,
+      "uncertainty_range": [0.65, 0.94],
+      "last_tested_timestamp": "2026-10-19T13:10:00Z"
+    },
+    {
+      "skill_id": "skill_parts_vs_sub_decision",
+      "skill_name": "Method Choice: Substitution vs Parts",
+      "alpha": 4.0,
+      "beta": 5.0,
+      "mastery_percentage": 44.4,
+      "uncertainty_range": [0.22, 0.68],
+      "last_tested_timestamp": "2026-10-19T11:45:00Z"
+    },
+    {
+      "skill_id": "skill_ode_integrating_factor",
+      "skill_name": "First-Order Linear ODE: Integrating Factor Setup",
+      "alpha": 3.0,
+      "beta": 6.0,
+      "mastery_percentage": 33.3,
+      "uncertainty_range": [0.15, 0.58],
+      "last_tested_timestamp": "2026-10-19T10:30:00Z"
+    }
+  ],
+  "overall_readiness_score": 58.5,
+  "modality_affinities": {
+    "visual_flowchart": 0.88,
+    "spot_the_bug": 0.84,
+    "real_world_analogy": 0.79,
+    "audio_deconstruction": 0.72,
+    "textual_deduction": 0.35
+  },
+  "proven_optimal_technique": "Visual Flowcharts + Active Spot-the-Bug Drills",
+  "total_marks_recovered_to_date": 8.0
+}

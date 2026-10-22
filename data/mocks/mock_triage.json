@@ -1,0 +1,43 @@
+{
+  "course_id": "course_calc_301",
+  "documents": [
+    {
+      "document_id": "doc_syll_01",
+      "filename": "Calculus_III_Syllabus_2026.pdf",
+      "classified_type": "syllabus",
+      "confidence": 0.98,
+      "page_count": 4,
+      "topics_detected": ["Integration Techniques", "Partial Derivatives", "Multiple Integrals", "Vector Calculus"],
+      "exam_weight_percentage": 100.0
+    },
+    {
+      "document_id": "doc_pyq_01",
+      "filename": "Midterm_Exam_2024_Paper.pdf",
+      "classified_type": "past_paper",
+      "confidence": 0.95,
+      "page_count": 3,
+      "topics_detected": ["Integration by Parts", "Substitution", "Differential Equations"],
+      "exam_weight_percentage": 40.0
+    },
+    {
+      "document_id": "doc_notes_01",
+      "filename": "Prof_Kapoor_Module2_IntegrationNotes.pdf",
+      "classified_type": "lecture_notes",
+      "confidence": 0.99,
+      "page_count": 28,
+      "topics_detected": ["Integration by Parts", "Trigonometric Substitution", "Partial Fractions"],
+      "exam_weight_percentage": null
+    },
+    {
+      "document_id": "doc_rubric_01",
+      "filename": "Official_Marking_Scheme_Midterm2024.pdf",
+      "classified_type": "rubric",
+      "confidence": 0.92,
+      "page_count": 2,
+      "topics_detected": ["Step-by-step marking", "Partial credit rules"],
+      "exam_weight_percentage": null
+    }
+  ],
+  "total_documents": 4,
+  "ready_for_intake": true
+}
