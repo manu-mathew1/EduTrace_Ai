@@ -79,14 +79,14 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅] **Task 1.5:** Implement core Bayesian Learning Twin prior math in `backend/services/twin_service.py`.
 
 #### P2: Stage 1 — Smart Ingestion & Course Knowledge RAG
-- [ ] **Task 1.6:** Implement backend document upload router stub in `backend/api/documents.py` returning `mock_triage.json`.
-- [ ] **Task 1.7:** Curate Golden Sample course material in `data/sample_courses/math_calculus/` (Syllabus, Notes, Past Paper).
-- [ ] **Task 1.8:** Build initial Ingestion drag-and-drop dropzone UI shell in `frontend/src/pages/IngestionPage.tsx`.
+- [✅ (Completed by P1)] **Task 1.6:** Implement backend document upload router stub in `backend/api/documents.py` returning `mock_triage.json`.
+- [✅ (Completed by P1)] **Task 1.7:** Curate Golden Sample course material in `data/sample_courses/math_calculus/` (Syllabus, Notes, Past Paper).
+- [✅ (Completed by P1)] **Task 1.8:** Build initial Ingestion drag-and-drop dropzone UI shell in `frontend/src/pages/IngestionPage.tsx`.
 
 #### P3: Stage 2 — Metacognitive Intake & Diagnostic Probe
-- [ ] **Task 1.9:** Implement backend intake router stub in `backend/api/intake.py` returning `mock_probe.json`.
-- [ ] **Task 1.10:** Setup AI client wrapper in `ai/client.py` enforcing structured JSON outputs.
-- [ ] **Task 1.11:** Build initial Intake consultation chat UI card in `frontend/src/pages/IntakePage.tsx`.
+- [✅ (Completed by P1)] **Task 1.9:** Implement backend intake router stub in `backend/api/intake.py` returning `mock_probe.json`.
+- [✅ (Completed by P1)] **Task 1.10:** Setup AI client wrapper in `ai/client.py` enforcing structured JSON outputs.
+- [✅ (Completed by P1)] **Task 1.11:** Build initial Intake consultation chat UI card in `frontend/src/pages/IntakePage.tsx`.
 
 #### P4: Stage 3 — Forensic Step-Diff & Socratic Co-Pilot
 - [ ] **Task 1.12:** Implement backend submissions router stub in `backend/api/submissions.py` returning `mock_forensic_diff.json`.
