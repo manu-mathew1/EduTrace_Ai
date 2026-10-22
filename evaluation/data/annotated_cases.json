@@ -1,0 +1,156 @@
+{
+  "dataset_version": "1.0.0",
+  "annotated_cases_count": 5,
+  "description": "Gold-standard expert-annotated benchmark cases for Day 2 Stage 5/6 evaluation. Includes ground-truth step divergence index, error taxonomy classification, and Marks Recovery ROI calibration.",
+  "cases": [
+    {
+      "case_id": "case_calc_01",
+      "subject": "Calculus III",
+      "topic": "Integration by Parts: Repeated Iteration",
+      "archetype": "procedural",
+      "question_text": "Evaluate \\int x^2 \\cos(x) \\, dx",
+      "canonical_steps": [
+        "u = x^2, dv = cos(x)dx => du = 2x dx, v = sin(x)",
+        "= x^2 sin(x) - \\int 2x sin(x) dx",
+        "u2 = 2x, dv2 = sin(x)dx => v2 = -cos(x). Apply uv - \\int v du with outer minus: - [ -2x cos(x) - \\int -2cos(x) dx ]",
+        "= x^2 sin(x) + 2x cos(x) - 2sin(x) + C"
+      ],
+      "student_steps": [
+        "u = x^2, dv = cos(x)dx => du = 2x dx, v = sin(x)",
+        "= x^2 sin(x) - \\int 2x sin(x) dx",
+        "= x^2 sin(x) - [ -2x cos(x) - \\int -2cos(x) dx ]",
+        "= x^2 sin(x) + 2x cos(x) - 2sin(x)"
+      ],
+      "ground_truth_divergence_step": 3,
+      "ground_truth_error_taxonomy": "procedural_calculation",
+      "expected_marks": 5.0,
+      "total_marks": 10.0,
+      "forensic_leak_analysis": "Student successfully set up both stages of integration by parts. The divergence occurred in Step 3 when expanding nested negative signs: the outer minus in - [ -2x cos(x) ... ] was distributed to make +2x cos(x), but the second integral term inside the brackets was inverted incorrectly, and the integration constant (+ C) was omitted in the final answer.",
+      "recovery_recommendation": {
+        "recommended_modality": "spot_the_bug",
+        "remediation_time_minutes": 20,
+        "potential_marks_recoverable": 8.0,
+        "exam_weight_percentage": 15.0,
+        "roi_score": 0.36,
+        "rationale": "High exam recurrence (15% of Exam 2). Sign distribution errors in repeated parts are high-velocity fixes through targeted spot-the-bug bracket drills."
+      }
+    },
+    {
+      "case_id": "case_calc_02",
+      "subject": "Calculus III",
+      "topic": "Method Selection: Substitution vs Arctan Standard Form",
+      "archetype": "procedural",
+      "question_text": "Evaluate \\int \\frac{1}{1+x^2} \\, dx",
+      "canonical_steps": [
+        "Recognize standard derivative form d/dx(arctan(x)) = 1/(1+x^2)",
+        "Write antiderivative directly: arctan(x) + C"
+      ],
+      "student_steps": [
+        "Let u = 1 + x^2 => du = 2x dx",
+        "Integral = (1/2x) \\int (1/u) du = (1/2x) ln|1+x^2| + C"
+      ],
+      "ground_truth_divergence_step": 2,
+      "ground_truth_error_taxonomy": "method_selection",
+      "expected_marks": 1.0,
+      "total_marks": 5.0,
+      "forensic_leak_analysis": "Student attempted u-substitution on 1/(1+x^2). In Step 2, the student pulled an expression containing the integration variable x outside the integral sign: (1/2x) \\int (1/u) du. Variables cannot be treated as constants across the integration operator. The fundamental error was selecting u-substitution instead of recognizing standard inverse trigonometric form.",
+      "recovery_recommendation": {
+        "recommended_modality": "visual_flowchart",
+        "remediation_time_minutes": 25,
+        "potential_marks_recoverable": 6.0,
+        "exam_weight_percentage": 12.0,
+        "roi_score": 0.187,
+        "rationale": "Method hesitation between algebraic substitution and standard trigonometric tables causes severe time leaks during exams. Decision flowcharts provide clear visual branching rules."
+      }
+    },
+    {
+      "case_id": "case_calc_03",
+      "subject": "Calculus III",
+      "topic": "Improper Integrals: Interior Discontinuity",
+      "archetype": "conceptual",
+      "question_text": "Evaluate \\int_{-1}^{1} \\frac{1}{x^2} \\, dx",
+      "canonical_steps": [
+        "Identify essential infinite discontinuity at x = 0",
+        "Split into improper limit integrals: lim_{t->0^-} \\int_{-1}^t x^{-2} dx + lim_{s->0^+} \\int_s^1 x^{-2} dx",
+        "Show both limits evaluate to \\infty, therefore integral diverges"
+      ],
+      "student_steps": [
+        "Antiderivative of x^{-2} is -1/x",
+        "Evaluate [-1/x] from -1 to 1 = (-1/1) - (-1/-1) = -1 - 1 = -2"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "conceptual_misunderstanding",
+      "expected_marks": 0.0,
+      "total_marks": 6.0,
+      "forensic_leak_analysis": "Student blindly applied the Fundamental Theorem of Calculus across a non-removable infinite discontinuity at x = 0 without checking domain continuity. The function 1/x^2 is strictly positive everywhere on its domain, yet the student obtained a negative area of -2, failing to execute basic sanity checking or split the integral at the singularity.",
+      "recovery_recommendation": {
+        "recommended_modality": "real_world_analogy",
+        "remediation_time_minutes": 30,
+        "potential_marks_recoverable": 5.0,
+        "exam_weight_percentage": 10.0,
+        "roi_score": 0.11,
+        "rationale": "Conceptual barrier regarding domain continuity. A concrete physical metaphor (e.g., measuring bridge height over an infinite canyon) permanently cures blind FTC application."
+      }
+    },
+    {
+      "case_id": "case_calc_04",
+      "subject": "Calculus III",
+      "topic": "First-Order Linear ODE: Integrating Factor",
+      "archetype": "procedural",
+      "question_text": "Solve 2x y' + y = x^3",
+      "canonical_steps": [
+        "Divide entire equation by 2x to put in standard form: y' + (1/(2x))y = (1/2)x^2",
+        "Compute integrating factor I(x) = e^{\\int (1/(2x))dx} = e^{(1/2)ln(x)} = \\sqrt{x}",
+        "Multiply and integrate: \\sqrt{x} y = \\int (1/2)x^{5/2} dx = (1/7)x^{7/2} + C",
+        "Divide by \\sqrt{x}: y = (1/7)x^3 + C x^{-1/2}"
+      ],
+      "student_steps": [
+        "P(x) = 1, I(x) = e^{\\int 1 dx} = e^x",
+        "e^x y = \\int e^x x^3 dx"
+      ],
+      "ground_truth_divergence_step": 1,
+      "ground_truth_error_taxonomy": "method_selection",
+      "expected_marks": 1.0,
+      "total_marks": 8.0,
+      "forensic_leak_analysis": "Student failed to transform the differential equation into standard linear form y' + P(x)y = Q(x) before reading off P(x). The student mistakenly set P(x) = 1 (the coefficient of y) instead of dividing by the leading coefficient 2x to isolate y'. This cascades through the entire integrating factor setup.",
+      "recovery_recommendation": {
+        "recommended_modality": "spot_the_bug",
+        "remediation_time_minutes": 25,
+        "potential_marks_recoverable": 7.0,
+        "exam_weight_percentage": 12.0,
+        "roi_score": 0.20,
+        "rationale": "Leading coefficient omission is the #1 trap in first-order linear differential equations. A 25-minute spot-the-bug drill cements the mandatory standardization step."
+      }
+    },
+    {
+      "case_id": "case_calc_05",
+      "subject": "Calculus III",
+      "topic": "Integration by Parts: Constant of Integration Omission",
+      "archetype": "procedural",
+      "question_text": "Find the general antiderivative \\int x e^x \\, dx",
+      "canonical_steps": [
+        "u = x, dv = e^x dx => du = dx, v = e^x",
+        "= x e^x - \\int e^x dx",
+        "= x e^x - e^x + C"
+      ],
+      "student_steps": [
+        "u = x, dv = e^x dx => du = dx, v = e^x",
+        "= x e^x - \\int e^x dx",
+        "= x e^x - e^x"
+      ],
+      "ground_truth_divergence_step": 3,
+      "ground_truth_error_taxonomy": "rubric_omission",
+      "expected_marks": 4.0,
+      "total_marks": 5.0,
+      "forensic_leak_analysis": "All mathematical derivations, derivative computations, and integral evaluations were completely accurate. The only error was omitting the arbitrary constant of integration (+ C) for an indefinite integral, resulting in a mandatory 1-mark rubric penalty.",
+      "recovery_recommendation": {
+        "recommended_modality": "spot_the_bug",
+        "remediation_time_minutes": 10,
+        "potential_marks_recoverable": 3.0,
+        "exam_weight_percentage": 5.0,
+        "roi_score": 0.15,
+        "rationale": "Rubric checklist hygiene. Takes only 10 minutes to train an automated end-of-solution verification habit, recovering up to 3 cumulative marks across an exam paper."
+      }
+    }
+  ]
+}

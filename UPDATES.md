@@ -103,6 +103,28 @@
 
 ---
 
+### [Day 2 - 2026-10-23 00:52] - P1 (acting on behalf of P5 — Marks Recovery ROI Ranker & Benchmark Annotations)
+- **Branch:** `dev`
+- **Objective / Task:** Tasks 2.11 & 2.12 — Marks Recovery ROI Ranking Engine, Dynamic Recovery Router, and Ground-Truth Annotated Benchmark Cases.
+- **Context & Key Architectural Decisions:**
+  - **Marks Recovery ROI Ranking Engine (`ai/diagnostics/recovery_ranker.py`):** Implemented the core goal-aligned remediation ranking algorithm:
+    $$\text{Priority}(\text{Skill}) = \text{Normalized Exam Weight} \times \text{Observed Error Burden} \times \text{Remediation Velocity}$$
+    Where Velocity $= 60.0 / \text{remediation\_time\_minutes}$. The ranker sorts remediation opportunities descending by ROI, assigns optimal multimodal representation based on error archetype (e.g. `SPOT_THE_BUG` for procedural sign distribution, `VISUAL_FLOWCHART` for method choice, `REAL_WORLD_ANALOGY` for conceptual discontinuity), and computes exact total study time and cumulative marks recovery to bridge the baseline to target score gap.
+  - **Dynamic Recovery Map Router (`backend/api/recovery.py`):** Upgraded `GET /api/recovery/map` and `GET /api/recovery/{course_id}` to dynamically calculate ROI prioritization using `recovery_ranker`, supporting live `baseline_score` and `target_score` query parameters and SQLite `CourseModel` integration.
+  - **Frontend Intervention Studio (`frontend/src/pages/InterventionStudio.tsx`):** Connected live `useEffect` to fetch dynamic recovery priorities from `/api/recovery/map` while maintaining offline fallback defaults.
+  - **Ground-Truth Annotated Cases (`evaluation/data/annotated_cases.json`):** Formulated gold-standard annotations for the first 5 multi-subject benchmark cases (`case_calc_01` through `case_calc_05`) covering repeated integration by parts, substitution vs arctan form, improper integral discontinuity, linear ODE standardizing factors, and $+ C$ constant omissions, with detailed forensic leak analyses and calibrated ROI recommendations.
+  - **Unit & Integration Test Suite (`tests/test_p5_recovery.py`):** Built test suite verifying velocity and ROI mathematical precision, rank ordering, live `/api/recovery/map` endpoint behavior, and annotated cases data integrity. Executed with 100% test pass rate (4/4 tests passed, 20/20 all-suite tests passed).
+- **Files Modified / Created:**
+  - `ai/diagnostics/recovery_ranker.py`
+  - `backend/api/recovery.py`
+  - `frontend/src/pages/InterventionStudio.tsx`
+  - `evaluation/data/annotated_cases.json`
+  - `tests/test_p5_recovery.py`
+  - `TASKS.md` (Marked Tasks 2.11 and 2.12 as Completed by P1)
+  - `UPDATES.md` (Logged Section B entry)
+
+---
+
 ### [Day 2 - 2026-10-23 00:46] - P1 (acting on behalf of P4 — Forensic Step-Diff & Cognitive Error Taxonomy)
 - **Branch:** `dev`
 - **Objective / Task:** Tasks 2.9 & 2.10 — Step-Divergence Detection Engine, Cognitive Error Taxonomy Classifier, and Router Integration.

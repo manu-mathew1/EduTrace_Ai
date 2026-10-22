@@ -47,7 +47,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
   const [selectedBugStep, setSelectedBugStep] = useState<number | null>(null);
   const [bugFeedback, setBugFeedback] = useState<string | null>(null);
 
-  const priorities: PriorityItem[] = [
+  const defaultPriorities: PriorityItem[] = [
     {
       rank: 1,
       id: 'skill_parts_sign',
@@ -79,6 +79,34 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
       recommendedModality: 'analogy',
     },
   ];
+
+  const [priorities, setPriorities] = useState<PriorityItem[]>(defaultPriorities);
+
+  // Live recovery map fetch from backend API
+  useEffect(() => {
+    fetch('/api/recovery/map?baseline_score=52&target_score=75')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.priorities && data.priorities.length > 0) {
+          const mapped: PriorityItem[] = data.priorities.map((p: any) => ({
+            rank: p.rank,
+            id: p.skill_id,
+            name: p.skill_name,
+            errorType: p.diagnosed_error.replace('_', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+            examWeight: p.exam_weight_percentage,
+            timeMins: p.estimated_time_minutes,
+            marksRecoverable: p.potential_marks_recoverable,
+            recommendedModality: p.recommended_modality === 'visual_flowchart' ? 'flowchart' :
+                                 p.recommended_modality === 'real_world_analogy' ? 'analogy' :
+                                 p.recommended_modality === 'audio_deconstruction' ? 'audio' : 'spot_the_bug',
+          }));
+          setPriorities(mapped);
+        }
+      })
+      .catch(() => {
+        // Fallback to default calibrated list
+      });
+  }, []);
 
   // Audio animation ticker
   useEffect(() => {

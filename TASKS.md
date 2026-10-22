@@ -121,8 +121,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 2.10:** Build Error Taxonomy classifier tagging `procedural_calculation`, `method_selection`, `conceptual_misunderstanding`.
 
 #### P5: Stage 5/6 Pod (Recovery & Studio)
-- [ ] **Task 2.11:** Build Marks Recovery ROI ranking algorithm (`ai/diagnostics/recovery_ranker.py`).
-- [ ] **Task 2.12:** Annotate first 5 ground-truth benchmark cases in `evaluation/data/annotated_cases.json`.
+- [✅ (Completed by P1)] **Task 2.11:** Build Marks Recovery ROI ranking algorithm (`ai/diagnostics/recovery_ranker.py`).
+- [✅ (Completed by P1)] **Task 2.12:** Annotate first 5 ground-truth benchmark cases in `evaluation/data/annotated_cases.json`.
 
 ---
 
