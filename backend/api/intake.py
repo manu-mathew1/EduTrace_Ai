@@ -84,18 +84,26 @@ async def intake_consultation(
         is_consultation_complete=is_complete,
     )
 
-    # Persist session to SQLite
-    db_session = IntakeSessionModel(
-        session_id=session_id,
-        course_id=course_id,
-        messages_json=json.dumps([m.model_dump() for m in updated_messages]),
-        extracted_target_score=target_score,
-        extracted_timeline_days=6,
-        extracted_friction_topics_json=json.dumps(session_state.extracted_friction_topics),
-        recommended_mode=DiagnosticMode.PROBE.value,
-        is_consultation_complete=is_complete,
-    )
-    db.add(db_session)
+    # Persist or update session in SQLite (idempotent upsert)
+    existing_q = await db.execute(select(IntakeSessionModel).where(IntakeSessionModel.session_id == session_id))
+    existing = existing_q.scalars().first()
+    if existing:
+        existing.messages_json = json.dumps([m.model_dump() for m in updated_messages])
+        existing.extracted_target_score = target_score
+        existing.extracted_friction_topics_json = json.dumps(session_state.extracted_friction_topics)
+        existing.is_consultation_complete = is_complete
+    else:
+        db_session = IntakeSessionModel(
+            session_id=session_id,
+            course_id=course_id,
+            messages_json=json.dumps([m.model_dump() for m in updated_messages]),
+            extracted_target_score=target_score,
+            extracted_timeline_days=6,
+            extracted_friction_topics_json=json.dumps(session_state.extracted_friction_topics),
+            recommended_mode=DiagnosticMode.PROBE.value,
+            is_consultation_complete=is_complete,
+        )
+        db.add(db_session)
     await db.commit()
 
     return IntakeConsultResponse(

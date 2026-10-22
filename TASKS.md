@@ -103,8 +103,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 ### Day 2: Stage 1 (Smart Ingestion) & Stage 2 (Intake Consultation & Diagnostic Probe)
 
 #### P1: Core Systems & Integration
-- [ ] **Task 2.1:** Review Day 1 PRs, merge into `dev`, verify walking skeleton connects UI $\to$ Backend.
-- [ ] **Task 2.2:** Build Mission Control Dashboard in `frontend/src/pages/DashboardPage.tsx` displaying course overview and readiness score.
+- [✅] **Task 2.1:** Review Day 1 PRs, merge into `dev`, verify walking skeleton connects UI $\to$ Backend.
+- [✅] **Task 2.2:** Build Mission Control Dashboard in `frontend/src/pages/DashboardPage.tsx` displaying course overview and readiness score.
 
 #### P2: Stage 1 Pod (Ingestion & RAG)
 - [ ] **Task 2.3:** Build Multi-Document Auto-Triage Classifier (`rag/ingestion/classifier.py`) categorizing Syllabus vs Notes vs Past Paper.

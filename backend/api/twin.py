@@ -15,8 +15,9 @@ router = APIRouter(tags=["twin (P1)"])
 
 
 @router.get("/profile", response_model=LearningTwinResponse)
+@router.get("/{student_id}", response_model=LearningTwinResponse)
 async def get_twin_profile(
-    student_id: str = Query("std_rahul_99", description="Unique student ID"),
+    student_id: str = "std_rahul_99",
     course_id: str = Query("course_calc_301", description="Course identifier"),
     db: AsyncSession = Depends(get_db)
 ):

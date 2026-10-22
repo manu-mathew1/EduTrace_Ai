@@ -265,18 +265,30 @@ async def record_reassessment_outcome(
             )
             db_session.add(new_record)
 
-        log = ReassessmentLogModel(
-            id=reassessment_id,
-            student_id=student_id,
-            skill_id=skill_id,
-            is_improved=is_improved,
-            marks_awarded=marks_awarded,
-            marks_possible=marks_possible,
-            previous_mastery=prev_mastery,
-            new_mastery=new_mastery,
-            marks_recovered=marks_recovered_secured
-        )
-        db_session.add(log)
+        # Idempotent reassessment log insertion or update
+        log_stmt = select(ReassessmentLogModel).where(ReassessmentLogModel.id == reassessment_id)
+        log_res = await db_session.execute(log_stmt)
+        log = log_res.scalar_one_or_none()
+        if log:
+            log.is_improved = is_improved
+            log.marks_awarded = marks_awarded
+            log.marks_possible = marks_possible
+            log.previous_mastery = prev_mastery
+            log.new_mastery = new_mastery
+            log.marks_recovered = marks_recovered_secured
+        else:
+            log = ReassessmentLogModel(
+                id=reassessment_id,
+                student_id=student_id,
+                skill_id=skill_id,
+                is_improved=is_improved,
+                marks_awarded=marks_awarded,
+                marks_possible=marks_possible,
+                previous_mastery=prev_mastery,
+                new_mastery=new_mastery,
+                marks_recovered=marks_recovered_secured
+            )
+            db_session.add(log)
         await db_session.commit()
 
     return ReassessmentResult(
