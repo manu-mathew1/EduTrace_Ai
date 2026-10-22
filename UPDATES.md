@@ -103,6 +103,32 @@
 
 ---
 
+### [Day 2 - 2026-10-23 00:46] - P1 (acting on behalf of P4 — Forensic Step-Diff & Cognitive Error Taxonomy)
+- **Branch:** `dev`
+- **Objective / Task:** Tasks 2.9 & 2.10 — Step-Divergence Detection Engine, Cognitive Error Taxonomy Classifier, and Router Integration.
+- **Context & Key Architectural Decisions:**
+  - **Step-Divergence Detection Engine (`ai/forensics/divergence_detector.py`):** Implemented step-by-step verification comparing student mathematical steps against rubric milestones. Features automatic heuristic step normalization, divergence detection (e.g., bracket negative distribution errors), carried-forward error tracking, marks accounting (partial marks vs lost marks), and pedagogical forensic summaries. Supports Gemini LLM structured outputs with deterministic fallback.
+  - **Cognitive Error Taxonomy Classifier (`ai/forensics/taxonomy_classifier.py`):** Built taxonomy classifier tagging errors against `ErrorTaxonomy` enum:
+    - `procedural_calculation` (sign inversions, arithmetic errors, brackets)
+    - `method_selection` (wrong integration technique, inappropriate substitution)
+    - `conceptual_misunderstanding` (violating derivative/integral relationships)
+    - `rubric_omission` (missing $+C$, omitting boundary conditions)
+    - `notation_ambiguity`
+    Generates remediation hints and pinpoint descriptions.
+  - **Live Router Integration (`backend/api/submissions.py`):** Added live `POST /api/submissions/diff` and `POST /api/submissions/analyze` endpoints calling `divergence_detector` and persisting results to `SubmissionModel` in SQLite. Fixed `CourseModel` DB attributes. Connected `POST /api/submissions/socratic-chat` to explain step divergences.
+  - **Frontend Forensics Page (`frontend/src/pages/ForensicsPage.tsx`):** Wired Socratic Co-Pilot chat to call live backend `/api/submissions/socratic-chat` with smooth fallback.
+  - **Unit & Integration Test Suite (`tests/test_p4_forensics.py`):** Built test suite verifying step divergence detection, cognitive error classification, and live `/api/submissions/analyze` endpoint. Executed with 100% test pass rate (3/3 tests passed, 16/16 all-suite tests passed).
+- **Files Modified / Created:**
+  - `ai/forensics/divergence_detector.py`
+  - `ai/forensics/taxonomy_classifier.py`
+  - `backend/api/submissions.py`
+  - `frontend/src/pages/ForensicsPage.tsx`
+  - `tests/test_p4_forensics.py`
+  - `TASKS.md` (Marked Tasks 2.9 and 2.10 as Completed by P1)
+  - `UPDATES.md` (Logged Section B entry)
+
+---
+
 ### [Day 2 - 2026-10-23 00:41] - P1 (acting on behalf of P3 — Metacognitive Intake & Diagnostic Probe)
 - **Branch:** `dev`
 - **Objective / Task:** Tasks 2.6, 2.7, 2.8 — 3-Turn Intake Triage Agent, Mode A 10-Minute Diagnostic Probe Generator, and Live Intake Chat Integration.

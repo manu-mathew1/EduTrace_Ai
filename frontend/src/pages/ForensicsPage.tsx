@@ -84,11 +84,36 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
     },
   ];
 
-  const handleSendChat = () => {
+  const handleSendChat = async () => {
     if (!chatInput.trim()) return;
     const userMsg = chatInput;
     setChatMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
     setChatInput('');
+
+    try {
+      const response = await fetch('/api/submissions/socratic-chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          submission_id: 'sub_live_01',
+          selected_step_index: selectedStep,
+          user_question: userMsg,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setChatMessages((prev) => [
+          ...prev,
+          {
+            role: 'ai',
+            text: data.reply || `In Step ${selectedStep}, check your sign distribution across the inner integral!`,
+          },
+        ]);
+        return;
+      }
+    } catch {
+      // Graceful fallback to rich localized explanation
+    }
 
     setTimeout(() => {
       setChatMessages((prev) => [
@@ -98,7 +123,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
           text: `In Step ${selectedStep}, the formula is: uv - ∫ v du. Since v = -cos(x), the integral term becomes - ∫ (-cos(x)) (2 dx) = + 2 ∫ cos(x) dx. When distributing the outer minus sign across [ -2x cos(x) + 2 sin(x) ], the second term must become -2 sin(x). Prof Kapoor warns about this exact bracket trap in Lecture Module 2, Slide 19!`,
         },
       ]);
-    }, 600);
+    }, 400);
   };
 
   return (

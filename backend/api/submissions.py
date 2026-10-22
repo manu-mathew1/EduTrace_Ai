@@ -25,6 +25,8 @@ from backend.schemas.contracts import (
     StepStatus,
 )
 from ai.forensics.step_parser import parse_and_diff_steps, generate_deterministic_diff
+from ai.forensics.divergence_detector import divergence_detector
+from ai.forensics.taxonomy_classifier import taxonomy_classifier
 
 router = APIRouter()
 MOCKS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "mocks"
@@ -74,10 +76,10 @@ async def get_forensics_diff(
     return generate_deterministic_diff(
         submission_id=submission_id,
         question_id="q3_integration_by_parts",
-        submitted_text="u=x^2, dv=cos(x)dx\n= x^2 sin(x) - \int 2x sin(x) dx\n= x^2 sin(x) - [ -2x cos(x) - \int -2cos(x) dx ]\n= x^2 sin(x) + 2x cos(x) - 2sin(x)",
+        submitted_text="u=x^2, dv=cos(x)dx\n= x^2 sin(x) - \\int 2x sin(x) dx\n= x^2 sin(x) - [ -2x cos(x) - \\int -2cos(x) dx ]\n= x^2 sin(x) + 2x cos(x) - 2sin(x)",
         rubric_steps=[
             "Identify parts u and dv correctly: u = x^2, dv = cos(x)dx",
-            "Apply integration by parts formula: uv - \int v du",
+            "Apply integration by parts formula: uv - \\int v du",
             "Perform second iteration with outer minus distributed",
             "Final simplified antiderivative with constant + C",
         ],
@@ -100,8 +102,8 @@ async def analyze_submission(
     """
     default_rubric = [
         "Identify parts u and dv correctly: u = x^2, dv = cos(x)dx",
-        "Apply integration by parts formula: uv - \int v du",
-        "Perform second iteration: u = 2x, dv = sin(x)dx => v = -cos(x). Apply uv - \int v du with outer negative.",
+        "Apply integration by parts formula: uv - \\int v du",
+        "Perform second iteration: u = 2x, dv = sin(x)dx => v = -cos(x). Apply uv - \\int v du with outer negative.",
         "Final simplified antiderivative with constant: x^2 sin(x) + 2x cos(x) - 2sin(x) + C",
     ]
     rubrics = rubric_steps or default_rubric
@@ -112,34 +114,44 @@ async def analyze_submission(
         db_course = CourseModel(
             id=course_id,
             title="Calculus III: Multivariable & Advanced Integration",
-            code="MATH 301",
             current_baseline=50,
             target_exam_date="2026-10-28",
         )
         db.add(db_course)
         await db.commit()
 
-    diff_result = await parse_and_diff_steps(
+    diff_result = await divergence_detector.detect_divergence(
         submission_id=submission_id,
         question_id=question_id,
-        submitted_text=submitted_work,
+        submitted_work=submitted_work,
         rubric_steps=rubrics,
     )
 
-    # Persist submission model
-    db_sub = SubmissionModel(
-        id=submission_id,
-        course_id=course_id,
-        question_id=question_id,
-        submitted_work=submitted_work,
-        steps_json=json.dumps([s.model_dump() for s in diff_result.steps]),
-        first_divergence_step=diff_result.first_divergence_step,
-        primary_error_type=diff_result.primary_error_type.value if diff_result.primary_error_type else None,
-        estimated_marks_obtained=diff_result.estimated_marks_obtained,
-        total_possible_marks=diff_result.total_possible_marks,
-        forensic_summary=diff_result.forensic_summary,
-    )
-    db.add(db_sub)
+    # Persist or update submission model (idempotent upsert)
+    existing_sub = await db.execute(select(SubmissionModel).where(SubmissionModel.id == submission_id))
+    sub_record = existing_sub.scalars().first()
+    if sub_record:
+        sub_record.submitted_work = submitted_work
+        sub_record.steps_json = json.dumps([s.model_dump() for s in diff_result.steps])
+        sub_record.first_divergence_step = diff_result.first_divergence_step
+        sub_record.primary_error_type = diff_result.primary_error_type.value if diff_result.primary_error_type else None
+        sub_record.estimated_marks_obtained = diff_result.estimated_marks_obtained
+        sub_record.total_possible_marks = diff_result.total_possible_marks
+        sub_record.forensic_summary = diff_result.forensic_summary
+    else:
+        db_sub = SubmissionModel(
+            id=submission_id,
+            course_id=course_id,
+            question_id=question_id,
+            submitted_work=submitted_work,
+            steps_json=json.dumps([s.model_dump() for s in diff_result.steps]),
+            first_divergence_step=diff_result.first_divergence_step,
+            primary_error_type=diff_result.primary_error_type.value if diff_result.primary_error_type else None,
+            estimated_marks_obtained=diff_result.estimated_marks_obtained,
+            total_possible_marks=diff_result.total_possible_marks,
+            forensic_summary=diff_result.forensic_summary,
+        )
+        db.add(db_sub)
     await db.commit()
 
     return diff_result

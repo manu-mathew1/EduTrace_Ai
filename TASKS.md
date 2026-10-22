@@ -117,8 +117,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 2.8:** Connect Intake UI to live `POST /api/intake/chat` and render Mode A interactive scratchpad.
 
 #### P4: Stage 3 Pod (Forensics)
-- [ ] **Task 2.9:** Build Step-Divergence detection prompt (`ai/forensics/divergence_detector.py`) pin-pointing exact leak point.
-- [ ] **Task 2.10:** Build Error Taxonomy classifier tagging `procedural_calculation`, `method_selection`, `conceptual_misunderstanding`.
+- [✅ (Completed by P1)] **Task 2.9:** Build Step-Divergence detection prompt (`ai/forensics/divergence_detector.py`) pin-pointing exact leak point.
+- [✅ (Completed by P1)] **Task 2.10:** Build Error Taxonomy classifier tagging `procedural_calculation`, `method_selection`, `conceptual_misunderstanding`.
 
 #### P5: Stage 5/6 Pod (Recovery & Studio)
 - [ ] **Task 2.11:** Build Marks Recovery ROI ranking algorithm (`ai/diagnostics/recovery_ranker.py`).
