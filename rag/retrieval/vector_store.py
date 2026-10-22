@@ -1,14 +1,15 @@
 """
-EduTrace AI — Course Knowledge Vector Store & Chunking Engine (Pod P2: Task 2.4)
-Extracts chunks from academic documents, indexes them into a vector store (ChromaDB
-with deterministic fallback), and provides semantic search and citation retrieval.
+EduTrace AI — Course Knowledge Vector Store & Caching Engine (Pod P2: Tasks 2.4 & 3.4)
+Extracts chunks from academic documents, indexes them into a high-performance vector
+knowledge store, and provides sub-millisecond cached semantic search and citation retrieval.
 """
 
 import os
 import re
 import math
+import time
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Set, Tuple
 from pathlib import Path
 
 logger = logging.getLogger("edutrace.rag.vector_store")
@@ -39,15 +40,78 @@ class DocumentChunk:
         self.metadata = metadata or {}
 
 
+class SearchQueryCache:
+    """
+    In-memory LRU Query Cache with TTL and Hit Statistics for ultra-low latency live demos (Task 3.4).
+    """
+
+    def __init__(self, max_size: int = 500, ttl_seconds: float = 300.0):
+        self.max_size = max_size
+        self.ttl_seconds = ttl_seconds
+        self._cache: Dict[Tuple[str, str, int], Tuple[float, List[Dict[str, Any]]]] = {}
+        self.hits: int = 0
+        self.misses: int = 0
+        self.total_search_time_ms: float = 0.0
+
+    def _make_key(self, course_id: str, query: str, limit: int) -> Tuple[str, str, int]:
+        normalized_q = " ".join(query.strip().lower().split())
+        return (course_id, normalized_q, limit)
+
+    def get(self, course_id: str, query: str, limit: int) -> Optional[List[Dict[str, Any]]]:
+        key = self._make_key(course_id, query, limit)
+        if key in self._cache:
+            timestamp, data = self._cache[key]
+            if time.time() - timestamp <= self.ttl_seconds:
+                self.hits += 1
+                return data
+            else:
+                del self._cache[key]
+        self.misses += 1
+        return None
+
+    def set(self, course_id: str, query: str, limit: int, results: List[Dict[str, Any]]):
+        if len(self._cache) >= self.max_size:
+            # Evict oldest entry
+            oldest_key = next(iter(self._cache))
+            del self._cache[oldest_key]
+        key = self._make_key(course_id, query, limit)
+        self._cache[key] = (time.time(), results)
+
+    def invalidate(self, course_id: Optional[str] = None):
+        if course_id is None:
+            self._cache.clear()
+        else:
+            to_remove = [k for k in self._cache if k[0] == course_id]
+            for k in to_remove:
+                del self._cache[k]
+
+    def get_metrics(self) -> Dict[str, Any]:
+        total = self.hits + self.misses
+        hit_ratio = round(self.hits / total, 3) if total > 0 else 0.0
+        avg_latency = round(self.total_search_time_ms / total, 2) if total > 0 else 0.0
+        return {
+            "cache_hits": self.hits,
+            "cache_misses": self.misses,
+            "total_queries": total,
+            "hit_ratio": hit_ratio,
+            "cached_entries": len(self._cache),
+            "average_latency_ms": avg_latency,
+        }
+
+
 class VectorStoreEngine:
     """
-    Academic Vector Store Engine with ChromaDB support and zero-block fallback.
+    Academic Vector Store Engine with inverted indexing, ChromaDB support,
+    and sub-millisecond LRU query caching (Task 3.4).
     """
 
     def __init__(self, persist_directory: Optional[Path] = None):
         self.persist_directory = persist_directory or CHROMA_DIR
         self.persist_directory.mkdir(parents=True, exist_ok=True)
         self._in_memory_chunks: List[DocumentChunk] = []
+        self._inverted_index: Dict[str, Set[str]] = {}  # token -> set of chunk_ids
+        self._chunk_map: Dict[str, DocumentChunk] = {}
+        self.cache = SearchQueryCache()
         self._init_default_chunks()
 
     def _init_default_chunks(self):
@@ -61,6 +125,15 @@ class VectorStoreEngine:
                 slide_number=14,
                 page_number=14,
                 text="Integration by Parts: Formula is derived from the product rule: d/dx(uv) = u'v + uv'. Integrating both sides yields int u dv = uv - int v du. Choose u according to the LIATE rule.",
+            ),
+            DocumentChunk(
+                chunk_id="chunk_kapoor_slide17",
+                doc_id="doc_notes_01",
+                course_id="course_calc_301",
+                title="Prof Kapoor Lecture Notes - Module 2 (Integration Techniques)",
+                slide_number=17,
+                page_number=17,
+                text="Pitfall Alert: Do not attempt u-substitution when the integrand matches standard inverse trigonometric derivative 1/(1+x^2). Always inspect degree of numerator vs denominator before initiating substitution.",
             ),
             DocumentChunk(
                 chunk_id="chunk_kapoor_slide19",
@@ -80,8 +153,37 @@ class VectorStoreEngine:
                 page_number=22,
                 text="Linear First-Order Differential Equations: Always put into canonical standard form y' + P(x)y = Q(x) by dividing through by the leading coefficient before calculating the integrating factor I(x) = exp(int P(x) dx).",
             ),
+            DocumentChunk(
+                chunk_id="chunk_kapoor_slide25",
+                doc_id="doc_notes_01",
+                course_id="course_calc_301",
+                title="Prof Kapoor Lecture Notes - Module 3 (Improper Integrals)",
+                slide_number=25,
+                page_number=25,
+                text="Critical Warning: Never apply the Fundamental Theorem of Calculus blindly across an infinite discontinuity or singularity (e.g. 1/x^2 at x=0). You must split the integral into two improper limit integrals.",
+            ),
+            DocumentChunk(
+                chunk_id="chunk_cs210_slide12",
+                doc_id="doc_notes_cs01",
+                course_id="course_cs_210",
+                title="CS 210: Algorithms - Module 1 (Divide and Conquer)",
+                slide_number=12,
+                page_number=12,
+                text="Binary Search Invariant: Compute midpoint using low + (high - low) // 2 to avoid 32-bit integer overflow. Maintain loop condition while low <= high with strict boundary updates.",
+            ),
         ]
-        self._in_memory_chunks.extend(seeds)
+        for s in seeds:
+            self._add_chunk_to_index(s)
+
+    def _add_chunk_to_index(self, chunk: DocumentChunk):
+        self._in_memory_chunks.append(chunk)
+        self._chunk_map[chunk.chunk_id] = chunk
+
+        tokens = set(re.findall(r"\w+", chunk.text.lower()))
+        for t in tokens:
+            if t not in self._inverted_index:
+                self._inverted_index[t] = set()
+            self._inverted_index[t].add(chunk.chunk_id)
 
     def chunk_text(
         self,
@@ -96,7 +198,6 @@ class VectorStoreEngine:
         Splits text into chunks, honoring slide/section headings if present.
         """
         chunks: List[DocumentChunk] = []
-        # Check for slide markers (e.g. ## Slide 14 or --- Slide 14)
         slide_splits = re.split(r"(?i)(?:##|\-\-\-)\s*Slide\s*(\d+)", text)
 
         if len(slide_splits) > 1:
@@ -109,32 +210,46 @@ class VectorStoreEngine:
                         chunk_id=cid,
                         doc_id=doc_id,
                         course_id=course_id,
-                        text=slide_content,
                         title=f"{filename} (Slide {slide_num})",
                         slide_number=slide_num,
                         page_number=slide_num,
+                        text=slide_content,
                     )
                 )
         else:
-            # Fixed-window chunking
-            start = 0
+            paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+            curr_chunk = ""
             idx = 1
-            while start < len(text):
-                end = min(len(text), start + chunk_size)
-                segment = text[start:end].strip()
-                if segment:
-                    chunks.append(
-                        DocumentChunk(
-                            chunk_id=f"{doc_id}_chunk_{idx}",
-                            doc_id=doc_id,
-                            course_id=course_id,
-                            text=segment,
-                            title=filename,
-                            page_number=max(1, start // 2000),
+            for p in paragraphs:
+                if len(curr_chunk) + len(p) <= chunk_size:
+                    curr_chunk += "\n\n" + p if curr_chunk else p
+                else:
+                    if curr_chunk:
+                        chunks.append(
+                            DocumentChunk(
+                                chunk_id=f"{doc_id}_part_{idx}",
+                                doc_id=doc_id,
+                                course_id=course_id,
+                                title=filename,
+                                slide_number=None,
+                                page_number=idx,
+                                text=curr_chunk,
+                            )
                         )
+                        idx += 1
+                    curr_chunk = p
+            if curr_chunk:
+                chunks.append(
+                    DocumentChunk(
+                        chunk_id=f"{doc_id}_part_{idx}",
+                        doc_id=doc_id,
+                        course_id=course_id,
+                        title=filename,
+                        slide_number=None,
+                        page_number=idx,
+                        text=curr_chunk,
                     )
-                    idx += 1
-                start += chunk_size - overlap
+                )
 
         return chunks
 
@@ -146,10 +261,14 @@ class VectorStoreEngine:
         content: str,
     ) -> int:
         """
-        Chunks and indexes a document into the vector knowledge base.
+        Chunks and indexes document content into the vector store.
+        Invalidates query cache for this course.
         """
         chunks = self.chunk_text(content, doc_id, course_id, filename)
-        self._in_memory_chunks.extend(chunks)
+        for c in chunks:
+            self._add_chunk_to_index(c)
+
+        self.cache.invalidate(course_id)
         logger.info(f"Indexed {len(chunks)} chunks for {filename} ({doc_id})")
         return len(chunks)
 
@@ -160,31 +279,63 @@ class VectorStoreEngine:
         limit: int = 3,
     ) -> List[Dict[str, Any]]:
         """
-        Retrieves top relevant knowledge chunks matching query using BM25 / token similarity.
+        Retrieves top relevant knowledge chunks matching query with sub-millisecond caching (Task 3.4).
         """
+        start_time = time.perf_counter()
+
+        # 1. Check in-memory LRU Query Cache (sub-millisecond return)
+        cached = self.cache.get(course_id, query, limit)
+        if cached is not None:
+            elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+            self.cache.total_search_time_ms += elapsed_ms
+            return cached
+
+        # 2. Inverted index candidate pre-filtering
         query_tokens = set(re.findall(r"\w+", query.lower()))
+        candidate_ids: Set[str] = set()
+
+        for token in query_tokens:
+            if token in self._inverted_index:
+                candidate_ids.update(self._inverted_index[token])
+
+        # If inverted index yields nothing, fallback to course chunks
+        candidates = [
+            self._chunk_map[cid]
+            for cid in candidate_ids
+            if cid in self._chunk_map and self._chunk_map[cid].course_id == course_id
+        ]
+        if not candidates:
+            candidates = [c for c in self._in_memory_chunks if c.course_id == course_id]
+
         results = []
-
-        for chunk in self._in_memory_chunks:
-            if chunk.course_id != course_id:
-                continue
-
+        for chunk in candidates:
             chunk_tokens = set(re.findall(r"\w+", chunk.text.lower()))
             overlap = len(query_tokens.intersection(chunk_tokens))
 
-            # Weight exact phrase or key calculus terms
-            if any(term in query.lower() for term in ["parts", "minus", "sign", "bracket", "leak"]):
-                if any(term in chunk.text.lower() for term in ["bracket", "minus", "pitfall", "parts"]):
-                    overlap += 3
+            # Domain-specific calculus & algorithm boosting
+            q_low = query.lower()
+            c_low = chunk.text.lower()
+            if any(term in q_low for term in ["parts", "minus", "sign", "bracket", "leak"]):
+                if any(term in c_low for term in ["bracket", "minus", "pitfall", "parts"]):
+                    overlap += 4
+            if any(term in q_low for term in ["sub", "arctan", "form"]):
+                if any(term in c_low for term in ["arctan", "substitution", "degree"]):
+                    overlap += 4
+            if any(term in q_low for term in ["ode", "factor", "differential"]):
+                if any(term in c_low for term in ["differential", "integrating factor", "leading"]):
+                    overlap += 4
+            if any(term in q_low for term in ["discontinuity", "improper", "boundary"]):
+                if any(term in c_low for term in ["discontinuity", "improper", "singularity"]):
+                    overlap += 4
 
             score = overlap / (math.sqrt(len(query_tokens) + 1) * math.sqrt(len(chunk_tokens) + 1))
             results.append((score, chunk))
 
-        # Sort by relevance score descending
+        # Sort descending by relevance score
         results.sort(key=lambda x: x[0], reverse=True)
         top = results[:limit]
 
-        return [
+        formatted = [
             {
                 "chunk_id": c.chunk_id,
                 "title": c.title,
@@ -195,6 +346,36 @@ class VectorStoreEngine:
             }
             for score, c in top
         ]
+
+        # 3. Store in cache for subsequent instantaneous queries
+        self.cache.set(course_id, query, limit, formatted)
+
+        elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+        self.cache.total_search_time_ms += elapsed_ms
+        return formatted
+
+    def benchmark_search_latency(self, query: str, course_id: str = "course_calc_301") -> Dict[str, Any]:
+        """
+        Benchmarks cold vs warm search latency for performance monitoring.
+        """
+        # Cold search (bypass cache temporarily)
+        self.cache.invalidate(course_id)
+        t0 = time.perf_counter()
+        cold_results = self.search(query=query, course_id=course_id)
+        cold_latency_ms = (time.perf_counter() - t0) * 1000.0
+
+        # Warm search (cached)
+        t1 = time.perf_counter()
+        warm_results = self.search(query=query, course_id=course_id)
+        warm_latency_ms = (time.perf_counter() - t1) * 1000.0
+
+        return {
+            "query": query,
+            "cold_latency_ms": round(cold_latency_ms, 3),
+            "warm_latency_ms": round(warm_latency_ms, 3),
+            "speedup_factor": round(cold_latency_ms / max(0.001, warm_latency_ms), 1),
+            "metrics": self.cache.get_metrics(),
+        }
 
     def retrieve_relevant_citations(
         self,

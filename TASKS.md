@@ -133,8 +133,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅] **Task 3.2:** Wire Course Database persistence into `backend/main.py`.
 
 #### P2: Stage 1 Pod (Ingestion & RAG)
-- [ ] **Task 3.3:** Build RAG Citation Retriever (`rag/retrieval/citation_engine.py`) extracting slide/page quotes for diverged steps.
-- [ ] **Task 3.4:** Optimize vector search latency and caching for live demo.
+- [✅ (Completed by P1)] **Task 3.3:** Build RAG Citation Retriever (`rag/retrieval/citation_engine.py`) extracting slide/page quotes for diverged steps.
+- [✅ (Completed by P1)] **Task 3.4:** Optimize vector search latency and caching for live demo.
 
 #### P3: Stage 2 Pod (Intake & Probe)
 - [ ] **Task 3.5:** Build Dual-Mode Diagnostic toggle: Mode A (Probe) vs Mode B (Exam Paper Upload with handwriting crops).

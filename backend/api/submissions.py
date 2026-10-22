@@ -27,6 +27,7 @@ from backend.schemas.contracts import (
 from ai.forensics.step_parser import parse_and_diff_steps, generate_deterministic_diff
 from ai.forensics.divergence_detector import divergence_detector
 from ai.forensics.taxonomy_classifier import taxonomy_classifier
+from rag.retrieval.citation_engine import citation_retriever
 
 router = APIRouter()
 MOCKS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "mocks"
@@ -164,20 +165,41 @@ async def socratic_chat(
 ):
     """
     Socratic Co-Pilot endpoint: explains step divergences using pedagogical questioning
-    and direct citations to lecture note slides.
+    and direct citations to lecture note slides retrieved from RAG Citation Engine (Task 3.3).
     """
     step_num = req.selected_step_index or 3
+    query_text = req.user_query or req.user_question or f"Sign distribution error in Step {step_num}"
+
+    # Dynamically retrieve grounded citation from P2 Citation Retriever
+    citations = citation_retriever.retrieve_for_divergence(
+        course_id="course_calc_301",
+        diverged_step_text=query_text,
+        expected_step_text=f"Step {step_num} bracket sign integration by parts",
+        error_type="procedural_calculation",
+        limit=1,
+    )
+
+    if citations:
+        best_cit = citations[0]
+        cited_title = best_cit.title
+        cited_slide = best_cit.slide_number or 19
+        remediation_tip = best_cit.pedagogical_remediation_tip
+    else:
+        cited_title = "Prof Kapoor Lecture Notes - Module 2 (Integration Techniques)"
+        cited_slide = 19
+        remediation_tip = "Enclose the entire second iteration in brackets before distributing the outer minus sign."
+
     reply = (
         f"Notice what happened in Step {step_num}: when you integrated by parts the second time, "
         "you had an outer minus sign in front of the entire bracket. "
         "Inside the bracket, uv was `-2x cos(x)` and the formula subtracted `\\int v du`, which gave another minus. "
-        "When you opened the brackets, how did that outer negative distribute to the second term?"
+        f"{remediation_tip} How did that outer negative distribute to the second term?"
     )
 
     return SocraticChatResponse(
         reply=reply,
-        cited_lecture_title="Prof Kapoor Lecture Notes - Module 2 (Integration Techniques)",
-        cited_page_or_slide=19,
+        cited_lecture_title=cited_title,
+        cited_page_or_slide=cited_slide,
         suggested_followup_question="Would you like to try expanding `-(A - B)` to see where the sign inverted?",
     )
 

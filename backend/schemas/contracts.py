@@ -195,7 +195,8 @@ class StepDivergenceResult(BaseModel):
 
 class SocraticChatRequest(BaseModel):
     submission_id: str
-    user_query: str
+    user_query: Optional[str] = None
+    user_question: Optional[str] = None
     selected_step_index: Optional[int] = None
 
 

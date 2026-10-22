@@ -23,6 +23,7 @@ from backend.schemas.contracts import (
 )
 from rag.ingestion.classifier import classifier
 from rag.retrieval.vector_store import vector_store
+from rag.retrieval.citation_engine import citation_retriever
 
 router = APIRouter()
 
@@ -181,3 +182,26 @@ async def get_document_triage(
         total_documents=0,
         ready_for_intake=False,
     )
+
+
+@router.get("/citations")
+async def get_citations(
+    course_id: str = Query("course_calc_301"),
+    query: str = Query(..., description="Topic or step text to find relevant lecture slide citations"),
+    limit: int = Query(3, ge=1, le=10),
+):
+    """
+    RAG Citation Retriever endpoint (Task 3.3):
+    Extracts slide/page quotes grounded in course notes.
+    """
+    matches = citation_retriever.retrieve_citations(course_id=course_id, topic=query, limit=limit)
+    return [m.to_dict() for m in matches]
+
+
+@router.get("/metrics")
+async def get_rag_metrics():
+    """
+    Returns RAG search latency and cache performance statistics (Task 3.4).
+    """
+    return citation_retriever.get_metrics()
+
