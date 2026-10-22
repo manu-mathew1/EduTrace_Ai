@@ -290,6 +290,8 @@ class MultimodalStudioContent(BaseModel):
     spot_the_bug_steps: List[Dict[str, Any]]
     bug_step_index: int
     bug_explanation: str
+    lecture_citations: Optional[List[Dict[str, Any]]] = None
+    lecture_grounding_quote: Optional[str] = None
 
 
 class ReassessmentQuestion(BaseModel):

@@ -229,6 +229,8 @@ export interface MultimodalStudioContent {
   spot_the_bug_steps: Record<string, any>[];
   bug_step_index: number;
   bug_explanation: string;
+  lecture_citations?: Record<string, any>[];
+  lecture_grounding_quote?: string;
 }
 
 export interface ReassessmentSubmission {

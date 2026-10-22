@@ -90,6 +90,30 @@ DOMAIN_FLOWCHARTS: Dict[str, Dict[str, str]] = {
   E --> F["Sum all 3 cofactor products for final determinant"]""",
         "decision_summary": "Superimpose the alternating checkerboard sign (+, -, +) prior to computing 2x2 cross multiplications.",
     },
+    # Macroeconomics Flowcharts (Task 4.4)
+    "skill_econ_multiplier": {
+        "title": "Keynesian Multiplier Verification Matrix",
+        "mermaid_code": """graph TD
+  A["Given Fiscal Stimulus: ΔG"] --> B{"Are taxes lump-sum or proportional to income t?"}
+  B -->|Lump-Sum: T = T0| C["Standard Multiplier: 1 / (1 - MPC)"]
+  B -->|Proportional: T = tY| D["MANDATORY: Include Tax Drag Factor (1 - t)"]
+  D --> E["Normalized Multiplier: 1 / [1 - MPC(1 - t)]"]
+  E --> F["Verify: True multiplier is strictly smaller than lump-sum"]
+  F --> G["Compute Total Output Expansion: ΔY = k * ΔG"]""",
+        "decision_summary": "Always verify whether taxes are lump-sum or proportional before selecting the multiplier formula.",
+    },
+    "skill_is_lm_crowding": {
+        "title": "IS-LM Equilibrium & Crowding-Out Guardrail",
+        "mermaid_code": """graph TD
+  A["Fiscal Expansion: ΔG > 0"] --> B["Shift IS Curve Rightward by k * ΔG"]
+  B --> C{"Is the economy at the Zero Lower Bound / Liquidity Trap?"}
+  C -->|Yes: r = 0| D["Zero Crowding-Out: Output expands by full horizontal shift"]
+  C -->|No: Upward LM| E["Money Demand L(r,Y) increases with higher income"]
+  E --> F["Interest rate rises: r increases to clear money market"]
+  F --> G["Higher r reduces private investment: I(r) contracts"]
+  G --> H["Crowding-Out: Final ΔY is strictly less than horizontal IS shift"]""",
+        "decision_summary": "Account for interest rate adjustments and private investment dampening in the IS-LM goods-money equilibrium.",
+    },
 }
 
 
@@ -105,23 +129,29 @@ class FlowchartGenerator:
         skill_name: str,
         error_type: Optional[str] = None,
         procedure_steps: Optional[list] = None,
+        lecture_quote: Optional[str] = None,
     ) -> FlowchartResponse:
         """
-        Generates Mermaid flowchart using knowledge bank or structured LLM synthesis.
+        Generates Mermaid flowchart using knowledge bank or structured LLM synthesis,
+        optionally grounded in lecture notes.
         """
         # 1. Match domain templates
         for key, data in DOMAIN_FLOWCHARTS.items():
             if key in skill_id or any(w in skill_name.lower() for w in key.replace("skill_", "").split("_")):
-                return FlowchartResponse(**data)
+                flowchart_data = dict(data)
+                if lecture_quote and "Lecture Note Alert:" not in flowchart_data["decision_summary"]:
+                    flowchart_data["decision_summary"] = f"{flowchart_data['decision_summary']} (Lecture Note Alert: {lecture_quote})"
+                return FlowchartResponse(**flowchart_data)
 
         # 2. Check LLM client if configured
         if getattr(ai_client, "api_key", None):
+            quote_clause = f"\n- Grounded Lecture Note Rule: {lecture_quote}" if lecture_quote else ""
             prompt = f"""
 Create a Mermaid.js decision flowchart (graph TD) for the following academic skill:
 - Skill ID: {skill_id}
 - Skill Name: {skill_name}
 - Error Category: {error_type or 'Procedural / Method Choice'}
-- Canonical Procedure: {procedure_steps or 'Step-by-step mathematical problem solving'}
+- Canonical Procedure: {procedure_steps or 'Step-by-step mathematical problem solving'}{quote_clause}
 
 Return a valid JSON object adhering to FlowchartResponse with title, mermaid_code, and decision_summary.
 Ensure all node text with special characters is wrapped in double quotes inside brackets.

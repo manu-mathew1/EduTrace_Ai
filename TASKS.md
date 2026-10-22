@@ -159,8 +159,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅] **Task 4.2:** Integrate live Bayesian Learning Twin updates upon reassessment completion.
 
 #### P2: Stage 1 Pod (Ingestion & RAG)
-- [ ] **Task 4.3:** Connect citation engine to Multimodal Studio prompts for lecture note grounding.
-- [ ] **Task 4.4:** Finalize sample course documents (Calculus + Macroeconomics).
+- [✅ (Completed by P1)] **Task 4.3:** Connect citation engine to Multimodal Studio prompts for lecture note grounding.
+- [✅ (Completed by P1)] **Task 4.4:** Finalize sample course documents (Calculus + Macroeconomics).
 
 #### P3: Stage 2 Pod (Intake & Probe)
 - [ ] **Task 4.5:** Polish Intake conversational styling and add quick-select chip suggestions ("I'm aiming for 75+", "Have 5 days").

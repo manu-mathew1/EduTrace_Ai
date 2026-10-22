@@ -43,6 +43,14 @@ async def seed_default_courses(db: AsyncSession) -> List[CourseModel]:
             current_baseline=60,
             target_exam_date="2026-11-04",
         ),
+        CourseModel(
+            id="course_econ_202",
+            title="ECON 202: Intermediate Macroeconomics",
+            subject_archetype="conceptual",
+            target_score=80,
+            current_baseline=55,
+            target_exam_date="2026-11-12",
+        ),
     ]
 
     seeded = []

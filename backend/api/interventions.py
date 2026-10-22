@@ -26,24 +26,25 @@ class InterventionGenerateRequest(BaseModel):
     skill_name: Optional[str] = None
     error_type: Optional[str] = None
     divergence_context: Optional[str] = None
+    course_id: Optional[str] = "course_calc_301"
 
 
 @router.get("/studio", response_model=MultimodalStudioContent)
-@router.get("/{skill_id}", response_model=MultimodalStudioContent)
-async def get_intervention_studio(
-    skill_id: str = "skill_parts_sign_expansion",
+async def get_intervention_studio_default(
+    skill_id: str = Query("skill_parts_sign_expansion", description="Skill identifier"),
+    course_id: str = Query("course_calc_301", description="Course identifier"),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Returns the complete 4-tab Multimodal Studio content for a prioritized skill.
-    Uses dynamic AI studio engine with domain fallback.
+    Returns the complete 4-tab Multimodal Studio content for default prioritized skill,
+    grounded directly in lecture slide citations.
     """
-    # Normalize skill id
     normalized_id = "skill_parts_sign" if "parts" in skill_id and "sign" in skill_id else skill_id
 
     try:
         content = await studio_engine.build_studio_content(
             skill_id=normalized_id,
+            course_id=course_id,
         )
         return content
     except Exception as e:
@@ -56,7 +57,38 @@ async def get_intervention_studio(
             data = json.load(f)
             return MultimodalStudioContent(**data)
 
-    return await studio_engine.build_studio_content(skill_id="skill_parts_sign")
+    return await studio_engine.build_studio_content(skill_id="skill_parts_sign", course_id=course_id)
+
+
+@router.get("/{skill_id}", response_model=MultimodalStudioContent)
+async def get_intervention_studio_by_skill(
+    skill_id: str,
+    course_id: str = Query("course_calc_301", description="Course identifier"),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Returns the complete 4-tab Multimodal Studio content for a specific skill ID,
+    grounded in professor lecture notes.
+    """
+    normalized_id = "skill_parts_sign" if "parts" in skill_id and "sign" in skill_id else skill_id
+
+    try:
+        content = await studio_engine.build_studio_content(
+            skill_id=normalized_id,
+            course_id=course_id,
+        )
+        return content
+    except Exception as e:
+        logger.warning(f"Studio generation fallback: {e}")
+
+    # Fallback to mock fixture
+    mock_file = MOCKS_DIR / "mock_intervention.json"
+    if mock_file.exists():
+        with open(mock_file, "r") as f:
+            data = json.load(f)
+            return MultimodalStudioContent(**data)
+
+    return await studio_engine.build_studio_content(skill_id="skill_parts_sign", course_id=course_id)
 
 
 @router.post("/generate", response_model=MultimodalStudioContent)
@@ -65,11 +97,13 @@ async def generate_custom_intervention(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Dynamically generates a custom 4-tab multimodal intervention package for any topic.
+    Dynamically generates a custom 4-tab multimodal intervention package for any topic,
+    grounded in lecture note quotes.
     """
     return await studio_engine.build_studio_content(
         skill_id=req.skill_id,
         skill_name=req.skill_name,
         error_type=req.error_type,
         divergence_context=req.divergence_context,
+        course_id=req.course_id or "course_calc_301",
     )

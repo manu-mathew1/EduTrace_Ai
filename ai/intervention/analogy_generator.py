@@ -64,6 +64,17 @@ DOMAIN_ANALOGIES: Dict[str, Dict[str, str]] = {
         "content": "Applying the quotient rule without squaring the denominator is like building the second story of a house and forgetting the concrete foundation slab. Even if your numerator subtraction (u'v - uv') is completely accurate, the whole structure collapses to zero marks if v² is omitted underneath.",
         "remediation_takeaway": "Write the denominator v² first before deriving the numerator so you never forget the foundation.",
     },
+    # Macroeconomics Analogies (Task 4.4)
+    "skill_econ_multiplier": {
+        "title": "The Leaky Bucket Irrigation Sieve",
+        "content": "Think of fiscal stimulus like pouring water from a government reservoir into farm irrigation canals. The Marginal Propensity to Consume (MPC) is the fraction of water farmers spray onto crops. But proportional taxation is a drainage sieve built into the canal floor. If you calculate how many crops grow assuming zero water drains through the sieve, you will overestimate crop yield by double! Always calculate the water that remains after the tax sieve drains away: 1 / [1 - MPC(1 - t)].",
+        "remediation_takeaway": "Always multiply MPC by (1 - t) in the multiplier denominator to account for tax leakage.",
+    },
+    "skill_is_lm_crowding": {
+        "title": "The Crowded Highway Toll Lane",
+        "content": "Imagine a fast express lane where government buses suddenly surge in number. The road gets congested, driving up the toll booth price (the interest rate). Private cars (private investment) see the skyrocketing toll and decide to stay home or take side streets instead. The total increase in traffic is far less than the number of government buses added because private cars were crowded off the road.",
+        "remediation_takeaway": "An increase in government spending pushes up interest rates, which crowds out interest-sensitive private investment.",
+    },
 }
 
 
@@ -79,23 +90,29 @@ class AnalogyGenerator:
         skill_name: str,
         error_type: Optional[str] = None,
         divergence_context: Optional[str] = None,
+        lecture_quote: Optional[str] = None,
     ) -> AnalogyResponse:
         """
-        Generates an analogy using LLM or domain calibrated knowledge bank.
+        Generates an analogy using LLM or domain calibrated knowledge bank,
+        grounded in professor lecture notes.
         """
         # Check domain knowledge bank first
         for key, data in DOMAIN_ANALOGIES.items():
             if key in skill_id or any(w in skill_name.lower() for w in key.replace("skill_", "").split("_")):
-                return AnalogyResponse(**data)
+                analogy_data = dict(data)
+                if lecture_quote and "Grounded in" not in analogy_data["content"]:
+                    analogy_data["content"] = f"{analogy_data['content']} Grounded in lecture guidance: \"{lecture_quote}\""
+                return AnalogyResponse(**analogy_data)
 
         # Check LLM client if configured
         if getattr(ai_client, "api_key", None):
+            quote_clause = f"\n- Grounded Lecture Note Reference: {lecture_quote}" if lecture_quote else ""
             prompt = f"""
 Create a real-world physical analogy for the following academic skill and student misconception:
 - Skill ID: {skill_id}
 - Skill Name: {skill_name}
 - Error Category: {error_type or 'Procedural / Conceptual'}
-- Divergence Context: {divergence_context or 'Student inverted signs or omitted preconditions'}
+- Divergence Context: {divergence_context or 'Student inverted signs or omitted preconditions'}{quote_clause}
 
 Return valid JSON adhering to the AnalogyResponse schema with title, content, and remediation_takeaway.
 """

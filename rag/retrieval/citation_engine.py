@@ -85,6 +85,24 @@ class CitationRetriever:
                 "Binary Search Midpoint Overflow / Loop Invariant",
                 "Review Slide 12: Use `low + (high - low) // 2` to prevent 32-bit integer overflow.",
             )
+        elif any(w in combined for w in ["multiplier", "keynesian", "tax drag", "c_1", "mpc"]):
+            return (
+                "keynesian multiplier proportional taxation tax drag denominator",
+                "Omission of Proportional Tax Drag in Multiplier",
+                "Review Slide 8: The multiplier with proportional tax is 1 / [1 - c1(1 - t)]. Omitting (1 - t) overstates stimulus.",
+            )
+        elif any(w in combined for w in ["crowding", "is-lm", "is curve", "lm curve", "private investment"]):
+            return (
+                "is-lm fiscal expansion interest rate crowding out private investment",
+                "Neglect of Private Investment Crowding-Out",
+                "Review Slide 15: Increased transaction money demand drives up interest rates, partially crowding out private investment.",
+            )
+        elif any(w in combined for w in ["stagflation", "supply shock", "sras"]):
+            return (
+                "adverse supply shock sras stagflation inflation recession trade-off",
+                "Misdiagnosing Supply Shock as Demand Deficiency",
+                "Review Slide 24: Adverse supply shocks shift SRAS left. Monetary demand stimulus worsens inflation.",
+            )
         else:
             return (
                 f"{diverged_text} {expected_text}",

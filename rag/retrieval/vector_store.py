@@ -171,6 +171,43 @@ class VectorStoreEngine:
                 page_number=12,
                 text="Binary Search Invariant: Compute midpoint using low + (high - low) // 2 to avoid 32-bit integer overflow. Maintain loop condition while low <= high with strict boundary updates.",
             ),
+            # Macroeconomics Seeds (Task 4.4)
+            DocumentChunk(
+                chunk_id="chunk_econ_slide8",
+                doc_id="doc_notes_econ01",
+                course_id="course_econ_202",
+                title="Prof Taylor Lecture Notes - Module 1 (The Keynesian Cross)",
+                slide_number=8,
+                page_number=8,
+                text="The Government Purchases Multiplier with Proportional Taxation: Formula is Delta Y / Delta G = 1 / [1 - c1(1 - t)]. Common trap is omitting the tax rate t from the denominator, leading to severe overestimation of fiscal stimulus.",
+            ),
+            DocumentChunk(
+                chunk_id="chunk_econ_slide15",
+                doc_id="doc_notes_econ01",
+                course_id="course_econ_202",
+                title="Prof Taylor Lecture Notes - Module 2 (The IS-LM Framework)",
+                slide_number=15,
+                page_number=15,
+                text="Crowding-Out Effect in IS-LM: Fiscal expansion shifts the IS curve rightward, raising output and transaction money demand. With fixed money supply, interest rate r rises, reducing interest-sensitive private investment I(r) and partially offsetting output expansion.",
+            ),
+            DocumentChunk(
+                chunk_id="chunk_econ_slide18",
+                doc_id="doc_notes_econ01",
+                course_id="course_econ_202",
+                title="Prof Taylor Lecture Notes - Module 2 (The IS-LM Framework)",
+                slide_number=18,
+                page_number=18,
+                text="Liquidity Trap at Zero Lower Bound: When nominal interest rates hit zero, money demand is infinitely elastic. Conventional monetary expansion cannot lower r further, but fiscal policy experiences zero crowding-out and operates at maximum multiplier potency.",
+            ),
+            DocumentChunk(
+                chunk_id="chunk_econ_slide24",
+                doc_id="doc_notes_econ01",
+                course_id="course_econ_202",
+                title="Prof Taylor Lecture Notes - Module 3 (AS-AD Model)",
+                slide_number=24,
+                page_number=24,
+                text="Adverse Supply Shocks and Stagflation: An unexpected rise in input costs shifts SRAS leftward, causing simultaneous inflation and output contraction. Demand-side monetary stimulus cannot cure unemployment without accelerating inflation.",
+            ),
         ]
         for s in seeds:
             self._add_chunk_to_index(s)
@@ -331,6 +368,16 @@ class VectorStoreEngine:
             if any(term in q_low for term in ["discontinuity", "improper", "boundary"]):
                 if any(term in c_low for term in ["discontinuity", "improper", "singularity"]):
                     overlap += 6
+            # Macroeconomics Boosting (Task 4.4)
+            if any(term in q_low for term in ["multiplier", "tax", "keynesian", "drag"]):
+                if any(term in c_low for term in ["multiplier", "taxation", "keynesian", "drag"]):
+                    overlap += 8
+            if any(term in q_low for term in ["is-lm", "crowding", "investment", "interest rate"]):
+                if any(term in c_low for term in ["is-lm", "crowding-out", "interest rate", "investment"]):
+                    overlap += 8
+            if any(term in q_low for term in ["supply shock", "stagflation", "sras"]):
+                if any(term in c_low for term in ["supply shock", "stagflation", "sras"]):
+                    overlap += 8
 
             score = overlap / (math.sqrt(len(query_tokens) + 1) * math.sqrt(len(chunk_tokens) + 1))
             results.append((score, chunk))

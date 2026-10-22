@@ -17,7 +17,9 @@ import {
   Clock,
   Award,
   Zap,
+  BookOpen,
 } from 'lucide-react';
+import { MultimodalStudioContent } from '../types/schema';
 
 interface InterventionStudioProps {
   onNavigateToReassessment?: () => void;
@@ -81,6 +83,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
   ];
 
   const [priorities, setPriorities] = useState<PriorityItem[]>(defaultPriorities);
+  const [studioContent, setStudioContent] = useState<MultimodalStudioContent | null>(null);
 
   // Live recovery map fetch from backend API
   useEffect(() => {
@@ -107,6 +110,18 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
         // Fallback to default calibrated list
       });
   }, []);
+
+  // Live studio content fetch grounded in lecture notes (Task 4.3)
+  useEffect(() => {
+    fetch(`/api/interventions/${selectedSkillId}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) {
+          setStudioContent(data);
+        }
+      })
+      .catch(() => {});
+  }, [selectedSkillId]);
 
   // Audio animation ticker
   useEffect(() => {
@@ -288,6 +303,31 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
             </button>
           </div>
         </div>
+
+        {/* Grounded Lecture Note Callout Banner (Task 4.3) */}
+        {studioContent?.lecture_grounding_quote && (
+          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-start space-x-3 text-xs animate-fadeIn">
+            <BookOpen className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <span className="font-bold text-indigo-300">Grounded in Professor's Lecture Notes:</span>
+                {studioContent.lecture_citations?.[0]?.slide_number && (
+                  <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-mono text-[10px]">
+                    Slide {studioContent.lecture_citations[0].slide_number}
+                  </span>
+                )}
+                {studioContent.lecture_citations?.[0]?.title && (
+                  <span className="text-[10px] text-slate-400 truncate max-w-xs">
+                    {studioContent.lecture_citations[0].title}
+                  </span>
+                )}
+              </div>
+              <p className="text-slate-300 italic font-serif leading-relaxed">
+                "{studioContent.lecture_grounding_quote}"
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Studio Tab Contents */}
         <div className="p-6">

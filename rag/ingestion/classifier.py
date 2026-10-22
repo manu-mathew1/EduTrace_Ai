@@ -43,7 +43,13 @@ class DocumentClassifier:
         "Partial Fractions": [r"partial fractions?", r"decomposition", r"rational functions?"],
         "Differential Equations": [r"differential equations?", r"\bode\b", r"integrating factor", r"separable"],
         "Multiple Integrals": [r"double integral", r"triple integral", r"polar coordinates", r"jacobian"],
-        "Vector Calculus": [r"gradient", r"divergence", r"curl", r"line integral", r"surface integral", r"green'?s theorem"]
+        "Vector Calculus": [r"gradient", r"divergence", r"curl", r"line integral", r"surface integral", r"green'?s theorem"],
+        # Macroeconomics Topics (Task 4.4)
+        "Keynesian Multipliers": [r"keynesian", r"multiplier", r"\bmpc\b", r"disposable income", r"planned expenditure"],
+        "IS-LM Framework": [r"\bis[-_\s]?lm\b", r"goods market", r"money market", r"crowding[-_\s]?out", r"liquidity preference"],
+        "AS-AD & Inflation": [r"aggregate demand", r"aggregate supply", r"\bas[-_\s]?ad\b", r"phillips curve", r"stagflation"],
+        "Neoclassical Growth": [r"solow", r"steady[-_\s]?state", r"capital accumulation", r"golden rule"],
+        "Open Economy Macroeconomics": [r"mundell[-_\s]?fleming", r"exchange rate", r"capital mobility", r"net exports"],
     }
 
     @classmethod
@@ -78,7 +84,10 @@ class DocumentClassifier:
                 topics_detected.append(topic_name)
 
         if not topics_detected:
-            topics_detected = ["Calculus Foundations", "Advanced Integration"]
+            if any(k in content_lower or k in fn_lower for k in ["econ", "macro", "fiscal", "monetary", "inflation", "gdp"]):
+                topics_detected = ["Macroeconomic Foundations", "Keynesian Cross & IS-LM"]
+            else:
+                topics_detected = ["Calculus Foundations", "Advanced Integration"]
 
         # Estimate pages
         if file_bytes_len > 0:
