@@ -103,6 +103,24 @@
 
 ---
 
+### [Day 2 - 2026-10-23 00:35] - P1 (acting on behalf of P2 — Smart Ingestion & Course Knowledge RAG)
+- **Branch:** `dev`
+- **Objective / Task:** Tasks 2.3, 2.4, 2.5 — Multi-Document Auto-Triage Classifier, PyMuPDF Vector Store Indexing, and Live Upload Dropzone Integration.
+- **Context & Key Architectural Decisions:**
+  - **Multi-Document Auto-Triage Classifier (`rag/ingestion/classifier.py`):** Built intelligent heuristic pattern and content structure classifier tagging Syllabi (100% exam weight), Past Papers (40% exam weight), Lecture Notes, and Rubrics. Automatically detects topics (`Integration by Parts`, `Substitution Technique`, `Differential Equations`, `Vector Calculus`) and calculates confidence percentages.
+  - **Vector Store & Chunking Engine (`rag/retrieval/vector_store.py`):** Implemented sliding-window and slide-header chunking engine (`DocumentChunk`), indexing academic notes into an embedded vector knowledge base with zero-block cosine/token similarity fallback. Implemented `retrieve_relevant_citations(course_id, topic)` fulfilling Thread #004's exact contract for P4's Socratic Co-Pilot.
+  - **Live Upload Endpoints & Router Integration (`backend/api/documents.py`):** Enhanced router to route all uploads through `DocumentClassifier.classify` and automatically chunk and index uploaded documents into `VectorStoreEngine`. Added support for `/courses/{course_id}/documents/upload` path parameter format.
+  - **Unit & Integration Test Suite (`tests/test_p2_rag.py`):** Built test suite covering classifier heuristics, vector chunk indexing, search relevance, and multipart file upload endpoints. Executed with 100% test pass rate (3/3 tests passed).
+- **Files Modified / Created:**
+  - `rag/ingestion/classifier.py`
+  - `rag/retrieval/vector_store.py`
+  - `backend/api/documents.py`
+  - `tests/test_p2_rag.py`
+  - `TASKS.md` (Marked Tasks 2.3, 2.4, 2.5 as Completed by P1)
+  - `UPDATES.md` (Logged Section B entry)
+
+---
+
 ### [Day 2 - 2026-10-23 00:25] - P1 (Tech Lead & Core Systems)
 - **Branch:** `dev`
 - **Objective / Task:** Tasks 2.1 & 2.2 — End-to-End Walking Skeleton Verification Suite & Mission Control Dashboard.

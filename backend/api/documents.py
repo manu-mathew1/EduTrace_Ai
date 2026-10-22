@@ -21,6 +21,8 @@ from backend.schemas.contracts import (
     ClassifiedDocument,
     DocumentTriageResponse,
 )
+from rag.ingestion.classifier import classifier
+from rag.retrieval.vector_store import vector_store
 
 router = APIRouter()
 
@@ -28,63 +30,16 @@ MOCKS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "mocks"
 UPLOADS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "uploads"
 
 
-def classify_document(filename: str, content_sample: str = "") -> tuple[DocumentType, float, List[str], Optional[float]]:
-    """
-    Auto-triage classifier: determines document role based on filename tokens and content cues.
-    Returns: (classified_type, confidence, topics_detected, exam_weight)
-    """
-    fn_lower = filename.lower()
-    text_lower = content_sample.lower()
-
-    if any(k in fn_lower for k in ["syllabus", "curriculum", "course_outline", "overview"]):
-        return (
-            DocumentType.SYLLABUS,
-            0.98,
-            ["Integration Techniques", "Partial Derivatives", "Multiple Integrals", "Vector Calculus"],
-            100.0,
-        )
-    elif any(k in fn_lower for k in ["pyq", "exam", "paper", "midterm", "final", "test", "quiz"]):
-        return (
-            DocumentType.PAST_PAPER,
-            0.95,
-            ["Integration by Parts", "Substitution", "Differential Equations"],
-            40.0,
-        )
-    elif any(k in fn_lower for k in ["rubric", "marking", "solution", "scheme", "answer_key"]):
-        return (
-            DocumentType.RUBRIC,
-            0.92,
-            ["Step-by-step marking", "Partial credit rules"],
-            None,
-        )
-    elif any(k in fn_lower for k in ["notes", "slide", "lecture", "module", "chapter", "handout"]):
-        return (
-            DocumentType.LECTURE_NOTES,
-            0.99,
-            ["Integration by Parts", "Trigonometric Substitution", "Partial Fractions"],
-            None,
-        )
-    else:
-        # Content-based heuristic fallback
-        if "grading criteria" in text_lower or "prerequisites" in text_lower:
-            return DocumentType.SYLLABUS, 0.85, ["Course Structure"], 100.0
-        elif "marks" in text_lower and ("question" in text_lower or "q1" in text_lower):
-            return DocumentType.PAST_PAPER, 0.80, ["Exam Questions"], 50.0
-        elif "definition" in text_lower or "theorem" in text_lower or "example" in text_lower:
-            return DocumentType.LECTURE_NOTES, 0.85, ["Course Content"], None
-        return DocumentType.UNKNOWN, 0.60, ["General Academic Material"], None
+def classify_document(filename: str, content_sample: str = "", file_bytes_len: int = 0) -> tuple[DocumentType, float, List[str], Optional[float], int]:
+    """Routes through the central DocumentClassifier (Task 2.3)."""
+    return classifier.classify(filename=filename, content=content_sample, file_bytes_len=file_bytes_len)
 
 
-@router.post("/upload", response_model=DocumentTriageResponse)
-async def upload_documents(
-    files: List[UploadFile] = File(...),
-    course_id: str = Form("course_calc_301"),
-    db: AsyncSession = Depends(get_db),
-):
-    """
-    Upload one or multiple course documents (Syllabus, Past Papers, Lecture Notes, Rubrics).
-    Auto-classifies each document and persists metadata to SQLite.
-    """
+async def _process_document_uploads(
+    files: List[UploadFile],
+    course_id: str,
+    db: AsyncSession,
+) -> DocumentTriageResponse:
     if not files:
         raise HTTPException(status_code=400, detail="No files provided for upload.")
 
@@ -102,16 +57,26 @@ async def upload_documents(
         with open(saved_path, "wb") as f:
             f.write(file_bytes)
 
-        # Estimate text sample for classification
+        # Estimate text sample for classification and indexing
         try:
-            sample_text = file_bytes[:2048].decode("utf-8", errors="ignore")
+            sample_text = file_bytes.decode("utf-8", errors="ignore")
         except Exception:
             sample_text = ""
 
-        # Estimate page count (heuristics: ~2KB per page or 1 page minimum)
-        est_pages = max(1, len(file_bytes) // 2500)
+        doc_type, confidence, topics, weight, est_pages = classify_document(
+            file.filename or "",
+            sample_text,
+            len(file_bytes)
+        )
 
-        doc_type, confidence, topics, weight = classify_document(file.filename or "", sample_text)
+        # Index into vector store for RAG citation retrieval (Task 2.4)
+        if sample_text:
+            vector_store.index_document(
+                doc_id=doc_id,
+                course_id=course_id,
+                filename=file.filename or "uploaded_doc",
+                content=sample_text,
+            )
 
         # Persist to database
         db_doc = DocumentModel(
@@ -147,6 +112,26 @@ async def upload_documents(
         total_documents=len(classified_docs),
         ready_for_intake=True,
     )
+
+
+@router.post("/upload", response_model=DocumentTriageResponse)
+async def upload_documents(
+    files: List[UploadFile] = File(...),
+    course_id: str = Form("course_calc_301"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Upload documents with course_id in Form body."""
+    return await _process_document_uploads(files=files, course_id=course_id, db=db)
+
+
+@router.post("/courses/{course_id}/documents/upload", response_model=DocumentTriageResponse)
+async def upload_course_documents(
+    course_id: str,
+    files: List[UploadFile] = File(...),
+    db: AsyncSession = Depends(get_db),
+):
+    """Upload documents with course_id in URL path (Task 2.5)."""
+    return await _process_document_uploads(files=files, course_id=course_id, db=db)
 
 
 @router.get("/triage", response_model=DocumentTriageResponse)

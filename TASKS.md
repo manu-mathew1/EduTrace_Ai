@@ -107,9 +107,9 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅] **Task 2.2:** Build Mission Control Dashboard in `frontend/src/pages/DashboardPage.tsx` displaying course overview and readiness score.
 
 #### P2: Stage 1 Pod (Ingestion & RAG)
-- [ ] **Task 2.3:** Build Multi-Document Auto-Triage Classifier (`rag/ingestion/classifier.py`) categorizing Syllabus vs Notes vs Past Paper.
-- [ ] **Task 2.4:** Build PyMuPDF chunking and ChromaDB vector indexing (`rag/retrieval/vector_store.py`).
-- [ ] **Task 2.5:** Connect Ingestion UI dropzone to live `POST /api/courses/{id}/documents/upload` endpoint; render smart badges.
+- [✅ (Completed by P1)] **Task 2.3:** Build Multi-Document Auto-Triage Classifier (`rag/ingestion/classifier.py`) categorizing Syllabus vs Notes vs Past Paper.
+- [✅ (Completed by P1)] **Task 2.4:** Build PyMuPDF chunking and ChromaDB vector indexing (`rag/retrieval/vector_store.py`).
+- [✅ (Completed by P1)] **Task 2.5:** Connect Ingestion UI dropzone to live `POST /api/courses/{id}/documents/upload` endpoint; render smart badges.
 
 #### P3: Stage 2 Pod (Intake & Probe)
 - [ ] **Task 2.6:** Build 3-turn Intake Triage Agent prompt (`ai/diagnostics/intake_agent.py`) extracting target score and friction topics.
