@@ -108,6 +108,7 @@ export interface IntakeConsultResponse {
   assistant_reply: string;
   session_state: IntakeSessionState;
   ready_for_diagnostic: boolean;
+  suggested_chips?: string[];
 }
 
 export interface HingeQuestion {

@@ -163,7 +163,7 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 4.4:** Finalize sample course documents (Calculus + Macroeconomics).
 
 #### P3: Stage 2 Pod (Intake & Probe)
-- [ ] **Task 4.5:** Polish Intake conversational styling and add quick-select chip suggestions ("I'm aiming for 75+", "Have 5 days").
+- [✅ (Completed by P1)] **Task 4.5:** Polish Intake conversational styling and add quick-select chip suggestions ("I'm aiming for 75+", "Have 5 days").
 
 #### P4: Stage 3 Pod (Forensics)
 - [ ] **Task 4.6:** Conduct dry runs on messy handwriting crops; ensure uncertainty badges trigger reliably.

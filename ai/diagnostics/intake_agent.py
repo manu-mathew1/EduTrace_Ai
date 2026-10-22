@@ -67,16 +67,40 @@ class IntakeAgent:
         if not detected_topics:
             detected_topics = ["Integration by Parts: Bracket Sign Distribution", "Substitution vs Standard Forms"]
 
-        # Extract target score if mentioned in message (e.g., "from 50% to 75%")
-        score_matches = [int(s) for s in re.findall(r"(\d{2})%", user_message)]
-        extracted_target = max(score_matches) if score_matches else target_score
+        # Extract target score if mentioned in message (e.g., "I'm aiming for 75+", "need 85%", "75%")
+        score_matches = []
+        kw_matches = re.findall(r"(?:aiming for|target|goal|need|score of)\s*(\d{2})(?:\+|%|marks?)?", user_message, re.IGNORECASE)
+        if kw_matches:
+            score_matches.extend([int(s) for s in kw_matches])
+        pct_matches = re.findall(r"(\d{2})\s*%", user_message)
+        if pct_matches:
+            score_matches.extend([int(s) for s in pct_matches])
+        plus_matches = re.findall(r"(\d{2})\s*\+", user_message)
+        if plus_matches:
+            score_matches.extend([int(s) for s in plus_matches])
 
-        is_complete = turn_number >= 2  # Complete by turn 2 or 3
+        valid_scores = [s for s in score_matches if 40 <= s <= 100]
+        extracted_target = max(valid_scores) if valid_scores else target_score
+
+        # Extract timeline in days if mentioned (e.g., "Have 5 days", "in 48 hours", "2 weeks")
+        extracted_days = 5
+        days_matches = re.findall(r"(\d+)\s*days?", user_message, re.IGNORECASE)
+        hours_matches = re.findall(r"(\d+)\s*hours?", user_message, re.IGNORECASE)
+        weeks_matches = re.findall(r"(\d+)\s*weeks?", user_message, re.IGNORECASE)
+        if days_matches:
+            extracted_days = int(days_matches[0])
+        elif hours_matches:
+            extracted_days = max(1, int(hours_matches[0]) // 24)
+        elif weeks_matches:
+            extracted_days = int(weeks_matches[0]) * 7
+
+        is_complete = turn_number >= 2 or any(k in msg_lower for k in ["ready", "launch", "probe", "begin"])
 
         prompt = f"""
 Turn Number: {turn_number}/3
 Student Target Score: {extracted_target}%
 Baseline Score: {baseline_score}%
+Timeline Days Remaining: {extracted_days}
 Current User Message: "{user_message}"
 Conversation History:
 {chr(10).join(f"- {m.role.upper()}: {m.content}" for m in history)}
@@ -96,6 +120,28 @@ Generate a helpful, empathetic response guiding the student to calibrate their 1
         except Exception:
             reply = cls._generate_deterministic_reply(turn_number, extracted_target, baseline_score, user_message)
 
+        # Contextual Quick-Select Chips (Task 4.5)
+        if turn_number == 1:
+            suggested_chips = [
+                "I'm aiming for 75+",
+                "Have 5 days left",
+                "Bracket sign distribution in parts",
+                "Method selection: substitution vs parts",
+            ]
+        elif turn_number == 2:
+            suggested_chips = [
+                "Bracket sign mistakes in integration by parts",
+                "Integrating factor setup in linear ODEs",
+                "Boundary checks in improper integrals",
+                "Ready to launch Mode A Diagnostic Probe",
+            ]
+        else:
+            suggested_chips = [
+                "Launch Mode A 10-Minute Probe",
+                "Explain the 3 calibrated hinge questions",
+                "Switch to Mode B: Upload Exam Paper",
+            ]
+
         # Update message history
         updated_messages = list(history)
         updated_messages.append(IntakeMessage(role="user", content=user_message))
@@ -106,7 +152,7 @@ Generate a helpful, empathetic response guiding the student to calibrate their 1
             course_id=course_id,
             messages=updated_messages,
             extracted_target_score=extracted_target,
-            extracted_timeline_days=5,
+            extracted_timeline_days=extracted_days,
             extracted_friction_topics=detected_topics,
             recommended_mode=DiagnosticMode.PROBE,
             is_consultation_complete=is_complete,
@@ -116,6 +162,7 @@ Generate a helpful, empathetic response guiding the student to calibrate their 1
             assistant_reply=reply,
             session_state=session_state,
             ready_for_diagnostic=is_complete,
+            suggested_chips=suggested_chips,
         )
 
     @classmethod

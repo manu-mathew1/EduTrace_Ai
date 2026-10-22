@@ -131,6 +131,7 @@ class IntakeConsultResponse(BaseModel):
     assistant_reply: str
     session_state: IntakeSessionState
     ready_for_diagnostic: bool
+    suggested_chips: Optional[List[str]] = None
 
 
 class HingeQuestion(BaseModel):
