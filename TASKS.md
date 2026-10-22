@@ -129,8 +129,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 ### Day 3: Stage 3 (Forensic Step-Diff & Socratic Chat) & Stage 4 (Error Fingerprint)
 
 #### P1: Core Systems & Integration
-- [ ] **Task 3.1:** Merge Day 2 PRs; test that uploaded documents feed into Stage 2 Diagnostic Probe.
-- [ ] **Task 3.2:** Wire Course Database persistence into `backend/main.py`.
+- [✅] **Task 3.1:** Merge Day 2 PRs; test that uploaded documents feed into Stage 2 Diagnostic Probe.
+- [✅] **Task 3.2:** Wire Course Database persistence into `backend/main.py`.
 
 #### P2: Stage 1 Pod (Ingestion & RAG)
 - [ ] **Task 3.3:** Build RAG Citation Retriever (`rag/retrieval/citation_engine.py`) extracting slide/page quotes for diverged steps.

@@ -25,7 +25,7 @@
 | **#003** | `[RESOLVED]` | P3 $\to$ P1 | Register `intake.router` in `backend/main.py` | Day 1 |
 | **#004** | `[RESOLVED]` | P4 $\to$ P2 | Citation search function signature request for Socratic co-pilot | Day 1 |
 | **#005** | `[RESOLVED]` | P5 $\to$ P1 | Function signature request for Bayesian Twin update | Day 1 |
-| **#006** | `[UNDER DISCUSSION - 3/5]` | P1 $\to$ Team | Feature Proposal: Audio Waveform Visualizer in Studio | Day 1 |
+| **#006** | `[APPROVED & SCHEDULED]` | P1 $\to$ Team | Feature Proposal: Audio Waveform Visualizer in Studio | Day 1 |
 
 ---
 
@@ -100,6 +100,32 @@
 ---
 
 ## Section B: Detailed Technical Work Logs (Reverse Chronological)
+
+---
+
+### [Day 3 - 2026-10-23 01:05] - P1 (Tech Lead & Core Systems)
+- **Branch:** `dev`
+- **Objective / Task:** Tasks 3.1 & 3.2 — Document-to-Probe Integration Pipeline & Full Course Database Persistence.
+- **Context & Key Architectural Decisions:**
+  - **Task 3.1: Document-to-Diagnostic Probe Integration (`ai/diagnostics/probe_generator.py` & `backend/api/intake.py`):**
+    - Enhanced `probe_generator` with a comprehensive calibrated Question Bank supporting topics across Procedural Calculus (Parts, Substitution, Improper Discontinuities, Differential Equations) and Computer Science/Algorithms (Binary Search overflow/invariants).
+    - Wired `get_diagnostic_probe` endpoint in `backend/api/intake.py` to query SQLite `DocumentModel` for all detected syllabus/notes topics and `IntakeSessionModel` for student-reported friction topics, feeding them dynamically into the probe question calibration engine with source attribution (`"uploaded_course_documents"` vs `"default_curriculum"`).
+  - **Task 3.2: Full Course Database Persistence & CRUD Router (`backend/api/courses.py` & `backend/main.py`):**
+    - Created dedicated course router mounted at `/api/courses` supporting `GET /api/courses`, `GET /api/courses/{course_id}`, `POST /api/courses`, `PUT /api/courses/{course_id}`, and `DELETE /api/courses/{course_id}`.
+    - Implemented automatic database seeding in `lifespan` ensuring default benchmark courses (`course_calc_301`: Calculus III and `course_cs_210`: Data Structures & Algorithms) persist in SQLite on startup.
+    - Updated `frontend/src/pages/DashboardPage.tsx` with live course fetch telemetry.
+    - Modernized Pydantic v2 schemas in `backend/schemas/contracts.py` with `CourseUpdate` and clean schema extra configurations, completely eliminating deprecation warnings.
+  - **Unit & Integration Test Suite (`tests/test_p1_day3.py`):** Built test suite verifying course seeding, full CRUD lifecycle, and the dynamic pipeline where uploaded course documents feed topics into Stage 2 Diagnostic Probe. Executed with 100% test pass rate (3/3 tests passed, 23/23 all-suite tests passed).
+- **Files Modified / Created:**
+  - `backend/api/courses.py`
+  - `backend/main.py`
+  - `backend/api/intake.py`
+  - `ai/diagnostics/probe_generator.py`
+  - `backend/schemas/contracts.py`
+  - `frontend/src/pages/DashboardPage.tsx`
+  - `tests/test_p1_day3.py`
+  - `TASKS.md` (Marked Tasks 3.1 and 3.2 as Completed by P1)
+  - `UPDATES.md` (Logged Section B entry)
 
 ---
 

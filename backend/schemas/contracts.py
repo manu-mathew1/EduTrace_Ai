@@ -65,11 +65,19 @@ class StepStatus(str, Enum):
 # =====================================================================
 
 class CourseCreate(BaseModel):
-    title: str = Field(..., example="Math 301: Multivariable Calculus")
+    title: str = Field(..., json_schema_extra={"example": "Math 301: Multivariable Calculus"})
     subject_archetype: KnowledgeArchetype = Field(default=KnowledgeArchetype.PROCEDURAL)
     target_score: int = Field(default=75, ge=0, le=100)
     current_baseline: Optional[int] = Field(default=50, ge=0, le=100)
-    target_exam_date: Optional[str] = Field(None, example="2026-10-28")
+    target_exam_date: Optional[str] = Field(None, json_schema_extra={"example": "2026-10-28"})
+
+
+class CourseUpdate(BaseModel):
+    title: Optional[str] = None
+    subject_archetype: Optional[KnowledgeArchetype] = None
+    target_score: Optional[int] = Field(None, ge=0, le=100)
+    current_baseline: Optional[int] = Field(None, ge=0, le=100)
+    target_exam_date: Optional[str] = None
 
 
 class CourseResponse(BaseModel):
@@ -104,7 +112,7 @@ class DocumentTriageResponse(BaseModel):
 # =====================================================================
 
 class IntakeMessage(BaseModel):
-    role: str = Field(..., example="user")  # 'user' or 'assistant'
+    role: str = Field(..., json_schema_extra={"example": "user"})  # 'user' or 'assistant'
     content: str
 
 
@@ -141,6 +149,8 @@ class DiagnosticProbeResponse(BaseModel):
     subject_archetype: KnowledgeArchetype
     total_estimated_minutes: int
     questions: List[HingeQuestion]
+    calibrated_topics: Optional[List[str]] = None
+    calibration_source: Optional[str] = None
 
 
 # =====================================================================

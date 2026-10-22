@@ -41,6 +41,12 @@ async def lifespan(app: FastAPI):
     try:
         await init_db()
         logger.info("✅ Database tables successfully created/verified.")
+        # Seed default courses on startup (Task 3.2)
+        from backend.db.database import AsyncSessionLocal
+        from backend.api.courses import seed_default_courses
+        async with AsyncSessionLocal() as session:
+            await seed_default_courses(session)
+        logger.info("✅ Default courses seeded/verified in SQLite.")
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {e}")
 
@@ -92,7 +98,7 @@ async def health_check():
         "status": "healthy",
         "engine": "FastAPI + SQLAlchemy + aiosqlite",
         "pods": {
-            "p1_core": "active (Bayesian Twin & Master Hub)",
+            "p1_core": "active (Bayesian Twin, Course Persistence & Master Hub)",
             "p2_ingestion": "registered (/api/documents)",
             "p3_intake": "registered (/api/intake)",
             "p4_forensics": "registered (/api/submissions)",
@@ -105,8 +111,12 @@ async def health_check():
 # Router Registrations (P1 Hub)
 # =====================================================================
 
+# 0. P1: Course Management & Database Persistence Router (Task 3.2)
+from backend.api import courses
+app.include_router(courses.router, prefix="/api/courses", tags=["courses (P1)"])
+
 # 1. P1: Metacognitive Learning Twin Router
-app.include_router(twin.router, prefix="/api/twin")
+app.include_router(twin.router, prefix="/api/twin", tags=["twin (P1)"])
 
 # 2. P2: Ingestion & Document Router (Thread #002)
 try:
