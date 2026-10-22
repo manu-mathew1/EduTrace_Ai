@@ -69,32 +69,85 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
   ]);
   const [input, setInput] = useState('');
   const [isConsultComplete, setIsConsultComplete] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [activeTab, setActiveTab] = useState<'consultation' | 'probe'>('consultation');
+  const [questions, setQuestions] = useState<Question[]>(DEFAULT_QUESTIONS);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({
     probe_q1: 'Part 1: u = 1+x^2, du = 2xdx => (1/2)ln|1+x^2|. Part 2: arctan(x) + C',
     probe_q2: 'Step 1: u=x^2, dv=e^-x dx => -x^2 e^-x + ∫ 2x e^-x dx\nStep 2: u=2x, dv=e^-x dx => -x^2 e^-x - 2x e^-x - 2e^-x + C',
     probe_q3: '[-1/x] from -1 to 1 = -1 - (1) = -2 (Wait, is x=0 a discontinuity?)',
   });
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  // Load diagnostic probe questions from backend
+  useEffect(() => {
+    fetch('/api/intake/probe?course_id=course_calc_301')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && data.questions && data.questions.length > 0) {
+          const qs: Question[] = data.questions.map((q: any) => ({
+            id: q.question_id,
+            text: q.question_text,
+            skill: q.target_skill,
+            trap: q.cognitive_trap_tested,
+            time: q.estimated_minutes,
+            marks: q.maximum_marks,
+          }));
+          setQuestions(qs);
+        }
+      })
+      .catch(() => {
+        // Keeps DEFAULT_QUESTIONS
+      });
+  }, []);
 
-    const newMsgs: Message[] = [...messages, { role: 'user', content: input }];
+  const handleSend = async () => {
+    if (!input.trim() || isSending) return;
+
+    const userText = input;
+    const newMsgs: Message[] = [...messages, { role: 'user', content: userText }];
     setMessages(newMsgs);
     setInput('');
+    setIsSending(true);
 
-    // Simulated counselor response or API fetch
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content:
-            'That makes total sense. Bracket sign distribution in integration by parts accounts for 15% of all lost marks in past exams. I have generated your Mode A "10-Minute Diagnostic Probe" with 3 calibrated hinge questions to pinpoint your exact leak point. Ready to solve?',
-        },
-      ]);
-      setIsConsultComplete(true);
-    }, 600);
+    try {
+      const res = await fetch('/api/intake/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          course_id: 'course_calc_301',
+          session_id: 'sess_user_demo',
+          user_message: userText,
+          messages_history: messages,
+          target_score: 75,
+          baseline_score: 50,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setMessages((prev) => [...prev, { role: 'assistant', content: data.assistant_reply }]);
+        if (data.ready_for_diagnostic || data.session_state?.is_consultation_complete) {
+          setIsConsultComplete(true);
+        }
+      } else {
+        throw new Error('API offline');
+      }
+    } catch {
+      // Offline fallback
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content:
+              'That makes total sense. Bracket sign distribution in integration by parts accounts for 15% of all lost marks in past exams. I have generated your Mode A "10-Minute Diagnostic Probe" with 3 calibrated hinge questions to pinpoint your exact leak point. Ready to solve?',
+          },
+        ]);
+        setIsConsultComplete(true);
+      }, 500);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (

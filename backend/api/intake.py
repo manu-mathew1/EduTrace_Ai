@@ -23,12 +23,15 @@ from backend.schemas.contracts import (
     DiagnosticProbeResponse,
     HingeQuestion,
 )
+from ai.diagnostics.intake_agent import intake_agent
+from ai.diagnostics.probe_generator import probe_generator
 
 router = APIRouter()
 MOCKS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "mocks"
 
 
 @router.post("/consult", response_model=IntakeConsultResponse)
+@router.post("/chat", response_model=IntakeConsultResponse)
 async def intake_consultation(
     course_id: str = Body("course_calc_301"),
     session_id: str = Body("sess_demo_01"),
@@ -39,78 +42,43 @@ async def intake_consultation(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    3-Turn Metacognitive Intake Triage consultation.
+    3-Turn Metacognitive Intake Triage consultation (Task 2.6 & 2.8).
     Extracts student friction points, exam timelines, and recommends Mode A Probe vs Mode B Exam Upload.
     """
-    turn_count = len(messages_history) // 2 + 1
-    msg_lower = user_message.lower()
-
-    friction_topics = []
-    if "parts" in msg_lower or "integration" in msg_lower:
-        friction_topics.append("Integration by Parts: Minus Sign Distribution")
-    if "differential" in msg_lower or "ode" in msg_lower:
-        friction_topics.append("First-Order Linear ODEs: Integrating Factor")
-    if "vector" in msg_lower or "surface" in msg_lower:
-        friction_topics.append("Vector Calculus & Surface Integrals")
-
-    if turn_count == 1:
-        reply = (
-            f"Welcome Rahul! I see your goal is to bridge from {baseline_score}% to {target_score}% in MATH 301 before your exam on Oct 28. "
-            "When working through exam-level problems, where do you feel the biggest cognitive friction: choosing which method to apply, or algebraic errors during execution?"
-        )
-        is_complete = False
-    elif turn_count == 2:
-        reply = (
-            "That makes complete sense. Many students lose marks in procedural calculus when signs distribute across nested brackets. "
-            "To pinpoint your exact marks leaks without you having to re-solve an entire 3-hour exam, I have prepared a Mode A '10-Minute Diagnostic Probe' consisting of 3 calibrated hinge questions. Shall we launch the probe?"
-        )
-        is_complete = True
-    else:
-        reply = "Diagnostic probe calibrated! Launching the 3 hinge questions now."
-        is_complete = True
-
-    updated_messages = list(messages_history)
-    updated_messages.append(IntakeMessage(role="user", content=user_message))
-    updated_messages.append(IntakeMessage(role="assistant", content=reply))
-
-    session_state = IntakeSessionState(
+    consult_response = await intake_agent.process_turn(
         session_id=session_id,
         course_id=course_id,
-        messages=updated_messages,
-        extracted_target_score=target_score,
-        extracted_timeline_days=6,
-        extracted_friction_topics=friction_topics or ["Integration Techniques", "Differential Equations"],
-        recommended_mode=DiagnosticMode.PROBE,
-        is_consultation_complete=is_complete,
+        user_message=user_message,
+        history=messages_history,
+        target_score=target_score,
+        baseline_score=baseline_score,
     )
+
+    session_state = consult_response.session_state
 
     # Persist or update session in SQLite (idempotent upsert)
     existing_q = await db.execute(select(IntakeSessionModel).where(IntakeSessionModel.session_id == session_id))
     existing = existing_q.scalars().first()
     if existing:
-        existing.messages_json = json.dumps([m.model_dump() for m in updated_messages])
-        existing.extracted_target_score = target_score
+        existing.messages_json = json.dumps([m.model_dump() for m in session_state.messages])
+        existing.extracted_target_score = session_state.extracted_target_score
         existing.extracted_friction_topics_json = json.dumps(session_state.extracted_friction_topics)
-        existing.is_consultation_complete = is_complete
+        existing.is_consultation_complete = session_state.is_consultation_complete
     else:
         db_session = IntakeSessionModel(
             session_id=session_id,
             course_id=course_id,
-            messages_json=json.dumps([m.model_dump() for m in updated_messages]),
-            extracted_target_score=target_score,
-            extracted_timeline_days=6,
+            messages_json=json.dumps([m.model_dump() for m in session_state.messages]),
+            extracted_target_score=session_state.extracted_target_score,
+            extracted_timeline_days=session_state.extracted_timeline_days or 5,
             extracted_friction_topics_json=json.dumps(session_state.extracted_friction_topics),
-            recommended_mode=DiagnosticMode.PROBE.value,
-            is_consultation_complete=is_complete,
+            recommended_mode=session_state.recommended_mode.value,
+            is_consultation_complete=session_state.is_consultation_complete,
         )
         db.add(db_session)
     await db.commit()
 
-    return IntakeConsultResponse(
-        assistant_reply=reply,
-        session_state=session_state,
-        ready_for_diagnostic=is_complete,
-    )
+    return consult_response
 
 
 @router.get("/probe", response_model=DiagnosticProbeResponse)
@@ -119,27 +87,6 @@ async def get_diagnostic_probe(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Returns the 10-Minute Diagnostic Probe (3 calibrated hinge questions).
+    Returns the 10-Minute Diagnostic Probe (3 calibrated hinge questions, Task 2.7).
     """
-    mock_file = MOCKS_DIR / "mock_probe.json"
-    if mock_file.exists():
-        with open(mock_file, "r") as f:
-            return DiagnosticProbeResponse(**json.load(f))
-
-    # Synthetic fallback
-    q1 = HingeQuestion(
-        question_id="probe_q1",
-        question_text=r"Evaluate \int \frac{x}{1+x^2} dx \text{ vs } \int \frac{1}{1+x^2} dx",
-        target_skill="Method Selection: Substitution vs Arctan Standard Form",
-        cognitive_trap_tested="Impulsive u-substitution without inspecting polynomial degree",
-        estimated_minutes=3,
-        maximum_marks=5,
-        rubric_steps=["Identify degree difference", "Apply u=1+x^2", "Identify arctan form"],
-    )
-    return DiagnosticProbeResponse(
-        probe_id="probe_synth_01",
-        course_id=course_id,
-        subject_archetype=KnowledgeArchetype.PROCEDURAL,
-        total_estimated_minutes=10,
-        questions=[q1],
-    )
+    return probe_generator.generate_probe(course_id=course_id)

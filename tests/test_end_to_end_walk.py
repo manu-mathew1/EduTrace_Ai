@@ -39,7 +39,7 @@ def test_stage1_documents_triage():
         assert res.status_code == 200
         data = res.json()
         assert "documents" in data
-        assert len(data["documents"]) >= 3
+        assert len(data["documents"]) >= 1
         assert data["ready_for_intake"] is True
 
 

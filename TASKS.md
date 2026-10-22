@@ -112,9 +112,9 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 2.5:** Connect Ingestion UI dropzone to live `POST /api/courses/{id}/documents/upload` endpoint; render smart badges.
 
 #### P3: Stage 2 Pod (Intake & Probe)
-- [ ] **Task 2.6:** Build 3-turn Intake Triage Agent prompt (`ai/diagnostics/intake_agent.py`) extracting target score and friction topics.
-- [ ] **Task 2.7:** Build Mode A "10-Minute Diagnostic Probe" generator (`ai/diagnostics/probe_generator.py`) serving 3 calibrated hinge questions.
-- [ ] **Task 2.8:** Connect Intake UI to live `POST /api/intake/chat` and render Mode A interactive scratchpad.
+- [✅ (Completed by P1)] **Task 2.6:** Build 3-turn Intake Triage Agent prompt (`ai/diagnostics/intake_agent.py`) extracting target score and friction topics.
+- [✅ (Completed by P1)] **Task 2.7:** Build Mode A "10-Minute Diagnostic Probe" generator (`ai/diagnostics/probe_generator.py`) serving 3 calibrated hinge questions.
+- [✅ (Completed by P1)] **Task 2.8:** Connect Intake UI to live `POST /api/intake/chat` and render Mode A interactive scratchpad.
 
 #### P4: Stage 3 Pod (Forensics)
 - [ ] **Task 2.9:** Build Step-Divergence detection prompt (`ai/forensics/divergence_detector.py`) pin-pointing exact leak point.
