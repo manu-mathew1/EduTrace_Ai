@@ -87,6 +87,19 @@
 
 ---
 
+### [Day 1 - 2026-10-22 14:35] - P1 (Tech Lead & Core Systems)
+- **Branch:** `dev`
+- **Objective / Task:** Privacy Isolation for Role-Specific Agent Instruction Files.
+- **Context & Key Architectural Decisions:**
+  - Added `.agents/` and `AGENTS.md` to `.gitignore` and untracked them from Git remote history on both `main` and `dev`.
+  - Guarantees complete role confidentiality so teammates only possess their assigned vertical pod instructions.
+  - Eliminates potential Git merge conflicts on `AGENTS.md` when different pod branches merge into `dev`.
+  - Updated `README.md` onboarding steps accordingly.
+- **Files Modified:**
+  - `.gitignore`, `README.md`, `UPDATES.md`.
+
+---
+
 ### [Day 1 - 2026-10-22 14:30] - P1 (Tech Lead & Core Systems)
 - **Branch:** `dev`
 - **Objective / Task:** Task 1.1 — Central GitHub Repository Live & Remote Push (`main` and `dev`).
