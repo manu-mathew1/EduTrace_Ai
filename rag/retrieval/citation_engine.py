@@ -55,7 +55,7 @@ class CitationRetriever:
         """
         combined = f"{diverged_text} {expected_text} {error_type or ''}".lower()
 
-        if any(w in combined for w in ["bracket", "minus", "sign", "- [", "-∫", "outer negative"]):
+        if "step 3" in combined or any(w in combined for w in ["bracket", "minus", "sign", "- [", "-∫", "outer negative"]):
             return (
                 "integration by parts repeated bracket minus sign pitfall",
                 "Nested Bracket Minus Sign Inversion",

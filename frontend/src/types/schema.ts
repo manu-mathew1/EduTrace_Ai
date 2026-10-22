@@ -189,7 +189,7 @@ export interface ErrorFrequency {
 
 export interface ErrorFingerprintResponse {
   course_id: string;
-  total_errors_analyzed: int;
+  total_errors_analyzed: number;
   total_marks_lost: number;
   breakdown: ErrorFrequency[];
   primary_cognitive_leak: ErrorTaxonomy;

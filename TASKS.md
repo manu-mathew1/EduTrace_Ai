@@ -141,10 +141,10 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 3.6:** Wire completed diagnostic probe submissions into Stage 3 forensics endpoint.
 
 #### P4: Stage 3 Pod (Forensics)
-- [ ] **Task 3.7:** Build live `POST /api/submissions/analyze` endpoint calling real VLM divergence detector.
-- [ ] **Task 3.8:** Build Socratic Chat co-pilot endpoint (`backend/api/forensics_chat.py`) citing lecture notes via P2's RAG retriever.
-- [ ] **Task 3.9:** Build Side-by-Side Visual Step Diff component with red/amber divergence highlights and uncertainty badge inline selector.
-- [ ] **Task 3.10:** Build Cognitive Error Fingerprint breakdown card in `frontend/src/components/fingerprint/ErrorFingerprint.tsx`.
+- [✅ (Completed by P1)] **Task 3.7:** Build live `POST /api/submissions/analyze` endpoint calling real VLM divergence detector with dynamic citation attachment.
+- [✅ (Completed by P1)] **Task 3.8:** Build Socratic Chat co-pilot endpoint (`backend/api/forensics_chat.py` & `ai/forensics/socratic_copilot.py`) citing lecture notes via P2's RAG retriever.
+- [✅ (Completed by P1)] **Task 3.9:** Build Side-by-Side Visual Step Diff component with red/amber divergence highlights and uncertainty badge inline selector (`frontend/src/pages/ForensicsPage.tsx`).
+- [✅ (Completed by P1)] **Task 3.10:** Build Cognitive Error Fingerprint breakdown card in `frontend/src/components/fingerprint/ErrorFingerprint.tsx` and SQLite analytics router (`backend/api/fingerprint.py`).
 
 #### P5: Stage 5/6 Pod (Recovery & Studio)
 - [ ] **Task 3.11:** Build Multimodal Content Generators: Real-World Analogy generator and Mermaid Flowchart generator (`ai/intervention/`).

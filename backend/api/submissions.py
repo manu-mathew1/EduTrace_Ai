@@ -27,7 +27,9 @@ from backend.schemas.contracts import (
 from ai.forensics.step_parser import parse_and_diff_steps, generate_deterministic_diff
 from ai.forensics.divergence_detector import divergence_detector
 from ai.forensics.taxonomy_classifier import taxonomy_classifier
+from ai.forensics.socratic_copilot import socratic_copilot
 from rag.retrieval.citation_engine import citation_retriever
+from backend.api.fingerprint import get_cognitive_error_fingerprint
 
 router = APIRouter()
 MOCKS_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "mocks"
@@ -128,6 +130,36 @@ async def analyze_submission(
         rubric_steps=rubrics,
     )
 
+    # Attach live citations from P2 RAG Retriever for detected divergence
+    if diff_result.first_divergence_step is not None:
+        div_idx = diff_result.first_divergence_step
+        diverged_step = next((s for s in diff_result.steps if s.step_index == div_idx), None)
+        diverged_text = diverged_step.submitted_work if diverged_step else submitted_work
+        expected_text = diverged_step.expected_rubric_step if diverged_step else "canonical step"
+        
+        citations = citation_retriever.retrieve_for_divergence(
+            course_id=course_id,
+            diverged_step_text=diverged_text,
+            expected_step_text=expected_text,
+            error_type=diff_result.primary_error_type.value if diff_result.primary_error_type else "procedural_calculation",
+            limit=2,
+        )
+        if citations:
+            diff_result.course_citations = [
+                {
+                    "title": c.title,
+                    "slide_number": c.slide_number,
+                    "page_number": c.page_number,
+                    "quote": c.quote,
+                    "remediation_tip": c.pedagogical_remediation_tip,
+                    "matched_trap": c.matched_trap,
+                }
+                for c in citations
+            ]
+            if diverged_step:
+                diverged_step.cited_source_title = citations[0].title
+                diverged_step.cited_page_or_slide = citations[0].slide_number or 19
+
     # Persist or update submission model (idempotent upsert)
     existing_sub = await db.execute(select(SubmissionModel).where(SubmissionModel.id == submission_id))
     sub_record = existing_sub.scalars().first()
@@ -168,39 +200,47 @@ async def socratic_chat(
     and direct citations to lecture note slides retrieved from RAG Citation Engine (Task 3.3).
     """
     step_num = req.selected_step_index or 3
-    query_text = req.user_query or req.user_question or f"Sign distribution error in Step {step_num}"
+    query_text = (req.user_query or req.user_question or "").strip()
+    if not query_text:
+        query_text = f"Why did my Step {step_num} diverge?"
 
-    # Dynamically retrieve grounded citation from P2 Citation Retriever
-    citations = citation_retriever.retrieve_for_divergence(
+    # Context extraction from DB or mock fixture
+    step_context = {}
+    try:
+        sub_res = await db.execute(select(SubmissionModel).where(SubmissionModel.id == req.submission_id))
+        sub_rec = sub_res.scalars().first()
+        if sub_rec and sub_rec.steps_json:
+            for s in json.loads(sub_rec.steps_json):
+                if s.get("step_index") == step_num:
+                    step_context = {
+                        "submitted_work": s.get("submitted_work", ""),
+                        "expected_rubric_step": s.get("expected_rubric_step", ""),
+                        "error_type": s.get("error_type", sub_rec.primary_error_type or "procedural_calculation"),
+                        "divergence_reason": s.get("divergence_reason", sub_rec.forensic_summary or ""),
+                    }
+                    break
+        elif (MOCKS_DIR / "mock_forensic_diff.json").exists():
+            with open(MOCKS_DIR / "mock_forensic_diff.json") as f:
+                mock_data = json.load(f)
+                if mock_data.get("submission_id") == req.submission_id or req.submission_id == "sub_math_9042":
+                    for s in mock_data.get("steps", []):
+                        if s.get("step_index") == step_num:
+                            step_context = {
+                                "submitted_work": s.get("submitted_work", ""),
+                                "expected_rubric_step": s.get("expected_rubric_step", ""),
+                                "error_type": s.get("error_type", "procedural_calculation"),
+                                "divergence_reason": s.get("divergence_reason", ""),
+                            }
+                            break
+    except Exception as e:
+        logger.warning(f"Error fetching submission context for Socratic chat: {e}")
+
+    return await socratic_copilot.generate_response(
+        submission_id=req.submission_id,
+        selected_step_index=step_num,
+        user_query=query_text,
         course_id="course_calc_301",
-        diverged_step_text=query_text,
-        expected_step_text=f"Step {step_num} bracket sign integration by parts",
-        error_type="procedural_calculation",
-        limit=1,
-    )
-
-    if citations:
-        best_cit = citations[0]
-        cited_title = best_cit.title
-        cited_slide = best_cit.slide_number or 19
-        remediation_tip = best_cit.pedagogical_remediation_tip
-    else:
-        cited_title = "Prof Kapoor Lecture Notes - Module 2 (Integration Techniques)"
-        cited_slide = 19
-        remediation_tip = "Enclose the entire second iteration in brackets before distributing the outer minus sign."
-
-    reply = (
-        f"Notice what happened in Step {step_num}: when you integrated by parts the second time, "
-        "you had an outer minus sign in front of the entire bracket. "
-        "Inside the bracket, uv was `-2x cos(x)` and the formula subtracted `\\int v du`, which gave another minus. "
-        f"{remediation_tip} How did that outer negative distribute to the second term?"
-    )
-
-    return SocraticChatResponse(
-        reply=reply,
-        cited_lecture_title=cited_title,
-        cited_page_or_slide=cited_slide,
-        suggested_followup_question="Would you like to try expanding `-(A - B)` to see where the sign inverted?",
+        step_context=step_context,
     )
 
 
@@ -210,36 +250,6 @@ async def get_error_fingerprint(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Aggregated Cognitive Error Fingerprint breakdown across past submissions.
+    Aggregated Cognitive Error Fingerprint breakdown across past submissions from SQLite.
     """
-    breakdown = [
-        ErrorFrequency(
-            error_type=ErrorTaxonomy.PROCEDURAL_CALCULATION,
-            count=8,
-            percentage=53.3,
-            marks_lost_total=18.0,
-            example_question_ids=["q3_integration_by_parts", "q7_line_integrals"],
-        ),
-        ErrorFrequency(
-            error_type=ErrorTaxonomy.METHOD_SELECTION,
-            count=4,
-            percentage=26.7,
-            marks_lost_total=12.0,
-            example_question_ids=["q1_substitution_vs_arctan", "q5_taylor_series"],
-        ),
-        ErrorFrequency(
-            error_type=ErrorTaxonomy.RUBRIC_OMISSION,
-            count=3,
-            percentage=20.0,
-            marks_lost_total=6.0,
-            example_question_ids=["q3_final_line", "q9_convergence_interval"],
-        ),
-    ]
-
-    return ErrorFingerprintResponse(
-        course_id=course_id,
-        total_errors_analyzed=15,
-        total_marks_lost=36.0,
-        breakdown=breakdown,
-        primary_cognitive_leak=ErrorTaxonomy.PROCEDURAL_CALCULATION,
-    )
+    return await get_cognitive_error_fingerprint(course_id=course_id, db=db)

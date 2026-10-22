@@ -315,18 +315,22 @@ class VectorStoreEngine:
             # Domain-specific calculus & algorithm boosting
             q_low = query.lower()
             c_low = chunk.text.lower()
-            if any(term in q_low for term in ["parts", "minus", "sign", "bracket", "leak"]):
-                if any(term in c_low for term in ["bracket", "minus", "pitfall", "parts"]):
-                    overlap += 4
+            if any(term in q_low for term in ["bracket", "minus", "sign", "leak", "nested"]):
+                if "bracket" in c_low or "minus" in c_low:
+                    overlap += 10
+                elif "parts" in c_low:
+                    overlap += 2
+            elif "parts" in q_low and "parts" in c_low:
+                overlap += 4
             if any(term in q_low for term in ["sub", "arctan", "form"]):
                 if any(term in c_low for term in ["arctan", "substitution", "degree"]):
-                    overlap += 4
+                    overlap += 6
             if any(term in q_low for term in ["ode", "factor", "differential"]):
                 if any(term in c_low for term in ["differential", "integrating factor", "leading"]):
-                    overlap += 4
+                    overlap += 6
             if any(term in q_low for term in ["discontinuity", "improper", "boundary"]):
                 if any(term in c_low for term in ["discontinuity", "improper", "singularity"]):
-                    overlap += 4
+                    overlap += 6
 
             score = overlap / (math.sqrt(len(query_tokens) + 1) * math.sqrt(len(chunk_tokens) + 1))
             results.append((score, chunk))

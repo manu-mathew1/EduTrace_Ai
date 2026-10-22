@@ -160,13 +160,15 @@ except (ImportError, AttributeError):
         """Fallback mock response for P3 diagnostic probe."""
         return load_mock("mock_probe.json")
 
-# 4. P4: Forensics & Step-Diff Router
+# 4. P4: Forensics, Socratic Chat & Error Fingerprint Routers
 try:
-    from backend.api import submissions
+    from backend.api import submissions, forensics_chat, fingerprint
     app.include_router(submissions.router, prefix="/api/submissions", tags=["submissions (P4)"])
-    logger.info("✅ Mounted live P4 router: submissions.py")
-except (ImportError, AttributeError):
-    logger.info("ℹ️ Mounting mock fallback routes for P4 /api/submissions until P4 finishes Task 1.12")
+    app.include_router(forensics_chat.router, prefix="/api/forensics", tags=["forensics-chat (P4)"])
+    app.include_router(fingerprint.router, prefix="/api/fingerprint", tags=["fingerprint (P4)"])
+    logger.info("✅ Mounted live P4 routers: submissions.py, forensics_chat.py, fingerprint.py")
+except (ImportError, AttributeError) as e:
+    logger.info(f"ℹ️ Mounting mock fallback routes for P4 /api/submissions: {e}")
 
     @app.get("/api/submissions/forensics", tags=["submissions (P4 Mock)"])
     @app.post("/api/submissions/diff", tags=["submissions (P4 Mock)"])
