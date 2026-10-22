@@ -113,12 +113,13 @@ def test_annotated_benchmark_cases_integrity():
     with open(annotated_file, "r") as f:
         payload = json.load(f)
 
-    assert payload["annotated_cases_count"] == 5
+    assert payload["annotated_cases_count"] >= 10
     cases = payload["cases"]
-    assert len(cases) == 5
+    assert len(cases) >= 10
 
     case_ids = [c["case_id"] for c in cases]
-    assert case_ids == ["case_calc_01", "case_calc_02", "case_calc_03", "case_calc_04", "case_calc_05"]
+    for cid in ["case_calc_01", "case_calc_02", "case_calc_03", "case_calc_04", "case_calc_05", "case_calc_06", "case_calc_07", "case_calc_08", "case_calc_09", "case_calc_10"]:
+        assert cid in case_ids
 
     for case in cases:
       assert "ground_truth_divergence_step" in case

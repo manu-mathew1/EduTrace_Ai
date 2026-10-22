@@ -147,8 +147,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 3.10:** Build Cognitive Error Fingerprint breakdown card in `frontend/src/components/fingerprint/ErrorFingerprint.tsx` and SQLite analytics router (`backend/api/fingerprint.py`).
 
 #### P5: Stage 5/6 Pod (Recovery & Studio)
-- [ ] **Task 3.11:** Build Multimodal Content Generators: Real-World Analogy generator and Mermaid Flowchart generator (`ai/intervention/`).
-- [ ] **Task 3.12:** Annotate cases 6–10 in `evaluation/data/annotated_cases.json`.
+- [✅ (Completed by P1)] **Task 3.11:** Build Multimodal Content Generators: Real-World Analogy generator and Mermaid Flowchart generator (`ai/intervention/`).
+- [✅ (Completed by P1)] **Task 3.12:** Annotate cases 6–10 in `evaluation/data/annotated_cases.json` and build Benchmark Runner (`evaluation/runner.py`).
 
 ---
 
