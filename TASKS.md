@@ -89,9 +89,9 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 1.11:** Build initial Intake consultation chat UI card in `frontend/src/pages/IntakePage.tsx`.
 
 #### P4: Stage 3 — Forensic Step-Diff & Socratic Co-Pilot
-- [ ] **Task 1.12:** Implement backend submissions router stub in `backend/api/submissions.py` returning `mock_forensic_diff.json`.
-- [ ] **Task 1.13:** Build side-by-side Step Diff component shell in `frontend/src/pages/ForensicsPage.tsx`.
-- [ ] **Task 1.14:** Test Gemini prompt parsing handwritten student answer steps against rubric steps in `ai/forensics/step_parser.py`.
+- [✅ (Completed by P1)] **Task 1.12:** Implement backend submissions router stub in `backend/api/submissions.py` returning `mock_forensic_diff.json`.
+- [✅ (Completed by P1)] **Task 1.13:** Build side-by-side Step Diff component shell in `frontend/src/pages/ForensicsPage.tsx`.
+- [✅ (Completed by P1)] **Task 1.14:** Test Gemini prompt parsing handwritten student answer steps against rubric steps in `ai/forensics/step_parser.py`.
 
 #### P5: Stage 5/6 — Marks Recovery Map & Multimodal Studio
 - [ ] **Task 1.15:** Implement backend recovery and studio router stubs in `backend/api/recovery.py` and `backend/api/interventions.py`.

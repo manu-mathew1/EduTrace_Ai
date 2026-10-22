@@ -3,6 +3,7 @@ import { Shell, NavTab } from './components/layout/Shell';
 import { DashboardPage } from './pages/DashboardPage';
 import { IngestionPage } from './pages/IngestionPage';
 import { IntakePage } from './pages/IntakePage';
+import { ForensicsPage } from './pages/ForensicsPage';
 import { UploadCloud, MessageSquareCode, GitCompare, TrendingUp, Sparkles, AlertCircle } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -18,44 +19,8 @@ export const App: React.FC = () => {
       {/* Stage 2 Intake & Diagnostic Probe Page (Pod P3) */}
       {currentTab === 'intake' && <IntakePage onNavigateToForensics={() => setCurrentTab('forensics')} />}
 
-      {/* Stage 3 Forensic Step-Diff Walking Skeleton (Pod P4) */}
-      {currentTab === 'forensics' && (
-        <div className="space-y-6 animate-fadeIn">
-          <div className="flex items-center justify-between p-4 rounded-xl bg-slate-900 border border-slate-800">
-            <div>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400">
-                Pod P4 Domain: Forensic Step-Diff & Socratic Co-Pilot
-              </span>
-              <h2 className="text-xl font-bold text-white mt-1">Answer Step Divergence & Error Localization</h2>
-            </div>
-            <span className="text-xs text-slate-400">Task 1.12 & 1.13</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Student Submitted Work</h4>
-              <div className="p-4 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
-                <p>Step 1: let u = x, dv = cos(2x) dx</p>
-                <p>Step 2: du = dx, v = (1/2)sin(2x)</p>
-                <p className="text-rose-400 bg-rose-500/10 p-1 rounded border border-rose-500/20">
-                  Step 3: = (1/2)x sin(2x) + (1/4)cos(2x) + C  [DIVERGED]
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Rubric / Golden Solution</h4>
-              <div className="p-4 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
-                <p>Step 1: u = x, dv = cos(2x) dx</p>
-                <p>Step 2: du = dx, v = (1/2)sin(2x)</p>
-                <p className="text-emerald-400 bg-emerald-500/10 p-1 rounded border border-emerald-500/20">
-                  Step 3: = (1/2)x sin(2x) - ∫(1/2)sin(2x)dx = (1/2)x sin(2x) - (1/4)cos(2x) + C
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Stage 3 Forensic Step-Diff Page (Pod P4) */}
+      {currentTab === 'forensics' && <ForensicsPage onNavigateToRecovery={() => setCurrentTab('recovery')} />}
 
       {/* Stage 5 Marks Recovery Map Walking Skeleton (Pod P5) */}
       {currentTab === 'recovery' && (
