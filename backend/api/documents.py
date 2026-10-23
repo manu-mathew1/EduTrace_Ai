@@ -198,6 +198,24 @@ async def get_citations(
     return [m.to_dict() for m in matches]
 
 
+@router.get("/slides")
+async def get_document_slides(
+    course_id: str = Query("course_calc_301"),
+    doc_id: Optional[str] = Query(None),
+):
+    """
+    RAG Slide Inspection endpoint (Task 5.4):
+    Returns indexed slides with exact slide numbers, topic badges, quotes, and trap warnings.
+    Instant latency verification for live demo walkthroughs.
+    """
+    slides = citation_retriever.get_annotated_slides(course_id=course_id, doc_id=doc_id)
+    return {
+        "course_id": course_id,
+        "total_slides": len(slides),
+        "slides": slides,
+    }
+
+
 @router.get("/metrics")
 async def get_rag_metrics():
     """

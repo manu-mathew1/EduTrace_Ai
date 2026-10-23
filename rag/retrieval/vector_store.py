@@ -405,6 +405,30 @@ class VectorStoreEngine:
         self.cache.total_search_time_ms += elapsed_ms
         return formatted
 
+    def get_slides(self, course_id: str = "course_calc_301", doc_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        Retrieves all indexed lecture slides for a course or specific document (Task 5.4).
+        """
+        chunks = [
+            c for c in self._in_memory_chunks
+            if c.course_id == course_id and c.slide_number is not None
+        ]
+        if doc_id:
+            chunks = [c for c in chunks if c.doc_id == doc_id]
+        chunks.sort(key=lambda x: x.slide_number or 0)
+        return [
+            {
+                "chunk_id": c.chunk_id,
+                "doc_id": c.doc_id,
+                "course_id": c.course_id,
+                "title": c.title,
+                "slide_number": c.slide_number,
+                "page_number": c.page_number,
+                "quote": c.text,
+            }
+            for c in chunks
+        ]
+
     def benchmark_search_latency(self, query: str, course_id: str = "course_calc_301") -> Dict[str, Any]:
         """
         Benchmarks cold vs warm search latency for performance monitoring.

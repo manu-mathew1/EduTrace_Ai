@@ -174,6 +174,25 @@ class CitationRetriever:
             for r in raw_results
         ]
 
+    def get_annotated_slides(
+        self,
+        course_id: str = "course_calc_301",
+        doc_id: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Returns all slides with trap detection warnings and pedagogical remediation tips (Task 5.4).
+        """
+        raw_slides = self.vector_store.get_slides(course_id=course_id, doc_id=doc_id)
+        annotated: List[Dict[str, Any]] = []
+        for s in raw_slides:
+            _, trap_name, remediation = self._extract_trap_signature(s["quote"], s["quote"])
+            annotated.append({
+                **s,
+                "matched_trap": trap_name if trap_name != "General Step Divergence" else "Standard Lecture Theorem",
+                "pedagogical_remediation_tip": remediation,
+            })
+        return annotated
+
     def get_metrics(self) -> Dict[str, Any]:
         """Returns query caching and search performance metrics."""
         return self.vector_store.cache.get_metrics()

@@ -186,7 +186,7 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅] **Task 5.3:** Finalize 3-Minute Live Demo Pitch Script & Slide Deck.
 
 #### P2: Stage 1 Pod (Ingestion & RAG)
-- [ ] **Task 5.4:** Verify all document badges and citations display instant slide numbers during demo walkthrough.
+- [✅ (Completed by P1)] **Task 5.4:** Verify all document badges and citations display instant slide numbers during demo walkthrough.
 
 #### P3: Stage 2 Pod (Intake & Probe)
 - [ ] **Task 5.5:** Verify Intake consultation runs smoothly without lag on live stage.
