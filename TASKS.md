@@ -192,7 +192,7 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 5.5:** Verify Intake consultation runs smoothly without lag on live stage.
 
 #### P4: Stage 3 Pod (Forensics)
-- [ ] **Task 5.6:** Rehearse the live "Step Divergence & Uncertainty" interaction sequence.
+- [✅ (Completed by P1)] **Task 5.6:** Rehearse the live "Step Divergence & Uncertainty" interaction sequence.
 
 #### P5: Stage 5/6 Pod (Recovery & Studio)
 - [ ] **Task 5.7:** Run 15-case benchmark evaluation runner (`evaluation/runner.py`) and export Macro-F1 / accuracy charts for pitch slides.

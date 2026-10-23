@@ -19,6 +19,7 @@ import {
   PlusCircle,
   CheckCircle,
   ExternalLink,
+  Zap,
 } from 'lucide-react';
 import { ErrorFingerprint } from '../components/fingerprint/ErrorFingerprint';
 import { StepDivergenceResult, AnswerStep } from '../types/schema';
@@ -298,6 +299,68 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
           >
             <span>Proceed to Marks Recovery</span>
             <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Live Stage Rehearsal Fast-Action Bar (Task 5.6) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 gap-3">
+        <div className="flex items-center space-x-2 text-xs">
+          <Zap className="w-4 h-4 text-amber-400" />
+          <span className="font-bold text-white">Live Stage Rehearsal Actions:</span>
+          <span className="text-slate-400 hidden lg:inline">
+            1:00 Step 3 Leak &bull; 1:22 Handwriting Uncertainty &bull; 1:30 Slide 19 Citation &bull; 1:42 Error Fingerprint
+          </span>
+        </div>
+        <div className="flex items-center space-x-2 overflow-x-auto text-[11px]">
+          <button
+            onClick={() => {
+              setActiveTab('step_diff');
+              setSelectedStep(3);
+            }}
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all border ${
+              activeTab === 'step_diff' && selectedStep === 3
+                ? 'bg-rose-600 text-white border-rose-400 shadow-sm'
+                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+            }`}
+          >
+            Step 3 Leak
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('step_diff');
+              setSelectedStep(3);
+              setShowCropSelector(true);
+            }}
+            className="px-2.5 py-1 rounded-lg font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 transition-all flex items-center gap-1"
+          >
+            <Eye className="w-3 h-3" />
+            <span>Uncertainty Crop</span>
+          </button>
+          <button
+            onClick={() => {
+              setActiveCitationModal({
+                title: 'Prof Kapoor Lecture Notes — Module 2',
+                slide: 19,
+                quote: 'Pitfall Alert: When repeating integration by parts, always enclose the entire second iteration in brackets before distributing the outer minus sign.',
+                tip: 'Review Slide 19: Check bracket distribution.',
+                matchedTrap: 'Sign Inversion in Second Integration by Parts',
+              });
+            }}
+            className="px-2.5 py-1 rounded-lg font-bold bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 hover:bg-indigo-600/50 transition-all flex items-center gap-1"
+          >
+            <BookOpen className="w-3 h-3" />
+            <span>Open Slide 19</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('fingerprint')}
+            className={`px-2.5 py-1 rounded-lg font-bold transition-all border ${
+              activeTab === 'fingerprint'
+                ? 'bg-indigo-600 text-white border-indigo-400 shadow-sm'
+                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+            }`}
+          >
+            Stage 4 Fingerprint
           </button>
         </div>
       </div>
