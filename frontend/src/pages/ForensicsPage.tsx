@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { ErrorFingerprint } from '../components/fingerprint/ErrorFingerprint';
 import { StepDivergenceResult, AnswerStep } from '../types/schema';
+import { useCourses } from '../context/CourseContext';
 
 interface ForensicsPageProps {
   onNavigateToRecovery: () => void;
@@ -39,6 +40,7 @@ interface StepItem {
 }
 
 export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecovery }) => {
+  const { activeCourse, activeCourseId } = useCourses();
   const [activeTab, setActiveTab] = useState<'step_diff' | 'fingerprint'>('step_diff');
   const [selectedStep, setSelectedStep] = useState<number>(3);
   const [confirmedCropValue, setConfirmedCropValue] = useState<string>('-2x cos(x)');
@@ -219,7 +221,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           submission_id: `sub_custom_${Date.now()}`,
-          course_id: 'course_calc_301',
+          course_id: activeCourseId,
           question_id: 'q3_custom_integration',
           submitted_work: modalInputWork,
         }),
@@ -260,7 +262,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#E59934] bg-[#E59934]/10 px-1.5 py-0.5 rounded border border-[#E59934]/20">
-              Exam Mistake Analysis
+              {activeCourse?.title ? activeCourse.title.split(':')[0] : 'Exam Mistake Analysis'}
             </span>
             <span className="text-xs font-mono text-[#8A8F98]">Midterm Question 3</span>
           </div>
@@ -560,7 +562,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
       {/* TAB 2: ERROR PATTERNS FINGERPRINT */}
       {activeTab === 'fingerprint' && (
         <ErrorFingerprint
-          courseId="course_calc_301"
+          courseId={activeCourseId}
           onSelectSkill={(skillId) => {
             onNavigateToRecovery();
           }}

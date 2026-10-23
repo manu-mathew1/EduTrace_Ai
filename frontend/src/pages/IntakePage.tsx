@@ -17,6 +17,7 @@ import {
   FileText, 
   Zap 
 } from 'lucide-react';
+import { useCourses } from '../context/CourseContext';
 
 interface IntakePageProps {
   onNavigateToForensics: () => void;
@@ -64,11 +65,11 @@ const DEFAULT_QUESTIONS: Question[] = [
 ];
 
 export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics }) => {
+  const { activeCourse, activeCourseId } = useCourses();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content:
-        'Hello Rahul! Let’s set up your study plan for Calculus III. You’re aiming for 75% on the upcoming midterm. What topics or problem types feel trickiest right now?',
+      content: `Hello! Let’s set up your study plan for ${activeCourse?.title || 'your course'}. You’re aiming for ${activeCourse?.target_score || 75}% on the upcoming exam. What topics feel trickiest right now?`,
     },
   ]);
   const [input, setInput] = useState('');
@@ -78,17 +79,17 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
   const [diagnosticMode, setDiagnosticMode] = useState<'mode_a' | 'mode_b'>('mode_a');
   const [confirmedCropValue, setConfirmedCropValue] = useState<string>('-2x cos(x)');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [targetScore, setTargetScore] = useState<number>(75);
+  const [targetScore, setTargetScore] = useState<number>(activeCourse?.target_score || 75);
   const [timelineDays, setTimelineDays] = useState<number>(5);
   const [frictionSkills, setFrictionSkills] = useState<string[]>([
-    'Integration by Parts: Bracket Sign Distribution',
-    'Method Choice: Substitution vs Arctan Form',
+    'Core Theoretical Setup & Boundary Conditions',
+    'Method Selection & Formula Choices',
   ]);
   const [suggestedChips, setSuggestedChips] = useState<string[]>([
-    "I'm aiming for 75+",
+    `I'm aiming for ${activeCourse?.target_score || 75}+`,
     "Have 5 days left",
-    "Bracket sign mistakes in by-parts",
-    "Knowing when to use substitution vs parts",
+    "Formula selection under time pressure",
+    "Sign and calculation errors",
   ]);
   const [questions, setQuestions] = useState<Question[]>(DEFAULT_QUESTIONS);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({
@@ -110,9 +111,9 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          course_id: 'course_calc_301',
+          course_id: activeCourseId,
           session_id: 'sess_demo_01',
-          target_score: 75,
+          target_score: activeCourse?.target_score || 75,
           baseline_score: 50,
         }),
       });
@@ -166,7 +167,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           submission_id: 'sub_live_probe_01',
-          course_id: 'course_calc_301',
+          course_id: activeCourseId,
           probe_id: 'probe_calibrated_calc_01',
           question_id: 'probe_q2',
           submitted_work: userAnswers['probe_q2'] || 'u=x^2, dv=cos(x)dx ...',
@@ -188,9 +189,9 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          course_id: 'course_calc_301',
-          question_paper_filename: 'Midterm_2024_Calc3.pdf',
-          answer_sheet_filename: 'Rahul_AnswerSheet_Scan.pdf',
+          course_id: activeCourseId,
+          question_paper_filename: 'Exam_Paper_Scan.pdf',
+          answer_sheet_filename: 'AnswerSheet_Scan.pdf',
           confirmed_crops: {
             crop_q3_step3: confirmedCropValue,
           },
@@ -205,7 +206,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
   };
 
   useEffect(() => {
-    fetch('/api/intake/probe?course_id=course_calc_301')
+    fetch(`/api/intake/probe?course_id=${encodeURIComponent(activeCourseId)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.questions && data.questions.length > 0) {
@@ -221,7 +222,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         }
       })
       .catch(() => {});
-  }, []);
+  }, [activeCourseId]);
 
   return (
     <div className="space-y-6 font-sans pb-12">
@@ -232,7 +233,9 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#5E6AD2] bg-[#5E6AD2]/10 px-1.5 py-0.5 rounded border border-[#5E6AD2]/20">
               Diagnostic Check
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">Calculus III</span>
+            <span className="text-xs font-mono text-[#8A8F98]">
+              {activeCourse?.title ? activeCourse.title.split(':')[0] : 'Subject Checkup'}
+            </span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <MessageSquareCode className="w-4 h-4 text-[#5E6AD2]" />

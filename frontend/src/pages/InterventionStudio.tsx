@@ -21,6 +21,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { MultimodalStudioContent } from '../types/schema';
+import { useCourses } from '../context/CourseContext';
 
 interface InterventionStudioProps {
   initialMode?: 'recovery' | 'studio' | 'all';
@@ -46,6 +47,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
   onNavigateToRecovery,
   onNavigateToStudio,
 }) => {
+  const { activeCourse } = useCourses();
   const [viewMode, setViewMode] = useState<'recovery' | 'studio' | 'all'>(initialMode);
   const [selectedSkillId, setSelectedSkillId] = useState<string>('skill_parts_sign');
   const [activeTab, setActiveTab] = useState<'flowchart' | 'bug' | 'analogy' | 'audio'>('flowchart');
@@ -100,7 +102,9 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
   const [studioContent, setStudioContent] = useState<MultimodalStudioContent | null>(null);
 
   useEffect(() => {
-    fetch('/api/recovery/map?baseline_score=52&target_score=75')
+    const baseline = activeCourse?.current_baseline || 52;
+    const target = activeCourse?.target_score || 75;
+    fetch(`/api/recovery/map?baseline_score=${baseline}&target_score=${target}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.priorities && data.priorities.length > 0) {
@@ -120,7 +124,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
         }
       })
       .catch(() => {});
-  }, []);
+  }, [activeCourse?.course_id, activeCourse?.current_baseline, activeCourse?.target_score]);
 
   useEffect(() => {
     fetch(`/api/interventions/${selectedSkillId}`)
@@ -188,7 +192,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded border border-[#27C57E]/20">
               Score Booster • Interactive Studio
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">Calculus III</span>
+            <span className="text-xs font-mono text-[#8A8F98]">{activeCourse?.title || 'Course Recovery'}</span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-[#27C57E]" />

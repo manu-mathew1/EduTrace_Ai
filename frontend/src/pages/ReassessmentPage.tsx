@@ -16,6 +16,7 @@ import {
 import { ReassessmentQuestion, ReassessmentResult } from '../types/schema';
 import { TwinCelebrationModal } from '../components/twin/TwinCelebrationModal';
 import { useAuth } from '../context/AuthContext';
+import { useCourses } from '../context/CourseContext';
 
 interface ReassessmentPageProps {
   skillId?: string;
@@ -29,6 +30,7 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
   onReturnToRecovery,
 }) => {
   const { user } = useAuth();
+  const { activeCourse, activeCourseId } = useCourses();
   const [question, setQuestion] = useState<ReassessmentQuestion | null>(null);
   const [isLoadingQuestion, setIsLoadingQuestion] = useState<boolean>(true);
   const [submittedWork, setSubmittedWork] = useState<string>('');
@@ -99,7 +101,7 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
         body: JSON.stringify({
           reassessment_id: question?.reassessment_id || 'reassess_calc_01',
           student_id: user?.id || 'std_rahul_99',
-          course_id: user?.primary_course_id || 'course_calc_301',
+          course_id: activeCourseId || user?.primary_course_id || 'course_calc_301',
           skill_id: skillId,
           submitted_work: submittedWork,
         }),
@@ -157,7 +159,9 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded border border-[#27C57E]/20">
               Skill Verification • Earn Back Marks
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">Practice Problem</span>
+            <span className="text-xs font-mono text-[#8A8F98]">
+              {activeCourse?.title ? activeCourse.title.split(':')[0] : 'Practice Problem'}
+            </span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-[#27C57E]" />
