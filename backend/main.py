@@ -13,7 +13,7 @@ from typing import Dict, Any
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 
 from backend.db.database import init_db
 from backend.api import twin
@@ -82,7 +82,7 @@ app.add_middleware(
 # Core Health & Status Endpoints (P1)
 # =====================================================================
 
-@app.get("/", tags=["health"])
+@app.get("/api", tags=["health"])
 async def root():
     return {
         "platform": "EduTrace AI",
@@ -203,12 +203,42 @@ except (ImportError, AttributeError):
         return load_mock("mock_intervention.json")
 
 
-# Production Static Files Mount (serves compiled Vite React bundle if present)
+# Production Static Files Mount & SPA Routing (serves compiled Vite React bundle if present)
 from fastapi.staticfiles import StaticFiles
 FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
 if FRONTEND_DIST.exists():
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="static_frontend")
-    logger.info("✅ Mounted production frontend build from frontend/dist")
+    # Mount assets folder for bundled JS, CSS, fonts, and images
+    assets_dir = FRONTEND_DIST / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="static_assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        # Do not intercept API, Swagger docs, or openapi schema endpoints
+        if full_path.startswith("api") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
+            return JSONResponse(status_code=404, content={"detail": f"Endpoint /{full_path} not found"})
+
+        target_file = FRONTEND_DIST / full_path
+        if full_path and target_file.exists() and target_file.is_file():
+            return FileResponse(str(target_file))
+
+        index_file = FRONTEND_DIST / "index.html"
+        if index_file.exists():
+            return FileResponse(str(index_file))
+        return JSONResponse(status_code=404, content={"detail": "Index file not found"})
+
+    logger.info("✅ Mounted production SPA fallback router from frontend/dist")
+else:
+    @app.get("/", tags=["health"])
+    async def fallback_root():
+        return {
+            "platform": "EduTrace AI",
+            "version": "1.0.0",
+            "status": "operational",
+            "message": "Welcome to EduTrace AI API Hub. Visit /docs for Swagger UI.",
+            "team": "Team Cognix"
+        }
 
 
 if __name__ == "__main__":
