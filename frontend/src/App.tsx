@@ -5,6 +5,7 @@ import { IngestionPage } from './pages/IngestionPage';
 import { IntakePage } from './pages/IntakePage';
 import { ForensicsPage } from './pages/ForensicsPage';
 import { InterventionStudio } from './pages/InterventionStudio';
+import { ReassessmentPage } from './pages/ReassessmentPage';
 import { UploadCloud, MessageSquareCode, GitCompare, TrendingUp, Sparkles, AlertCircle } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -24,10 +25,18 @@ export const App: React.FC = () => {
       {currentTab === 'forensics' && <ForensicsPage onNavigateToRecovery={() => setCurrentTab('recovery')} />}
 
       {/* Stage 5 Marks Recovery Roadmap (Pod P5) */}
-      {currentTab === 'recovery' && <InterventionStudio onNavigateToReassessment={() => setCurrentTab('studio')} />}
+      {currentTab === 'recovery' && <InterventionStudio onNavigateToReassessment={() => setCurrentTab('reassessment')} />}
 
       {/* Stage 6 Multimodal Intervention Studio (Pod P5) */}
-      {currentTab === 'studio' && <InterventionStudio onNavigateToReassessment={() => setCurrentTab('dashboard')} />}
+      {currentTab === 'studio' && <InterventionStudio onNavigateToReassessment={() => setCurrentTab('reassessment')} />}
+
+      {/* Stage 7 Reassessment & Learning Twin Lock-in (Pod P5) */}
+      {currentTab === 'reassessment' && (
+        <ReassessmentPage
+          onReturnToDashboard={() => setCurrentTab('dashboard')}
+          onReturnToRecovery={() => setCurrentTab('recovery')}
+        />
+      )}
     </Shell>
   );
 };

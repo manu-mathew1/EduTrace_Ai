@@ -140,6 +140,29 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
     return () => clearInterval(interval);
   }, [isPlayingAudio]);
 
+  const togglePlayAudio = () => {
+    if (isPlayingAudio) {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsPlayingAudio(false);
+    } else {
+      setIsPlayingAudio(true);
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window && !isAudioMuted) {
+        window.speechSynthesis.cancel();
+        const textToSpeak =
+          studioContent?.audio_summary_script ||
+          "Hey! Here is your 60-second golden rule. Always enclose repeated iterations in brackets before distributing outer signs.";
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.rate = 1.05;
+        utterance.onend = () => {
+          setIsPlayingAudio(false);
+        };
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+  };
+
   const handleBugSelection = (stepNum: number) => {
     setSelectedBugStep(stepNum);
     if (stepNum === 3) {
@@ -487,7 +510,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <button
-                      onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                      onClick={togglePlayAudio}
                       className="w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30 transition-all"
                     >
                       {isPlayingAudio ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}

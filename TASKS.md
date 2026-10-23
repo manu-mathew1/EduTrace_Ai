@@ -170,11 +170,11 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 4.7:** Polish Socratic chat drawer animation and citation pill click-throughs.
 
 #### P5: Stage 5/6 Pod (Recovery & Studio)
-- [ ] **Task 4.8:** Build 60-Second Audio Deconstruction generator (`ai/intervention/audio_generator.py`) via ElevenLabs / Web Speech synthesis.
-- [ ] **Task 4.9:** Build Spot-the-Bug interactive drill generator and Isomorphic Reassessment question generator.
-- [ ] **Task 4.10:** Build Reassessment verification API (`POST /api/reassessment/verify`) calling P1's Learning Twin update function.
-- [ ] **Task 4.11:** Build Reassessment input view & live celebratory Learning Twin update modal in `frontend/src/pages/ReassessmentPage.tsx`.
-- [ ] **Task 4.12:** Annotate cases 11–15 (15 total benchmark cases complete).
+- [✅ (Completed by P1)] **Task 4.8:** Build 60-Second Audio Deconstruction generator (`ai/intervention/audio_generator.py`) via ElevenLabs / Web Speech synthesis.
+- [✅ (Completed by P1)] **Task 4.9:** Build Spot-the-Bug interactive drill generator and Isomorphic Reassessment question generator.
+- [✅ (Completed by P1)] **Task 4.10:** Build Reassessment verification API (`POST /api/reassessment/verify`) calling P1's Learning Twin update function.
+- [✅ (Completed by P1)] **Task 4.11:** Build Reassessment input view & live celebratory Learning Twin update modal in `frontend/src/pages/ReassessmentPage.tsx`.
+- [✅ (Completed by P1)] **Task 4.12:** Annotate cases 11–15 (15 total benchmark cases complete).
 
 ---
 

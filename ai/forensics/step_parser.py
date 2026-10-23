@@ -118,7 +118,7 @@ def generate_deterministic_diff(
             step_idx = i + 1
             work = submitted_lines[i] if i < len(submitted_lines) else "[Omitted step]"
 
-            if step_idx < first_divergence:
+            if first_divergence is None or step_idx < first_divergence:
                 status = StepStatus.SATISFIED
                 error_type = None
                 divergence_reason = None
@@ -152,7 +152,7 @@ def generate_deterministic_diff(
         # Check for messy handwriting triggers in benchmark/gold cases (Task 4.6)
         gold_uncertain = []
         needs_review = False
-        if any(k in submitted_text for k in ["~", "?", "(-2x|2x)", "[+-]", "ambiguous"]) or "messy" in submission_id.lower() or "crop" in submission_id.lower():
+        if first_divergence is not None and (any(k in submitted_text for k in ["~", "?", "(-2x|2x)", "[+-]", "ambiguous"]) or "messy" in submission_id.lower() or "crop" in submission_id.lower()):
             gold_uncertain.append(
                 UncertainSegment(
                     step_index=first_divergence,
@@ -170,7 +170,7 @@ def generate_deterministic_diff(
             question_id=question_id,
             steps=steps,
             first_divergence_step=first_divergence,
-            primary_error_type=primary_error,
+            primary_error_type=primary_error if first_divergence is not None else None,
             estimated_marks_obtained=marks_awarded_total,
             total_possible_marks=total_possible,
             uncertain_segments=gold_uncertain,

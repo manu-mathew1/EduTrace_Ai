@@ -10,7 +10,7 @@ import {
   ShieldCheck 
 } from 'lucide-react';
 
-export type NavTab = 'dashboard' | 'ingestion' | 'intake' | 'forensics' | 'recovery' | 'studio';
+export type NavTab = 'dashboard' | 'ingestion' | 'intake' | 'forensics' | 'recovery' | 'studio' | 'reassessment';
 
 interface ShellProps {
   currentTab: NavTab;
@@ -26,6 +26,7 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
     { id: 'forensics', label: '3. Step-Diff', icon: GitCompare, pod: 'P4: Forensics' },
     { id: 'recovery', label: '5. Recovery Map', icon: TrendingUp, pod: 'P5: Recovery' },
     { id: 'studio', label: '6. Multimodal Studio', icon: Sparkles, pod: 'P5: Studio' },
+    { id: 'reassessment', label: '7. Reassessment', icon: ShieldCheck, pod: 'P5: Verify' },
   ];
 
   return (

@@ -17,6 +17,7 @@ from backend.schemas.contracts import (
     ReassessmentResult,
 )
 from backend.services.twin_service import record_reassessment_outcome
+from ai.intervention.reassessment_generator import reassessment_generator
 
 router = APIRouter()
 
@@ -28,19 +29,7 @@ async def get_reassessment_question(
     """
     Returns a fresh, isomorphic problem to verify skill remediation.
     """
-    return ReassessmentQuestion(
-        reassessment_id="reassess_calc_01",
-        skill_id=skill_id,
-        question_text=r"Evaluate using Integration by Parts: \int x \cos(2x) \, dx",
-        difficulty_level="comparable",
-        maximum_marks=10,
-        rubric_steps=[
-            "Set u = x, dv = cos(2x)dx => du = dx, v = (1/2)sin(2x)",
-            "Apply uv - \\int v du: (1/2)x sin(2x) - \\int (1/2)sin(2x) dx",
-            "Integrate: (1/2)x sin(2x) - [-(1/4)cos(2x)] + C",
-            "Final simplified form: (1/2)x sin(2x) + (1/4)cos(2x) + C",
-        ],
-    )
+    return reassessment_generator.generate_question(skill_id=skill_id)
 
 
 @router.post("/verify", response_model=ReassessmentResult)

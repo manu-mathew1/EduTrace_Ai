@@ -15,6 +15,7 @@ from pydantic import BaseModel
 from backend.db.database import get_db
 from backend.schemas.contracts import MultimodalStudioContent
 from ai.intervention.studio_engine import studio_engine
+from ai.intervention.audio_generator import audio_generator, AudioDeconstructionResponse
 
 logger = logging.getLogger("edutrace.interventions")
 router = APIRouter()
@@ -106,4 +107,21 @@ async def generate_custom_intervention(
         error_type=req.error_type,
         divergence_context=req.divergence_context,
         course_id=req.course_id or "course_calc_301",
+    )
+
+
+@router.post("/audio", response_model=AudioDeconstructionResponse)
+async def generate_audio_deconstruction(
+    req: InterventionGenerateRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Task 4.8: Generates a 60-second audio deconstruction script with timestamps,
+    Web Speech SSML, and audio waveform amplitude data for live visualization.
+    """
+    return await audio_generator.generate_script(
+        skill_id=req.skill_id,
+        skill_name=req.skill_name or req.skill_id,
+        divergence_context=req.divergence_context,
+        error_type=req.error_type,
     )
