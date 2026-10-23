@@ -197,3 +197,6 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 #### P5: Stage 5/6 Pod (Recovery & Studio)
 - [✅ (Completed by P1)] **Task 5.7:** Run 15-case benchmark evaluation runner (`evaluation/runner.py`) and export Macro-F1 / accuracy charts for pitch slides.
 - [✅ (Completed by P1)] **Task 5.8:** Record high-definition 3-minute backup demo screen recording (with voiceover).
+
+#### P1: Core Systems & Multi-Tenant Authentication (Proposal #007)
+- [✅ (Completed by P1)] **Task 5.9:** Multi-Tenant User Authentication & Isolated Personal Learning Twins (Backend UserModel, PBKDF2-HMAC-SHA256 password security, JWT session tokens, `/api/auth` router, `AuthContext`, `AuthPage.tsx`, user-isolated Bayesian Twin & RAG state, `run_prod.sh`).

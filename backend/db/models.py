@@ -13,6 +13,21 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.db.database import Base
 
 
+class UserModel(Base):
+    """Multi-tenant User Model supporting student and instructor accounts (Proposal #007)."""
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
+    salt: Mapped[str] = mapped_column(String(64), nullable=False)
+    role: Mapped[str] = mapped_column(String(32), default="student", nullable=False)
+    primary_course_id: Mapped[Optional[str]] = mapped_column(String(64), default="course_calc_301", nullable=True)
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 class CourseModel(Base):
     __tablename__ = "courses"
 

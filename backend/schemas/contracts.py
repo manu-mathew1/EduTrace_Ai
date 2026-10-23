@@ -354,3 +354,47 @@ class LearningTwinResponse(BaseModel):
     modality_affinities: Dict[str, float]
     proven_optimal_technique: str
     total_marks_recovered_to_date: float
+
+
+# =====================================================================
+# Multi-Tenant Authentication & User Management (Proposal #007)
+# =====================================================================
+
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    name: str
+    role: str = "student"
+    primary_course_id: Optional[str] = "course_calc_301"
+    avatar_url: Optional[str] = None
+    created_at: Optional[str] = None
+
+
+class RegisterRequest(BaseModel):
+    email: str
+    name: str
+    password: str
+    primary_course_id: Optional[str] = "course_calc_301"
+    role: Optional[str] = "student"
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+
+
+class PersonaResponse(BaseModel):
+    id: str
+    email: str
+    name: str
+    role: str
+    primary_course_id: str
+    avatar_url: Optional[str] = None
+    headline: str
+    baseline_readiness: float

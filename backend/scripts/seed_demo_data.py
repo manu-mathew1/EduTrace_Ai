@@ -30,6 +30,7 @@ from backend.db.models import (
     ReassessmentLogModel,
 )
 from backend.services.twin_service import calculate_beta_mastery
+from backend.services.auth_service import seed_default_users
 
 
 async def seed_demo_data():
@@ -37,6 +38,10 @@ async def seed_demo_data():
     await init_db()
 
     async with AsyncSessionLocal() as session:
+        # 0. Seed Multi-Tenant Users (Proposal #007)
+        await seed_default_users(session)
+        print("  + Seeded Default Users (Rahul, Priya, Alex)")
+
         # 1. Seed Courses
         courses = [
             CourseModel(

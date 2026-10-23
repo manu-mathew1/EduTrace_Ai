@@ -282,3 +282,31 @@ export interface LearningTwinResponse {
   proven_optimal_technique: string;
   total_marks_recovered_to_date: number;
 }
+
+// Multi-Tenant Authentication & User Representation (Proposal #007)
+export interface UserResponse {
+  id: string;
+  email: string;
+  name: string;
+  role: 'student' | 'instructor' | 'admin';
+  primary_course_id?: string;
+  avatar_url?: string;
+  created_at?: string;
+}
+
+export interface AuthTokenResponse {
+  access_token: string;
+  token_type: string;
+  user: UserResponse;
+}
+
+export interface PersonaResponse {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  primary_course_id: string;
+  avatar_url?: string;
+  headline: string;
+  baseline_readiness: number;
+}

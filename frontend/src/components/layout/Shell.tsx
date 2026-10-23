@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Compass, 
   UploadCloud, 
@@ -7,8 +7,12 @@ import {
   TrendingUp, 
   Sparkles, 
   BrainCircuit, 
-  ShieldCheck 
+  ShieldCheck,
+  LogOut,
+  ChevronDown,
+  UserCheck
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export type NavTab = 'dashboard' | 'ingestion' | 'intake' | 'forensics' | 'recovery' | 'studio' | 'reassessment';
 
@@ -19,6 +23,9 @@ interface ShellProps {
 }
 
 export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children }) => {
+  const { user, logout, switchPersona, personas } = useAuth();
+  const [showPersonaMenu, setShowPersonaMenu] = useState(false);
+
   const navItems = [
     { id: 'dashboard', label: 'Mission Control', icon: Compass, pod: 'P1: Core' },
     { id: 'ingestion', label: '1. Ingestion', icon: UploadCloud, pod: 'P2: RAG' },
@@ -75,7 +82,7 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
               })}
             </nav>
 
-            {/* Live Telemetry Capsule */}
+            {/* Live Telemetry Capsule & User Profile */}
             <div className="flex items-center space-x-3">
               <div className="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -83,6 +90,75 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
                 <span className="font-semibold text-emerald-400">58.5%</span>
                 <span className="text-slate-700">|</span>
                 <span className="text-indigo-400 font-medium">+8.0 Marks</span>
+              </div>
+
+              {/* User Profile & Persona Switcher */}
+              <div className="relative flex items-center space-x-2">
+                <button
+                  onClick={() => setShowPersonaMenu(!showPersonaMenu)}
+                  className="flex items-center space-x-2 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs transition-all"
+                >
+                  <div className="w-6 h-6 rounded-full bg-indigo-600 overflow-hidden flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                    {user?.avatar_url ? (
+                      <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />
+                    ) : (
+                      user?.name?.charAt(0) || 'U'
+                    )}
+                  </div>
+                  <div className="hidden sm:block text-left">
+                    <p className="text-xs font-bold text-white leading-tight truncate max-w-[100px]">{user?.name || 'Student'}</p>
+                    <p className="text-[9px] text-indigo-400 capitalize leading-none">{user?.role || 'student'}</p>
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+
+                {/* Persona Switcher Dropdown */}
+                {showPersonaMenu && (
+                  <div className="absolute right-0 top-12 w-64 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl p-2 z-50 animate-fadeIn">
+                    <div className="px-2 py-1.5 border-b border-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Switch Student Persona
+                    </div>
+                    <div className="space-y-1 my-1">
+                      {personas.map((p) => (
+                        <button
+                          key={p.id}
+                          onClick={() => {
+                            switchPersona(p.id);
+                            setShowPersonaMenu(false);
+                          }}
+                          className={`w-full flex items-center space-x-2.5 px-2.5 py-2 rounded-xl text-left text-xs transition-all ${
+                            user?.id === p.id ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 font-bold' : 'text-slate-300 hover:bg-slate-800'
+                          }`}
+                        >
+                          <div className="w-6 h-6 rounded-full bg-slate-800 shrink-0 overflow-hidden">
+                            {p.avatar_url ? (
+                              <img src={p.avatar_url} alt={p.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-[10px] font-bold flex items-center justify-center h-full text-indigo-300">{p.name.charAt(0)}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs">{p.name}</p>
+                            <p className="text-[9px] text-slate-500 truncate">{p.id}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="border-t border-slate-800 pt-1">
+                      <button
+                        onClick={() => {
+                          setShowPersonaMenu(false);
+                          logout();
+                        }}
+                        className="w-full flex items-center space-x-2 px-2.5 py-2 rounded-xl text-left text-xs text-rose-400 hover:bg-rose-500/10 transition-all font-semibold"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

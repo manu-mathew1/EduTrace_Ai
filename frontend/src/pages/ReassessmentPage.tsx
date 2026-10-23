@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ReassessmentQuestion, ReassessmentResult } from '../types/schema';
 import { TwinCelebrationModal } from '../components/twin/TwinCelebrationModal';
+import { useAuth } from '../context/AuthContext';
 
 interface ReassessmentPageProps {
   skillId?: string;
@@ -27,6 +28,7 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
   onReturnToDashboard,
   onReturnToRecovery,
 }) => {
+  const { user } = useAuth();
   const [question, setQuestion] = useState<ReassessmentQuestion | null>(null);
   const [isLoadingQuestion, setIsLoadingQuestion] = useState<boolean>(true);
   const [submittedWork, setSubmittedWork] = useState<string>('');
@@ -100,8 +102,8 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reassessment_id: question?.reassessment_id || 'reassess_calc_01',
-          student_id: 'std_rahul_99',
-          course_id: 'course_calc_301',
+          student_id: user?.id || 'std_rahul_99',
+          course_id: user?.primary_course_id || 'course_calc_301',
           skill_id: skillId,
           submitted_work: submittedWork,
         }),

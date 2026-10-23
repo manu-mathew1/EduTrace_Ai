@@ -21,12 +21,14 @@ import {
 } from 'lucide-react';
 import { NavTab } from '../components/layout/Shell';
 import { LearningTwinResponse, SkillMastery } from '../types/schema';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
 }
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
+  const { user } = useAuth();
   const [selectedCourse, setSelectedCourse] = useState<'MATH-301' | 'CS-210'>('MATH-301');
   const [readinessScore, setReadinessScore] = useState<number>(68.4);
   const [marksRecovered, setMarksRecovered] = useState<number>(8.0);
@@ -46,7 +48,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       .catch(() => {});
 
     const courseId = selectedCourse === 'MATH-301' ? 'course_calc_301' : 'course_cs_210';
-    fetch(`/api/twin/profile?course_id=${courseId}&student_id=std_rahul_99`)
+    const activeStudentId = user?.id || 'std_rahul_99';
+
+    fetch(`/api/twin/profile?course_id=${courseId}&student_id=${activeStudentId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
@@ -60,7 +64,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         }
       })
       .catch((e) => console.warn('Using baseline twin', e));
-  }, [selectedCourse]);
+  }, [selectedCourse, user?.id]);
 
   return (
     <div className="space-y-8 animate-fadeIn pb-12">

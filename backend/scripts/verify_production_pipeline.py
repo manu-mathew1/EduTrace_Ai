@@ -83,6 +83,21 @@ class PipelineVerificationSuite:
         assert health_res.status_code == 200 and health_data["status"] == "healthy"
         self.record_pass("Stage 0", "API & Pod Registry Health", True, f"5/5 Pods Active: {list(health_data['pods'].keys())}", lat)
 
+        # Stage 0: Multi-Tenant Authentication & Personas (Proposal #007)
+        t0 = time.perf_counter()
+        personas_res = self.client.get("/api/auth/personas")
+        lat = (time.perf_counter() - t0) * 1000
+        personas_data = personas_res.json()
+        assert personas_res.status_code == 200 and len(personas_data) >= 3
+        self.record_pass("Stage 0", "Multi-Tenant Personas Hub", True, f"3 Personas Ready: {[p['name'] for p in personas_data]}", lat)
+
+        t0 = time.perf_counter()
+        login_res = self.client.post("/api/auth/login", json={"email": "rahul@edutrace.ai", "password": "password123"})
+        lat = (time.perf_counter() - t0) * 1000
+        login_data = login_res.json()
+        assert login_res.status_code == 200 and "access_token" in login_data
+        self.record_pass("Stage 0", "PBKDF2 Password Auth & Bearer Token", True, f"Authenticated '{login_data['user']['name']}' ({login_data['user']['email']})", lat)
+
         t0 = time.perf_counter()
         twin_init_res = self.client.get(f"/api/twin/profile?course_id={self.course_id}&student_id={self.student_id}")
         lat = (time.perf_counter() - t0) * 1000
@@ -374,6 +389,15 @@ class PipelineVerificationSuite:
         assert post_interval_width < prior_interval_width, "Uncertainty interval failed to narrow post-evidence!"
         lat = (time.perf_counter() - t0) * 1000
         self.record_pass("Backward Pass", "Bayesian Mathematical Precision", True, f"Prior {prior_m}% (width {prior_interval_width:.2f}) -> Posterior {post_m}% (width {post_interval_width:.2f}, uncertainty narrowed)", lat)
+
+        # -------------------------------------------------------------
+        # VERIFICATION B5: Strict Multi-Tenant Data Isolation (Proposal #007)
+        # -------------------------------------------------------------
+        t0 = time.perf_counter()
+        priya_twin = self.client.get(f"/api/twin/profile?course_id=course_econ_macro&student_id=std_priya_88").json()
+        assert priya_twin["total_marks_recovered_to_date"] == 0.0, "Tenant leak: Priya's twin was mutated by Rahul's test!"
+        lat = (time.perf_counter() - t0) * 1000
+        self.record_pass("Backward Pass", "Multi-Tenant User Twin Isolation", True, f"Priya Patel (std_priya_88) remains completely isolated at 0.0M recovered", lat)
 
     def print_final_report(self):
         print("\n" + "=" * 80)

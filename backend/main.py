@@ -44,9 +44,11 @@ async def lifespan(app: FastAPI):
         # Seed default courses on startup (Task 3.2)
         from backend.db.database import AsyncSessionLocal
         from backend.api.courses import seed_default_courses
+        from backend.services.auth_service import seed_default_users
         async with AsyncSessionLocal() as session:
             await seed_default_courses(session)
-        logger.info("✅ Default courses seeded/verified in SQLite.")
+            await seed_default_users(session)
+        logger.info("✅ Default courses and demo personas seeded/verified in SQLite.")
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {e}")
 
@@ -111,7 +113,11 @@ async def health_check():
 # Router Registrations (P1 Hub)
 # =====================================================================
 
-# 0. P1: Course Management & Database Persistence Router (Task 3.2)
+# 0. P1: Multi-Tenant Authentication Router (Proposal #007)
+from backend.api import auth
+app.include_router(auth.router, prefix="/api/auth", tags=["auth (P1)"])
+
+# 0.1 P1: Course Management & Database Persistence Router (Task 3.2)
 from backend.api import courses
 app.include_router(courses.router, prefix="/api/courses", tags=["courses (P1)"])
 
@@ -195,6 +201,14 @@ except (ImportError, AttributeError):
     async def mock_intervention_studio():
         """Fallback mock response for P5 multimodal studio."""
         return load_mock("mock_intervention.json")
+
+
+# Production Static Files Mount (serves compiled Vite React bundle if present)
+from fastapi.staticfiles import StaticFiles
+FRONTEND_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+if FRONTEND_DIST.exists():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIST), html=True), name="static_frontend")
+    logger.info("✅ Mounted production frontend build from frontend/dist")
 
 
 if __name__ == "__main__":

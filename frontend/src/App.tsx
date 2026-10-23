@@ -6,10 +6,24 @@ import { IntakePage } from './pages/IntakePage';
 import { ForensicsPage } from './pages/ForensicsPage';
 import { InterventionStudio } from './pages/InterventionStudio';
 import { ReassessmentPage } from './pages/ReassessmentPage';
-import { UploadCloud, MessageSquareCode, GitCompare, TrendingUp, Sparkles, AlertCircle } from 'lucide-react';
+import { AuthPage } from './pages/AuthPage';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-export const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { isAuthenticated, isLoading } = useAuth();
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400 text-xs">
+        Loading EduTrace AI...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AuthPage />;
+  }
 
   return (
     <Shell currentTab={currentTab} onSelectTab={setCurrentTab}>
@@ -50,6 +64,14 @@ export const App: React.FC = () => {
         />
       )}
     </Shell>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 
