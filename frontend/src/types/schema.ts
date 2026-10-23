@@ -139,6 +139,12 @@ export interface UncertainSegment {
   confirmed_value?: string;
 }
 
+export interface ConfirmCropRequest {
+  submission_id: string;
+  crop_id: string;
+  confirmed_value: string;
+}
+
 export interface AnswerStep {
   step_index: number;
   submitted_work: string;

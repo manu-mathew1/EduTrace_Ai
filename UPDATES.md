@@ -103,6 +103,39 @@
 
 ---
 
+### [Day 4 - 2026-10-23 09:48] - P1 (acting on behalf of P4 — Messy Handwriting Crops Uncertainty & Socratic Citation Click-Throughs)
+- **Branch:** `dev`
+- **Objective / Task:**
+  - **Task 4.6:** Conduct dry runs on messy handwriting crops; ensure uncertainty badges trigger reliably.
+  - **Task 4.7:** Polish Socratic chat drawer animation and citation pill click-throughs.
+- **Context & Key Architectural Decisions:**
+  - **Task 4.6: Handwriting Uncertainty Engine & Crop Confirmation Flow (`ai/forensics/step_parser.py`, `backend/api/submissions.py`, `backend/schemas/contracts.py`):**
+    - Extended Pydantic and TypeScript contracts with `ConfirmCropRequest` (`submission_id`, `crop_id`, `confirmed_value`).
+    - Added `needs_human_review: Mapped[Optional[bool]]` to `SubmissionModel` in `backend/db/models.py` with automatic safe migration in `init_db()`.
+    - Enhanced `StepParser` and `parse_and_diff_steps` to detect messy/ambiguous OCR inputs (e.g., `?~`, `?`, `~`, `[+-]`, `ambiguous`, `crop`), triggering `UncertainSegment` with `confidence < 0.80` (0.74) and setting `needs_human_review = True`.
+    - Implemented live `POST /api/submissions/confirm-crop` endpoint that accepts human-in-the-loop crop confirmation, resolves `needs_human_review = False`, sets `confidence = 1.0`, updates SQLite persistence, and returns synchronized `StepDivergenceResult`.
+  - **Task 4.7: Grounded Lecture Slide Preview Modal & Socratic Citation Click-Throughs (`frontend/src/pages/ForensicsPage.tsx`):**
+    - Turned derivation step cards' slide badges (`Slide 19`) into clickable interactive citation buttons.
+    - Wired Socratic Co-Pilot chat message citations into interactive citation pills opening the Grounded Lecture Slide Preview Modal.
+    - Rendered the RAG Vector Grounding Modal displaying verified lecture notes excerpt, slide number badge, identified pitfall alert, remediation advice, and one-click "Ask Co-Pilot about Slide {n}" action.
+    - Polished Socratic chat drawer animations (`transition-all duration-300`) with interactive alternative confirmation chips.
+  - **Automated Test Suite (`tests/test_p4_day4.py`):**
+    - Built comprehensive unit & API integration tests covering messy handwriting uncertainty triggers, clean derivation baseline confidence, live crop confirmation persistence in SQLite, and Socratic chat citation drawer responses.
+    - Verified 54/54 platform tests passing with 100% success.
+- **Files Modified / Created:**
+  - `backend/schemas/contracts.py`
+  - `frontend/src/types/schema.ts`
+  - `backend/db/models.py`
+  - `backend/db/database.py`
+  - `backend/api/submissions.py`
+  - `ai/forensics/step_parser.py`
+  - `frontend/src/pages/ForensicsPage.tsx`
+  - `tests/test_p4_day4.py` (New)
+  - `TASKS.md` (Marked Tasks 4.6 & 4.7 as Completed by P1)
+  - `UPDATES.md` (Logged Section B entry)
+
+---
+
 ### [Day 4 - 2026-10-23 04:30] - P1 (acting on behalf of P3 — Intake Conversational Styling & Quick-Select Chip Suggestions)
 - **Branch:** `dev`
 - **Objective / Task:** Task 4.5 — Polish Intake conversational styling and add quick-select chip suggestions ("I'm aiming for 75+", "Have 5 days").

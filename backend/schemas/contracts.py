@@ -176,6 +176,12 @@ class UncertainSegment(BaseModel):
     confirmed_value: Optional[str] = None
 
 
+class ConfirmCropRequest(BaseModel):
+    submission_id: str
+    crop_id: str
+    confirmed_value: str
+
+
 class ModeBAutopsyRequest(BaseModel):
     course_id: str = "course_calc_301"
     question_paper_filename: Optional[str] = None

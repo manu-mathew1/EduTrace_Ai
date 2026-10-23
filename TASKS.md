@@ -166,8 +166,8 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 4.5:** Polish Intake conversational styling and add quick-select chip suggestions ("I'm aiming for 75+", "Have 5 days").
 
 #### P4: Stage 3 Pod (Forensics)
-- [ ] **Task 4.6:** Conduct dry runs on messy handwriting crops; ensure uncertainty badges trigger reliably.
-- [ ] **Task 4.7:** Polish Socratic chat drawer animation and citation pill click-throughs.
+- [✅ (Completed by P1)] **Task 4.6:** Conduct dry runs on messy handwriting crops; ensure uncertainty badges trigger reliably.
+- [✅ (Completed by P1)] **Task 4.7:** Polish Socratic chat drawer animation and citation pill click-throughs.
 
 #### P5: Stage 5/6 Pod (Recovery & Studio)
 - [ ] **Task 4.8:** Build 60-Second Audio Deconstruction generator (`ai/intervention/audio_generator.py`) via ElevenLabs / Web Speech synthesis.

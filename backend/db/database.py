@@ -5,6 +5,7 @@ Modern SQLAlchemy 2.0 + aiosqlite asynchronous SQLite engine.
 
 import os
 from typing import AsyncGenerator
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 
@@ -53,3 +54,7 @@ async def init_db() -> None:
     from backend.db import models  # noqa: F401
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        try:
+            await conn.execute(text("ALTER TABLE submissions ADD COLUMN needs_human_review BOOLEAN DEFAULT 0"))
+        except Exception:
+            pass

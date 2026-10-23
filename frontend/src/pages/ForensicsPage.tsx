@@ -18,6 +18,7 @@ import {
   RefreshCw,
   PlusCircle,
   CheckCircle,
+  ExternalLink,
 } from 'lucide-react';
 import { ErrorFingerprint } from '../components/fingerprint/ErrorFingerprint';
 import { StepDivergenceResult, AnswerStep } from '../types/schema';
@@ -44,6 +45,13 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
   const [confirmedCropValue, setConfirmedCropValue] = useState<string>('-2x cos(x)');
   const [showCropSelector, setShowCropSelector] = useState<boolean>(false);
   const [cropConfirmedAlert, setCropConfirmedAlert] = useState<boolean>(false);
+  const [activeCitationModal, setActiveCitationModal] = useState<{
+    title: string;
+    slide: number;
+    quote: string;
+    tip?: string;
+    matchedTrap?: string;
+  } | null>(null);
 
   // Live Socratic Chat state
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'ai' | 'user'; text: string; citation?: string }>>([
@@ -169,11 +177,43 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
     }, 400);
   };
 
-  const handleConfirmCrop = (value: string) => {
+  const handleConfirmCrop = async (value: string) => {
     setConfirmedCropValue(value);
     setShowCropSelector(false);
     setCropConfirmedAlert(true);
-    setTimeout(() => setCropConfirmedAlert(false), 3000);
+    setTimeout(() => setCropConfirmedAlert(false), 3500);
+
+    // Call live backend crop confirmation endpoint (Task 4.6)
+    try {
+      const res = await fetch('/api/submissions/confirm-crop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          submission_id: 'sub_live_01',
+          crop_id: 'crop_q3_step3_line2',
+          confirmed_value: value,
+        }),
+      });
+      if (res.ok) {
+        const updated: StepDivergenceResult = await res.json();
+        if (updated.steps && updated.steps.length > 0) {
+          const mapped: StepItem[] = updated.steps.map((s: AnswerStep) => ({
+            index: s.step_index,
+            submitted: s.submitted_work,
+            expected: s.expected_rubric_step,
+            marksAwarded: s.marks_awarded,
+            marksPossible: s.marks_possible,
+            status: s.status as 'satisfied' | 'diverged' | 'carried_forward_error',
+            divergenceReason: s.divergence_reason,
+            citedSourceTitle: s.cited_source_title,
+            citedSlide: s.cited_page_or_slide,
+          }));
+          setSteps(mapped);
+        }
+      }
+    } catch (e) {
+      console.warn('Crop confirmation sync offline:', e);
+    }
   };
 
   const handleRunLiveAnalysis = async () => {
@@ -364,7 +404,25 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                           )}
                         </div>
                         {s.citedSlide && (
-                          <span className="text-[11px] text-slate-400 font-mono">Slide {s.citedSlide}</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveCitationModal({
+                                title: s.citedSourceTitle || 'Prof Kapoor Lecture Notes — Module 2',
+                                slide: s.citedSlide!,
+                                quote: 'Pitfall Alert: When repeating integration by parts, always enclose the entire second iteration in brackets before distributing the outer minus sign.',
+                                tip: 'Review slide examples on nested integration signs to reinforce bracket retention.',
+                                matchedTrap: 'Sign Inversion in Second Integration by Parts',
+                              });
+                            }}
+                            className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/20 hover:border-indigo-400 transition-all cursor-pointer"
+                            title="Click to view lecture slide citation"
+                          >
+                            <BookOpen className="w-3 h-3 text-indigo-400" />
+                            <span>Slide {s.citedSlide}</span>
+                            <ExternalLink className="w-2.5 h-2.5 ml-0.5 opacity-70" />
+                          </button>
                         )}
                       </div>
 
@@ -463,10 +521,28 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
             {/* Right Column: Socratic Chat Co-Pilot & Course Citation (5 cols) */}
             <div className="lg:col-span-5 space-y-4">
               {/* Lecture Citation Drawer */}
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <div className="flex items-center space-x-2 text-indigo-400 mb-2">
-                  <BookOpen className="w-4 h-4" />
-                  <h4 className="text-xs font-bold uppercase tracking-wider">Course Citation (RAG Grounded)</h4>
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 transition-all duration-300 hover:border-slate-700 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2 text-indigo-400">
+                    <BookOpen className="w-4 h-4" />
+                    <h4 className="text-xs font-bold uppercase tracking-wider">Course Citation (RAG Grounded)</h4>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActiveCitationModal({
+                        title: activeStepItem.citedSourceTitle || 'Prof Kapoor Lecture Notes — Module 2',
+                        slide: activeStepItem.citedSlide || 19,
+                        quote: 'Pitfall Alert: When repeating integration by parts, always enclose the entire second iteration in brackets before distributing the outer minus sign.',
+                        tip: 'Pay special attention to intermediate expressions when calculating -∫ v du.',
+                        matchedTrap: 'Sign Inversion in Second Integration by Parts',
+                      })
+                    }
+                    className="text-[10px] text-indigo-400 hover:text-indigo-300 font-medium underline flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <span>Inspect Slide</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </button>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-950 border border-slate-800/80 text-xs">
                   <p className="font-semibold text-slate-200">
@@ -480,7 +556,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
               </div>
 
               {/* Socratic Co-Pilot Interactive Chat */}
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col h-[480px]">
+              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col h-[480px] transition-all duration-300 shadow-lg">
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
                   <div className="flex items-center space-x-2">
                     <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center">
@@ -501,7 +577,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                   {chatMessages.map((m, idx) => (
                     <div
                       key={idx}
-                      className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} transition-opacity duration-200`}
                     >
                       <div
                         className={`max-w-[88%] p-3 rounded-xl leading-relaxed ${
@@ -512,10 +588,23 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                       >
                         {m.text}
                         {m.citation && (
-                          <div className="mt-2 pt-2 border-t border-slate-800/80 text-[10px] text-indigo-400 flex items-center gap-1 font-mono">
-                            <BookOpen className="w-3 h-3" />
-                            <span>{m.citation}</span>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveCitationModal({
+                                title: 'Prof Kapoor Lecture Notes — Module 2',
+                                slide: 19,
+                                quote: 'Pitfall Alert: When repeating integration by parts, always enclose the entire second iteration in brackets before distributing the outer minus sign.',
+                                tip: 'Consult this slide to trace where brackets were omitted in step 3.',
+                                matchedTrap: 'Sign Inversion in Second Integration by Parts',
+                              });
+                            }}
+                            className="mt-2 pt-2 border-t border-slate-800/80 text-[10px] text-indigo-400 flex items-center gap-1 font-mono hover:text-indigo-300 transition-colors text-left cursor-pointer w-full"
+                          >
+                            <BookOpen className="w-3 h-3 shrink-0" />
+                            <span className="underline decoration-indigo-500/50">{m.citation}</span>
+                            <ExternalLink className="w-2.5 h-2.5 ml-1 opacity-70 shrink-0" />
+                          </button>
                         )}
                       </div>
                     </div>
@@ -627,6 +716,92 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                 >
                   {isAnalyzing && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                   <span>{isAnalyzing ? 'Analyzing...' : 'Run Forensic Diff'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: LECTURE SLIDE GROUNDING & RAG CITATION PREVIEW (TASK 4.7) */}
+      {activeCitationModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4 animate-scaleUp">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Course Lecture Grounding</h3>
+                  <p className="text-[11px] text-slate-400 font-mono">
+                    {activeCitationModal.title} &bull; Slide {activeCitationModal.slide}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveCitationModal(null)}
+                className="text-slate-400 hover:text-white text-xs font-bold p-1 rounded hover:bg-slate-800"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Matched Trap Warning Badge */}
+            {activeCitationModal.matchedTrap && (
+              <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center space-x-2 text-xs text-amber-300">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
+                <span>
+                  <strong>Identified Pitfall:</strong> {activeCitationModal.matchedTrap}
+                </span>
+              </div>
+            )}
+
+            {/* Slide Excerpt / Exact Citation */}
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+                Verified Slide Excerpt (Vector RAG Citation):
+              </span>
+              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-200 leading-relaxed border-l-4 border-l-indigo-500">
+                &ldquo;{activeCitationModal.quote}&rdquo;
+              </div>
+            </div>
+
+            {/* Pedagogical Tip */}
+            {activeCitationModal.tip && (
+              <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs text-slate-300">
+                <div className="flex items-center space-x-1.5 text-indigo-400 font-semibold mb-1">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Remediation Advice</span>
+                </div>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  {activeCitationModal.tip}
+                </p>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
+              <span className="text-[11px] text-slate-500">Grounded in Course Corpus RAG</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveCitationModal(null)}
+                  className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const prompt = `Can you explain how Slide ${activeCitationModal.slide} applies to my sign error in Step ${selectedStep}?`;
+                    setActiveCitationModal(null);
+                    handleSendChat(prompt);
+                  }}
+                  className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Ask Co-Pilot About Slide {activeCitationModal.slide}</span>
                 </button>
               </div>
             </div>

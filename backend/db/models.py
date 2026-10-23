@@ -77,6 +77,7 @@ class SubmissionModel(Base):
     estimated_marks_obtained: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
     total_possible_marks: Mapped[float] = mapped_column(Float, default=10.0, nullable=False)
     forensic_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    needs_human_review: Mapped[Optional[bool]] = mapped_column(Boolean, default=False, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     course: Mapped["CourseModel"] = relationship("CourseModel", back_populates="submissions")
