@@ -65,7 +65,7 @@ const DEFAULT_QUESTIONS: Question[] = [
 ];
 
 export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics }) => {
-  const { activeCourse, activeCourseId } = useCourses();
+  const { activeCourse, activeCourseId, calibrateActiveCourse } = useCourses();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -125,6 +125,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         setFrictionSkills(data.session_state.extracted_friction_topics);
         setSuggestedChips(data.suggested_chips);
         setIsConsultComplete(true);
+        await calibrateActiveCourse();
       } else {
         throw new Error('Offline fallback');
       }
@@ -174,6 +175,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
           all_answers: userAnswers,
         }),
       });
+      await calibrateActiveCourse();
     } catch {
       // offline fallback
     } finally {
@@ -197,6 +199,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
           },
         }),
       });
+      await calibrateActiveCourse();
     } catch {
       // offline fallback
     } finally {

@@ -82,6 +82,13 @@ async def intake_consultation(
             is_consultation_complete=session_state.is_consultation_complete,
         )
         db.add(db_session)
+    # Mark course as calibrated
+    c_stmt = select(CourseModel).where(CourseModel.id == course_id)
+    c_res = await db.execute(c_stmt)
+    c_rec = c_res.scalars().first()
+    if c_rec:
+        c_rec.is_calibrated = True
+
     await db.commit()
 
     return consult_response
@@ -127,6 +134,13 @@ async def intake_demo_fast_forward(
             is_consultation_complete=True,
         )
         db.add(db_session)
+    # Mark course as calibrated
+    c_stmt = select(CourseModel).where(CourseModel.id == course_id)
+    c_res = await db.execute(c_stmt)
+    c_rec = c_res.scalars().first()
+    if c_rec:
+        c_rec.is_calibrated = True
+
     await db.commit()
 
     return consult_response
@@ -235,6 +249,14 @@ async def submit_diagnostic_probe(
             forensic_summary=diff_result.forensic_summary,
         )
         db.add(db_sub)
+
+    # Mark course as calibrated after diagnostic probe submission
+    c_stmt = select(CourseModel).where(CourseModel.id == req.course_id)
+    c_res = await db.execute(c_stmt)
+    c_rec = c_res.scalars().first()
+    if c_rec:
+        c_rec.is_calibrated = True
+
     await db.commit()
 
     return diff_result

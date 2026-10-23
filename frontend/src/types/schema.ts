@@ -58,6 +58,8 @@ export interface CourseCreate {
   target_score: number;
   current_baseline?: number;
   target_exam_date?: string;
+  user_id?: string;
+  is_calibrated?: boolean;
 }
 
 export interface CourseResponse {
@@ -68,6 +70,8 @@ export interface CourseResponse {
   current_baseline: number;
   target_exam_date?: string;
   created_at: string;
+  user_id?: string;
+  is_calibrated?: boolean;
 }
 
 export interface ClassifiedDocument {
@@ -299,6 +303,7 @@ export interface LearningTwinResponse {
   modality_affinities: Record<string, number>;
   proven_optimal_technique: string;
   total_marks_recovered_to_date: number;
+  is_calibrated?: boolean;
 }
 
 // Multi-Tenant Authentication & User Representation (Proposal #007)
@@ -307,7 +312,7 @@ export interface UserResponse {
   email: string;
   name: string;
   role: 'student' | 'instructor' | 'admin';
-  primary_course_id?: string;
+  primary_course_id?: string | null;
   avatar_url?: string;
   created_at?: string;
 }

@@ -135,6 +135,30 @@
 
 ---
 
+### [Day 5 - 2026-10-24 00:30] - P1 (Tech Lead & Core Systems — Clean Zero-State Registration & Authentic Diagnostic Flow)
+- **Branch:** `dev` $\to$ `main`
+- **Objective / Task (Task 5.12):**
+  - Resolved the demo data pollution issue where new registered students were automatically loaded with pre-set Calculus 301 data, pre-calculated 68% readiness, and pre-existing exam errors without having been evaluated.
+  - **1. Backend Database Isolation (`models.py`, `database.py`, `contracts.py`, `courses.py`):**
+    - Added `user_id` and `is_calibrated` boolean columns to `CourseModel` and SQLite schema migration.
+    - Scoped `GET /api/courses` to `user_id`: newly registered students receive ONLY their own enrolled courses (starts with empty list `[]`), while demo accounts retain access to benchmark tracks.
+    - Added `POST /api/courses/{course_id}/calibrate` endpoint to mark courses calibrated upon diagnostic intake completion.
+  - **2. Auth Clean Slate (`auth.py`, `AuthContext.tsx`):**
+    - Removed default assignment of `course_calc_301` from `UserModel` registration. New students start with `primary_course_id = None` and 0 uncalibrated Bayesian skills.
+  - **3. First-Run Dashboard Onboarding (`DashboardPage.tsx`):**
+    - Implemented clean Linear-style onboarding card when a student has 0 courses, presenting a direct `+ Add Your First Subject` CTA.
+    - Implemented "Awaiting Diagnostic" state when a subject is added: hides fake 68% readiness and replaces topic scores with a clear invitation to complete the 10-minute diagnostic check.
+  - **4. Diagnostic Calibration Flow (`IntakePage.tsx`, `Shell.tsx`):**
+    - Header readiness pill dynamically shows `Awaiting Diagnostic` (amber pill) until assessment is completed.
+    - Completing the diagnostic quiz or fast-forward triggers `calibrateActiveCourse()`, unlocking the real Bayesian Twin scores.
+- **Verification & Deployment:**
+  - Added new integration test `tests/test_p1_user_isolated_courses.py` covering clean registration, zero-course state, subject addition, and calibration.
+  - Pytest test suite: **84 / 84 tests passing (100% pass rate)**.
+  - Production frontend bundle rebuilt cleanly (`npm run build` completed in 1.09s).
+  - Multi-worker daemon running live on `http://0.0.0.0:8000/`.
+
+---
+
 ### [Day 5 - 2026-10-23 23:55] - P1 (Tech Lead & Core Systems — Universal Multi-Course Across All Pages Complete)
 - **Branch:** `dev` $\to$ `main`
 - **Objective / Task (Task 5.11 Finalization — Phases 1 to 7 Complete):**

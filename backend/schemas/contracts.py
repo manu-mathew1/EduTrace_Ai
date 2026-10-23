@@ -70,6 +70,8 @@ class CourseCreate(BaseModel):
     target_score: int = Field(default=75, ge=0, le=100)
     current_baseline: Optional[int] = Field(default=50, ge=0, le=100)
     target_exam_date: Optional[str] = Field(None, json_schema_extra={"example": "2026-10-28"})
+    user_id: Optional[str] = None
+    is_calibrated: Optional[bool] = False
 
 
 class CourseUpdate(BaseModel):
@@ -78,6 +80,7 @@ class CourseUpdate(BaseModel):
     target_score: Optional[int] = Field(None, ge=0, le=100)
     current_baseline: Optional[int] = Field(None, ge=0, le=100)
     target_exam_date: Optional[str] = None
+    is_calibrated: Optional[bool] = None
 
 
 class CourseResponse(BaseModel):
@@ -88,6 +91,8 @@ class CourseResponse(BaseModel):
     current_baseline: int
     target_exam_date: Optional[str]
     created_at: str
+    user_id: Optional[str] = None
+    is_calibrated: Optional[bool] = False
 
 
 class ClassifiedDocument(BaseModel):
@@ -354,6 +359,7 @@ class LearningTwinResponse(BaseModel):
     modality_affinities: Dict[str, float]
     proven_optimal_technique: str
     total_marks_recovered_to_date: float
+    is_calibrated: Optional[bool] = True
 
 
 # =====================================================================
@@ -365,7 +371,7 @@ class UserResponse(BaseModel):
     email: str
     name: str
     role: str = "student"
-    primary_course_id: Optional[str] = "course_calc_301"
+    primary_course_id: Optional[str] = None
     avatar_url: Optional[str] = None
     created_at: Optional[str] = None
 
@@ -374,7 +380,7 @@ class RegisterRequest(BaseModel):
     email: str
     name: str
     password: str
-    primary_course_id: Optional[str] = "course_calc_301"
+    primary_course_id: Optional[str] = None
     role: Optional[str] = "student"
 
 

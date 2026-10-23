@@ -58,3 +58,11 @@ async def init_db() -> None:
             await conn.execute(text("ALTER TABLE submissions ADD COLUMN needs_human_review BOOLEAN DEFAULT 0"))
         except Exception:
             pass
+        try:
+            await conn.execute(text("ALTER TABLE courses ADD COLUMN user_id VARCHAR(64)"))
+        except Exception:
+            pass
+        try:
+            await conn.execute(text("ALTER TABLE courses ADD COLUMN is_calibrated BOOLEAN DEFAULT 0"))
+        except Exception:
+            pass

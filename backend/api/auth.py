@@ -113,33 +113,34 @@ async def register_user(
         password_hash=p_hash,
         salt=p_salt,
         role=req.role or "student",
-        primary_course_id=req.primary_course_id or "course_calc_301",
+        primary_course_id=req.primary_course_id or None,
         avatar_url=avatar_url,
     )
     db.add(new_user)
 
-    # Initialize private baseline Bayesian Learning Twin skills for this new student
-    course_id = req.primary_course_id or "course_calc_301"
-    initial_skills = [
-        ("skill_parts_sign_expansion", "Integration by Parts: Bracket Sign Distribution", 2.0, 3.0),
-        ("skill_parts_vs_sub_decision", "Method Choice: Substitution vs Parts", 2.0, 3.0),
-        ("skill_ode_integrating_factor", "First-Order Linear ODE: Integrating Factor Setup", 2.0, 3.0),
-    ]
-    now_iso = datetime.utcnow().isoformat() + "Z"
-    for sid, sname, a, b in initial_skills:
-        m_pct, unc_range = calculate_beta_mastery(a, b)
-        model_inst = SkillTwinModel(
-            student_id=user_id,
-            course_id=course_id,
-            skill_id=sid,
-            skill_name=sname,
-            alpha=a,
-            beta=b,
-            mastery_percentage=m_pct,
-            uncertainty_range_json=str(unc_range),
-            last_tested_timestamp=now_iso,
-        )
-        db.add(model_inst)
+    # Initialize private baseline Bayesian Learning Twin skills ONLY IF a course was explicitly specified
+    if req.primary_course_id:
+        course_id = req.primary_course_id
+        initial_skills = [
+            ("skill_parts_sign_expansion", "Integration by Parts: Bracket Sign Distribution", 2.0, 3.0),
+            ("skill_parts_vs_sub_decision", "Method Choice: Substitution vs Parts", 2.0, 3.0),
+            ("skill_ode_integrating_factor", "First-Order Linear ODE: Integrating Factor Setup", 2.0, 3.0),
+        ]
+        now_iso = datetime.utcnow().isoformat() + "Z"
+        for sid, sname, a, b in initial_skills:
+            m_pct, unc_range = calculate_beta_mastery(a, b)
+            model_inst = SkillTwinModel(
+                student_id=user_id,
+                course_id=course_id,
+                skill_id=sid,
+                skill_name=sname,
+                alpha=a,
+                beta=b,
+                mastery_percentage=m_pct,
+                uncertainty_range_json=str(unc_range),
+                last_tested_timestamp=now_iso,
+            )
+            db.add(model_inst)
 
     await db.commit()
     await db.refresh(new_user)

@@ -23,7 +23,7 @@ class UserModel(Base):
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     salt: Mapped[str] = mapped_column(String(64), nullable=False)
     role: Mapped[str] = mapped_column(String(32), default="student", nullable=False)
-    primary_course_id: Mapped[Optional[str]] = mapped_column(String(64), default="course_calc_301", nullable=True)
+    primary_course_id: Mapped[Optional[str]] = mapped_column(String(64), default=None, nullable=True)
     avatar_url: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
@@ -32,6 +32,8 @@ class CourseModel(Base):
     __tablename__ = "courses"
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    user_id: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, index=True)
+    is_calibrated: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     subject_archetype: Mapped[str] = mapped_column(String(32), default="procedural", nullable=False)
     target_score: Mapped[int] = mapped_column(Integer, default=75, nullable=False)

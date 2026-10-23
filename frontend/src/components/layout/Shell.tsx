@@ -75,7 +75,7 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
             >
               <BookOpen className="w-3.5 h-3.5 text-[#5E6AD2]" />
               <span className="font-medium max-w-[130px] sm:max-w-[180px] truncate">
-                {activeCourse?.title ? activeCourse.title.split(':')[0] : 'Select Subject'}
+                {activeCourse?.title ? activeCourse.title.split(':')[0] : '+ Add Subject'}
               </span>
               <ChevronDown className="w-3 h-3 text-[#8A8F98]" />
             </button>
@@ -160,12 +160,30 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
 
         {/* Right: Readiness Badge & Student Profile */}
         <div className="flex items-center space-x-2.5">
-          {/* Student-Facing Readiness Pill */}
-          <div className="hidden lg:flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[#121316] border border-white/[0.08] text-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#27C57E] shadow-[0_0_8px_rgba(39,197,126,0.6)]" />
-            <span className="text-[#8A8F98] text-[11px]">Exam Readiness:</span>
-            <span className="font-mono text-[11px] font-semibold text-[#27C57E]">68%</span>
-          </div>
+          {/* Dynamic Exam Readiness Pill */}
+          {activeCourse ? (
+            <div className="hidden lg:flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[#121316] border border-white/[0.08] text-xs">
+              {activeCourse.is_calibrated ? (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#27C57E] shadow-[0_0_8px_rgba(39,197,126,0.6)]" />
+                  <span className="text-[#8A8F98] text-[11px]">Exam Readiness:</span>
+                  <span className="font-mono text-[11px] font-semibold text-[#27C57E]">
+                    {activeCourse.current_baseline || 68}%
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E59934] shadow-[0_0_8px_rgba(229,153,52,0.6)]" />
+                  <span className="text-[#E59934] text-[11px] font-medium">Awaiting Diagnostic</span>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="hidden lg:flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[#121316] border border-white/[0.08] text-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#8A8F98]" />
+              <span className="text-[#8A8F98] text-[11px]">Setup Pending</span>
+            </div>
+          )}
 
           {/* Persona Menu Trigger */}
           <div className="relative">

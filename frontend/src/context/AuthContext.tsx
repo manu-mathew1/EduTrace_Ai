@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     email: string,
     name: string,
     password: string,
-    courseId: string = 'course_calc_301'
+    courseId?: string
   ): Promise<boolean> => {
     setAuthError(null);
     try {
@@ -136,7 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email,
           name,
           password,
-          primary_course_id: courseId,
+          primary_course_id: courseId || null,
           role: 'student',
         }),
       });
@@ -152,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(data.user);
       localStorage.setItem('edutrace_token', data.access_token);
       localStorage.setItem('edutrace_user', JSON.stringify(data.user));
+      localStorage.removeItem('edutrace_active_course');
       return true;
     } catch {
       setAuthError('Registration server offline.');

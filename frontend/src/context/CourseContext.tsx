@@ -13,13 +13,14 @@ interface CourseContextType {
     targetScore?: number,
     examDate?: string
   ) => Promise<CourseResponse | null>;
+  calibrateActiveCourse: () => Promise<void>;
   isLoadingCourses: boolean;
   refreshCourses: () => Promise<void>;
 }
 
 const CourseContext = createContext<CourseContextType | undefined>(undefined);
 
-const DEFAULT_COURSES: CourseResponse[] = [
+const DEMO_COURSES: CourseResponse[] = [
   {
     course_id: 'course_calc_301',
     title: 'Calculus III: Multivariable & Advanced Integration',
@@ -28,6 +29,7 @@ const DEFAULT_COURSES: CourseResponse[] = [
     current_baseline: 50,
     target_exam_date: '2026-10-28',
     created_at: new Date().toISOString(),
+    is_calibrated: true,
   },
   {
     course_id: 'course_cs_210',
@@ -37,6 +39,7 @@ const DEFAULT_COURSES: CourseResponse[] = [
     current_baseline: 60,
     target_exam_date: '2026-11-04',
     created_at: new Date().toISOString(),
+    is_calibrated: true,
   },
   {
     course_id: 'course_econ_202',
@@ -46,25 +49,43 @@ const DEFAULT_COURSES: CourseResponse[] = [
     current_baseline: 55,
     target_exam_date: '2026-11-12',
     created_at: new Date().toISOString(),
+    is_calibrated: true,
   },
 ];
 
 export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [courses, setCourses] = useState<CourseResponse[]>(DEFAULT_COURSES);
+  const isDemo = user?.id === 'std_rahul_99' || user?.id === 'std_priya_88' || user?.id === 'std_alex_77';
+
+  const [courses, setCourses] = useState<CourseResponse[]>(() => {
+    return isDemo ? DEMO_COURSES : [];
+  });
   const [activeCourseId, setActiveCourseIdState] = useState<string>(() => {
-    return localStorage.getItem('edutrace_active_course') || 'course_calc_301';
+    if (isDemo) {
+      return localStorage.getItem('edutrace_active_course') || 'course_calc_301';
+    }
+    return localStorage.getItem('edutrace_active_course') || '';
   });
   const [isLoadingCourses, setIsLoadingCourses] = useState<boolean>(true);
 
   const fetchCourses = async () => {
     try {
-      const res = await fetch('/api/courses');
+      const url = user?.id ? `/api/courses?user_id=${encodeURIComponent(user.id)}` : '/api/courses';
+      const res = await fetch(url);
       if (res.ok) {
         const data: CourseResponse[] = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        if (Array.isArray(data)) {
           setCourses(data);
-          // If activeCourseId is not in list, keep it or fallback
+          if (data.length > 0) {
+            const saved = localStorage.getItem('edutrace_active_course');
+            if (saved && data.some((c) => c.course_id === saved)) {
+              setActiveCourseIdState(saved);
+            } else {
+              setActiveCourseIdState(data[0].course_id);
+            }
+          } else {
+            setActiveCourseIdState('');
+          }
           return;
         }
       }
@@ -77,13 +98,12 @@ export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     fetchCourses();
-  }, []);
+  }, [user?.id]);
 
   // When user switches persona or logs in, sync active course if user has a primary_course_id
   useEffect(() => {
     if (user?.primary_course_id) {
       const saved = localStorage.getItem('edutrace_active_course');
-      // If no manually saved course, use user's default
       if (!saved) {
         setActiveCourseIdState(user.primary_course_id);
       }
@@ -93,8 +113,27 @@ export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const setActiveCourseId = (courseId: string) => {
     setActiveCourseIdState(courseId);
     try {
-      localStorage.setItem('edutrace_active_course', courseId);
+      if (courseId) {
+        localStorage.setItem('edutrace_active_course', courseId);
+      } else {
+        localStorage.removeItem('edutrace_active_course');
+      }
     } catch {}
+  };
+
+  const calibrateActiveCourse = async () => {
+    if (!activeCourseId) return;
+    try {
+      const res = await fetch(`/api/courses/${encodeURIComponent(activeCourseId)}/calibrate`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const updated: CourseResponse = await res.json();
+        setCourses((prev) => prev.map((c) => (c.course_id === updated.course_id ? updated : c)));
+      }
+    } catch (e) {
+      console.warn('Calibration sync failed:', e);
+    }
   };
 
   const createNewCourse = async (
@@ -110,6 +149,8 @@ export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         target_score: targetScore,
         current_baseline: 50,
         target_exam_date: examDate || '2026-11-15',
+        user_id: user?.id,
+        is_calibrated: false,
       };
 
       const res = await fetch('/api/courses', {
@@ -138,13 +179,15 @@ export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       current_baseline: 50,
       target_exam_date: examDate || '2026-11-15',
       created_at: new Date().toISOString(),
+      user_id: user?.id,
+      is_calibrated: false,
     };
     setCourses((prev) => [syntheticCourse, ...prev]);
     setActiveCourseId(fallbackId);
     return syntheticCourse;
   };
 
-  const activeCourse = courses.find((c) => c.course_id === activeCourseId) || courses[0] || null;
+  const activeCourse = courses.find((c) => c.course_id === activeCourseId) || (courses.length > 0 ? courses[0] : null);
 
   return (
     <CourseContext.Provider
@@ -154,6 +197,7 @@ export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         activeCourseId,
         setActiveCourseId,
         createNewCourse,
+        calibrateActiveCourse,
         isLoadingCourses,
         refreshCourses: fetchCourses,
       }}

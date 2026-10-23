@@ -238,14 +238,17 @@ async def get_learning_twin_data(
             log_res = await db_session.execute(log_stmt)
             total_recovered = float(log_res.scalar() or 0.0)
 
+            is_calibrated = course_rec.is_calibrated if course_rec else True
+
             return LearningTwinResponse(
                 student_id=student_id,
                 course_id=course_id,
                 skills=skills,
-                overall_readiness_score=readiness,
+                overall_readiness_score=readiness if is_calibrated else 0.0,
                 modality_affinities=DEFAULT_MODALITY_AFFINITIES,
                 proven_optimal_technique="Visual Flowcharts + Active Spot-the-Bug Drills",
-                total_marks_recovered_to_date=round(total_recovered, 1)
+                total_marks_recovered_to_date=round(total_recovered, 1),
+                is_calibrated=is_calibrated,
             )
 
     # Standard Golden Mock Fallback (Guarantees zero-block parallel execution)
