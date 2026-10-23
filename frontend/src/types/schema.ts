@@ -240,6 +240,18 @@ export interface MultimodalStudioContent {
   lecture_grounding_quote?: string;
 }
 
+export interface ReassessmentQuestion {
+  question_id?: string;
+  reassessment_id?: string;
+  skill_id: string;
+  question_text: string;
+  problem_statement?: string;
+  difficulty_level?: string;
+  maximum_marks?: number;
+  max_marks?: number;
+  rubric_steps: string[];
+}
+
 export interface ReassessmentSubmission {
   reassessment_id: string;
   submitted_work: string;
@@ -252,14 +264,18 @@ export interface ReassessmentSubmission {
 export interface ReassessmentResult {
   reassessment_id: string;
   skill_id: string;
+  skill_name?: string;
   is_improved: boolean;
   marks_awarded: number;
   marks_possible: number;
+  marks_recovered?: number;
   new_mastery_estimate: number;
   previous_mastery_estimate: number;
   uncertainty_interval: number[];
-  marks_recovered_secured: number;
+  marks_recovered_secured?: number;
   celebration_message: string;
+  alpha?: number;
+  beta?: number;
 }
 
 // Metacognitive Learning Twin Representation
