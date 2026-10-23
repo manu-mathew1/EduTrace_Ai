@@ -21,6 +21,7 @@ import {
   Copy
 } from 'lucide-react';
 import { NavTab } from '../components/layout/Shell';
+import { useCourses } from '../context/CourseContext';
 
 interface IngestionPageProps {
   onNavigateToIntake: () => void;
@@ -146,12 +147,13 @@ const DEFAULT_SLIDES: SlideItem[] = [
 ];
 
 export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake }) => {
+  const { activeCourse, activeCourseId } = useCourses();
   const [documents, setDocuments] = useState<ClassifiedDoc[]>(DEFAULT_DOCUMENTS);
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [targetScore, setTargetScore] = useState<number>(75);
+  const [targetScore, setTargetScore] = useState<number>(activeCourse?.target_score || 75);
   const [baselineScore, setBaselineScore] = useState<number>(50);
-  const [examDate, setExamDate] = useState<string>('2026-10-28');
+  const [examDate, setExamDate] = useState<string>(activeCourse?.target_exam_date || '2026-10-28');
 
   // Slide Inspection Modal State
   const [inspectingDoc, setInspectingDoc] = useState<ClassifiedDoc | null>(null);
@@ -159,10 +161,17 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
   const [selectedSlide, setSelectedSlide] = useState<SlideItem | null>(DEFAULT_SLIDES[2]);
 
   useEffect(() => {
-    fetch('/api/documents/triage?course_id=course_calc_301')
+    if (activeCourse) {
+      if (activeCourse.target_score) setTargetScore(activeCourse.target_score);
+      if (activeCourse.target_exam_date) setExamDate(activeCourse.target_exam_date);
+    }
+  }, [activeCourse]);
+
+  useEffect(() => {
+    fetch(`/api/documents/triage?course_id=${encodeURIComponent(activeCourseId)}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.documents && data.documents.length > 0) {
+        if (data && data.documents && Array.isArray(data.documents)) {
           const mapped: ClassifiedDoc[] = data.documents.map((d: any) => ({
             id: d.document_id,
             filename: d.filename,
@@ -173,14 +182,24 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
             examWeight: d.exam_weight_percentage,
           }));
           setDocuments(mapped);
+        } else if (activeCourseId === 'course_calc_301') {
+          setDocuments(DEFAULT_DOCUMENTS);
+        } else {
+          setDocuments([]);
         }
       })
-      .catch(() => {});
-  }, []);
+      .catch(() => {
+        if (activeCourseId === 'course_calc_301') {
+          setDocuments(DEFAULT_DOCUMENTS);
+        } else {
+          setDocuments([]);
+        }
+      });
+  }, [activeCourseId]);
 
   const openSlideInspector = (doc: ClassifiedDoc) => {
     setInspectingDoc(doc);
-    fetch(`/api/documents/slides?course_id=course_calc_301&doc_id=${doc.id}`)
+    fetch(`/api/documents/slides?course_id=${encodeURIComponent(activeCourseId)}&doc_id=${doc.id}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data && data.slides && data.slides.length > 0) {
@@ -224,7 +243,7 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
     setIsUploading(true);
     const formData = new FormData();
     files.forEach((f) => formData.append('files', f));
-    formData.append('course_id', 'course_calc_301');
+    formData.append('course_id', activeCourseId);
 
     try {
       const res = await fetch('/api/documents/upload', { method: 'POST', body: formData });
@@ -286,14 +305,16 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#4DA0FF] bg-[#4DA0FF]/10 px-1.5 py-0.5 rounded border border-[#4DA0FF]/20">
               Course Library
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">Calculus III</span>
+            <span className="text-xs font-mono text-[#8A8F98] max-w-xs truncate">
+              {activeCourse?.title || 'Active Subject'}
+            </span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <UploadCloud className="w-4 h-4 text-[#5E6AD2]" />
             Course Documents & References
           </h1>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Your uploaded lecture slides and past exams are used to ground AI tutor explanations and cite exact slide numbers.
+            Upload lecture notes, past exam papers, and rubrics for {activeCourse?.title ? activeCourse.title.split(':')[0] : 'this course'}.
           </p>
         </div>
 
@@ -379,40 +400,49 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
           </span>
         </div>
 
-        <div className="divide-y divide-white/[0.04]">
-          {documents.map((doc) => (
-            <div key={doc.id} className="px-4 py-3 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
-              <div className="flex items-center space-x-3 min-w-0 flex-1 pr-4">
-                <FileText className="w-4 h-4 text-[#8A8F98] shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-xs font-medium text-[#F7F8F8] truncate">{doc.filename}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {getTypeBadge(doc.type)}
-                    <span className="text-[10px] font-mono text-[#8A8F98]">{doc.pageCount} Pages</span>
-                    <span className="text-[10px] text-[#8A8F98] truncate hidden md:inline">
-                      • Topics: {doc.topics.slice(0, 2).join(', ')}
-                    </span>
+        {documents.length === 0 ? (
+          <div className="p-8 text-center space-y-2">
+            <p className="text-xs font-medium text-[#F7F8F8]">No files uploaded yet for this subject</p>
+            <p className="text-[11px] text-[#8A8F98] max-w-md mx-auto leading-relaxed">
+              Drop your course syllabus, lecture slides, or past midterms in the upload area above. Our ingestion engine will automatically extract the topics and initialize your Learning Twin!
+            </p>
+          </div>
+        ) : (
+          <div className="divide-y divide-white/[0.04]">
+            {documents.map((doc) => (
+              <div key={doc.id} className="px-4 py-3 flex items-center justify-between hover:bg-white/[0.02] transition-colors">
+                <div className="flex items-center space-x-3 min-w-0 flex-1 pr-4">
+                  <FileText className="w-4 h-4 text-[#8A8F98] shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-[#F7F8F8] truncate">{doc.filename}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {getTypeBadge(doc.type)}
+                      <span className="text-[10px] font-mono text-[#8A8F98]">{doc.pageCount} Pages</span>
+                      <span className="text-[10px] text-[#8A8F98] truncate hidden md:inline">
+                        • Topics: {doc.topics.slice(0, 2).join(', ')}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center space-x-2 shrink-0">
-                <button
-                  onClick={() => openSlideInspector(doc)}
-                  className="px-2.5 py-1 rounded bg-white/[0.06] hover:bg-white/[0.1] text-[11px] text-[#F7F8F8] transition-all"
-                >
-                  View Slides
-                </button>
-                <button
-                  onClick={() => removeDoc(doc.id)}
-                  className="p-1 rounded text-[#8A8F98] hover:text-[#EB5757] transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                <div className="flex items-center space-x-2 shrink-0">
+                  <button
+                    onClick={() => openSlideInspector(doc)}
+                    className="px-2.5 py-1 rounded bg-white/[0.06] hover:bg-white/[0.1] text-[11px] text-[#F7F8F8] transition-all"
+                  >
+                    View Slides
+                  </button>
+                  <button
+                    onClick={() => removeDoc(doc.id)}
+                    className="p-1 rounded text-[#8A8F98] hover:text-[#EB5757] transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Slide Inspector Modal */}

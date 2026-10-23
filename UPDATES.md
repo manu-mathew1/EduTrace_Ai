@@ -27,6 +27,7 @@
 | **#005** | `[RESOLVED]` | P5 $\to$ P1 | Function signature request for Bayesian Twin update | Day 1 |
 | **#006** | `[RESOLVED]` | P1 $\to$ Team | Feature Proposal: Audio Waveform Visualizer in Studio | Day 1 |
 | **#007** | `[RESOLVED]` | P1 $\to$ Team | Feature Proposal: Multi-Tenant User Authentication & Isolated Personal Learning Twins | Day 5 |
+| **#008** | `[RESOLVED]` | P1 $\to$ Team | Feature Proposal: Dynamic Custom Subject Creation & Multi-Course Twin | Day 5 |
 
 ---
 
@@ -115,9 +116,40 @@
   - P5: Agree ("Approved! Bayesian twin belief updates and marks recovered will be strictly personalized.")
 - **Discussion / Next Step:** 5/5 unanimous consensus reached. P1 scheduled as Task 5.9 in `TASKS.md` and implementing now.
 
+#### 💡 Feature Proposal #008: [P1 -> Team] Dynamic Custom Subject Creation & Universal Multi-Course Twin
+- **From:** P1 (Tech Lead & Core Systems)
+- **To:** Team (All Pods)
+- **Status:** `[RESOLVED - DIRECT EXECUTIVE APPROVAL BY P1]`
+- **The Idea:** Remove mandatory course track selection during registration. Enable students to study multiple academic courses concurrently and create custom subjects on the fly by uploading their syllabus, lecture notes, and past exams.
+- **Why it helps win:** Eliminates registration friction, matches the authentic student reality of managing multiple subjects in a semester, and proves to hackathon judges that EduTrace AI is a universal academic diagnostic engine—not hardcoded to a single course.
+- **Impact on Pods:**
+  - P1: Creates `CourseContext.tsx`, universal course switcher in `Shell.tsx`, and `CreateCourseModal.tsx`.
+  - P1 (Twin): Enhances `twin_service.py` to dynamically initialize domain-tailored baseline skills for any custom subject.
+  - P2 (Ingestion): Dynamically scopes document uploads and auto-triage by `course_id`.
+  - P3-P5: Scopes forensic diffs, recovery maps, and reassessments to active course.
+- **Status:** Fast-tracked and completely implemented by P1.
+
 ---
 
 ## Section B: Detailed Technical Work Logs (Reverse Chronological)
+
+---
+
+### [Day 5 - 2026-10-23 23:45] - P1 (Tech Lead & Core Systems — Dynamic Custom Subject Creation & Multi-Course Engine)
+- **Branch:** `dev` $\to$ `main`
+- **Objective / Task (Task 5.11):**
+  - Implement full universal multi-course capabilities across the application.
+  - Simplify user registration in `AuthPage.tsx` by removing the upfront mandatory course selection.
+  - Build universal subject management in `frontend/src/context/CourseContext.tsx` with persistence.
+  - Integrate interactive course switcher dropdown in `Shell.tsx` and quick switcher in `DashboardPage.tsx`.
+  - Build `CreateCourseModal.tsx` allowing students to create any custom subject (Physics, Chemistry, Law, CS, etc.) with custom archetype, target score, and exam date.
+  - Enhance `twin_service.py` with `get_initial_skills_for_course` to dynamically generate domain-appropriate skills for any subject.
+  - Scoped `IngestionPage.tsx` to `activeCourseId` with an empty state welcoming syllabus and PYQ uploads.
+- **Verification & Deployment:**
+  - Added new integration test suite `tests/test_p1_custom_courses.py` covering course creation, retrieval, dynamic twin generation, and triage.
+  - Pytest suite: **83 / 83 tests passing (100%)**.
+  - Production frontend bundle rebuilt cleanly (`npm run build` completed in 1.80s).
+  - Production daemon reloaded on `http://localhost:8000/`.
 
 ---
 

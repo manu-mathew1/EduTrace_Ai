@@ -13,9 +13,14 @@ import {
   ChevronRight,
   Activity,
   User,
-  GraduationCap
+  GraduationCap,
+  Plus,
+  BookOpen,
+  Check
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useCourses } from '../../context/CourseContext';
+import { CreateCourseModal } from '../course/CreateCourseModal';
 
 export type NavTab = 'dashboard' | 'ingestion' | 'intake' | 'forensics' | 'recovery' | 'studio' | 'reassessment';
 
@@ -27,7 +32,10 @@ interface ShellProps {
 
 export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children }) => {
   const { user, logout, switchPersona, personas } = useAuth();
+  const { courses, activeCourse, activeCourseId, setActiveCourseId } = useCourses();
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
+  const [showCourseMenu, setShowCourseMenu] = useState(false);
+  const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
 
   const navItems = [
     { id: 'dashboard', label: 'Overview', icon: Compass, key: '1' },
@@ -40,7 +48,6 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
   ];
 
   const currentTabLabel = navItems.find((item) => item.id === currentTab)?.label || 'Overview';
-  const courseTitle = user?.primary_course_id === 'course_econ_macro' ? 'Macroeconomics 202' : 'Calculus III (MATH-301)';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08090a] text-[#F7F8F8] font-sans antialiased selection:bg-[#5E6AD2]/30 selection:text-white">
@@ -60,12 +67,70 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
 
           <span className="text-white/20 text-xs font-mono">/</span>
 
-          {/* Student Breadcrumb */}
-          <div className="hidden sm:flex items-center space-x-1.5 text-xs text-[#8A8F98]">
-            <span className="hover:text-white transition-colors cursor-default">{courseTitle}</span>
-            <ChevronRight className="w-3 h-3 text-white/30" />
-            <span className="text-[#F7F8F8] font-medium">{currentTabLabel}</span>
+          {/* Dynamic Course Switcher Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowCourseMenu(!showCourseMenu)}
+              className="flex items-center space-x-1.5 px-2 py-1 rounded-md bg-[#121316] border border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.04] text-xs text-[#F7F8F8] transition-all"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-[#5E6AD2]" />
+              <span className="font-medium max-w-[130px] sm:max-w-[180px] truncate">
+                {activeCourse?.title ? activeCourse.title.split(':')[0] : 'Select Subject'}
+              </span>
+              <ChevronDown className="w-3 h-3 text-[#8A8F98]" />
+            </button>
+
+            {showCourseMenu && (
+              <div className="absolute left-0 top-9 w-72 rounded-xl bg-[#121316] border border-white/[0.1] shadow-2xl p-1.5 z-50 animate-fadeIn">
+                <div className="px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-[#8A8F98]">
+                  Your Enrolled Subjects
+                </div>
+                <div className="space-y-0.5 my-1 max-h-56 overflow-y-auto">
+                  {courses.map((c) => {
+                    const isSelected = c.course_id === activeCourseId;
+                    return (
+                      <button
+                        key={c.course_id}
+                        onClick={() => {
+                          setActiveCourseId(c.course_id);
+                          setShowCourseMenu(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left text-xs transition-all ${
+                          isSelected
+                            ? 'bg-[#5E6AD2]/15 text-[#F7F8F8] border border-[#5E6AD2]/30 font-medium'
+                            : 'text-[#8A8F98] hover:text-[#F7F8F8] hover:bg-white/[0.04]'
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1 pr-2">
+                          <p className="truncate text-xs font-medium text-[#F7F8F8]">{c.title}</p>
+                          <p className="text-[10px] text-[#8A8F98]">
+                            Goal: {c.target_score}% • Exam: {c.target_exam_date || 'TBD'}
+                          </p>
+                        </div>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-[#27C57E] shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-1 mt-1 border-t border-white/[0.06]">
+                  <button
+                    onClick={() => {
+                      setShowCourseMenu(false);
+                      setShowCreateCourseModal(true);
+                    }}
+                    className="w-full flex items-center space-x-2 px-2.5 py-2 rounded-lg text-xs text-[#5E6AD2] hover:bg-[#5E6AD2]/10 transition-colors font-medium"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Add New Subject</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
+
+          <span className="text-white/20 text-xs font-mono hidden sm:inline">/</span>
+          <span className="text-[#8A8F98] text-xs font-medium hidden sm:inline">{currentTabLabel}</span>
         </div>
 
         {/* Center: Simplified Navigation */}
@@ -194,10 +259,19 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
             <span>Personalized Academic Diagnostic & Mastery Platform</span>
           </div>
           <div className="text-white/50 text-[11px]">
-            Target Exam Date: Oct 28 • All progress automatically saved
+            Target Exam Date: {activeCourse?.target_exam_date || 'Oct 28'} • All progress automatically saved
           </div>
         </div>
       </footer>
+
+      {/* Create Custom Course Modal */}
+      <CreateCourseModal
+        isOpen={showCreateCourseModal}
+        onClose={() => setShowCreateCourseModal(false)}
+        onCourseCreated={() => {
+          onSelectTab('ingestion');
+        }}
+      />
     </div>
   );
 };

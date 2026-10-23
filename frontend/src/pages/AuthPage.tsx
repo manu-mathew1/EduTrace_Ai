@@ -20,7 +20,6 @@ export const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [courseId, setCourseId] = useState('course_calc_301');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +28,7 @@ export const AuthPage: React.FC = () => {
     if (tab === 'signin') {
       await login(email, password);
     } else {
-      await register(email, name, password, courseId);
+      await register(email, name, password);
     }
     setIsSubmitting(false);
   };
@@ -128,34 +127,19 @@ export const AuthPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {tab === 'register' && (
-              <>
-                <div>
-                  <label className="block text-[11px] font-mono uppercase text-[#8A8F98] mb-1.5">Full Name</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Maya Lin"
-                      className="w-full bg-[#08090a] border border-white/[0.08] focus:border-[#5E6AD2] focus:ring-1 focus:ring-[#5E6AD2] rounded-lg px-3 py-2 text-xs text-[#F7F8F8] placeholder-[#5B6069] outline-none transition-all"
-                    />
-                  </div>
+              <div>
+                <label className="block text-[11px] font-mono uppercase text-[#8A8F98] mb-1.5">Full Name</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Maya Lin"
+                    className="w-full bg-[#08090a] border border-white/[0.08] focus:border-[#5E6AD2] focus:ring-1 focus:ring-[#5E6AD2] rounded-lg px-3 py-2 text-xs text-[#F7F8F8] placeholder-[#5B6069] outline-none transition-all"
+                  />
                 </div>
-
-                <div>
-                  <label className="block text-[11px] font-mono uppercase text-[#8A8F98] mb-1.5">Primary Course Track</label>
-                  <select
-                    value={courseId}
-                    onChange={(e) => setCourseId(e.target.value)}
-                    className="w-full bg-[#08090a] border border-white/[0.08] focus:border-[#5E6AD2] focus:ring-1 focus:ring-[#5E6AD2] rounded-lg px-3 py-2 text-xs text-[#F7F8F8] outline-none transition-all"
-                  >
-                    <option value="course_calc_301">MATH-301: Multivariable Calculus</option>
-                    <option value="course_econ_macro">ECON-202: Macroeconomic Theory</option>
-                    <option value="course_cs_210">CS-210: Algorithms & Discrete Forensics</option>
-                  </select>
-                </div>
-              </>
+              </div>
             )}
 
             <div>

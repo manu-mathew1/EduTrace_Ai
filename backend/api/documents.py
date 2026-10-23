@@ -170,11 +170,12 @@ async def get_document_triage(
             ready_for_intake=len(docs) >= 1,
         )
 
-    # Golden Mock Fallback (Guarantees zero-block parallel execution)
-    mock_file = MOCKS_DIR / "mock_triage.json"
-    if mock_file.exists():
-        with open(mock_file, "r") as f:
-            return DocumentTriageResponse(**json.load(f))
+    # Golden Mock Fallback for default course (Guarantees zero-block parallel execution)
+    if course_id == "course_calc_301":
+        mock_file = MOCKS_DIR / "mock_triage.json"
+        if mock_file.exists():
+            with open(mock_file, "r") as f:
+                return DocumentTriageResponse(**json.load(f))
 
     return DocumentTriageResponse(
         course_id=course_id,

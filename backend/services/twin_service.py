@@ -104,6 +104,54 @@ def update_modality_affinity(
 # Database-Integrated Twin Service Operations
 # =====================================================================
 
+def get_initial_skills_for_course(course_id: str, course_title: str = "") -> List[Tuple[str, str, float, float]]:
+    """
+    Returns dynamically initialized baseline skills tailored to the specific course archetype or subject name.
+    """
+    cid = (course_id or "").lower()
+    ctitle = (course_title or "").lower()
+    parts = set(cid.replace("-", "_").split("_"))
+
+    if "physics" in cid or "physics" in ctitle or "mechanics" in ctitle:
+        return [
+            ("skill_free_body", "Newton's Second Law & Free-Body Vector Decomposition", 4.0, 5.0),
+            ("skill_conservation_momentum", "Conservation of Linear & Angular Momentum", 4.0, 5.0),
+            ("skill_work_energy", "Work-Energy Theorem & Conservative Potentials", 3.0, 6.0),
+        ]
+    elif "chem" in cid or "chemistry" in ctitle:
+        return [
+            ("skill_reaction_kinetics", "Reaction Kinetics & Rate Law Formulation", 4.0, 5.0),
+            ("skill_equilibrium_le_chatelier", "Chemical Equilibrium & Le Chatelier Shifts", 4.0, 5.0),
+            ("skill_buffer_titration", "Buffer Solutions & Acid-Base Titration Curves", 3.0, 6.0),
+        ]
+    elif "econ" in cid or "macro" in cid or "econ" in ctitle:
+        return [
+            ("skill_crowding_out", "Fiscal Policy: Crowding-Out Effect", 4.0, 5.0),
+            ("skill_islm_shifts", "IS-LM Curve Equilibrium & Shift Triggers", 4.0, 5.0),
+            ("skill_multiplier_effect", "Keynesian Expenditure Multiplier Calculation", 3.0, 6.0),
+        ]
+    elif "cs" in parts or "algo" in cid or "algorithms" in ctitle or "data structures" in ctitle:
+        return [
+            ("skill_loop_invariant", "Loop Invariant Maintenance & Termination Proofs", 4.0, 5.0),
+            ("skill_binary_search_termination", "Binary Search Termination & Boundary Indices", 4.0, 5.0),
+            ("skill_asymptotic_recurrence", "Master Theorem & Recurrence Relations", 3.0, 6.0),
+        ]
+    elif "calc" in cid or "math" in cid or "math" in ctitle:
+        return [
+            ("skill_parts_sign_expansion", "Integration by Parts: Bracket Sign Distribution", 4.0, 5.0),
+            ("skill_parts_vs_sub_decision", "Method Choice: Substitution vs Parts", 4.0, 5.0),
+            ("skill_ode_integrating_factor", "First-Order Linear ODE: Integrating Factor Setup", 3.0, 6.0),
+        ]
+    else:
+        clean_name = course_title.strip() if course_title else course_id.replace("course_", "").replace("_", " ").title()
+        prefix = course_id.replace("course_", "").replace("-", "_")[:8]
+        return [
+            (f"skill_{prefix}_core_principles", f"{clean_name}: Core Theoretical Principles", 4.0, 5.0),
+            (f"skill_{prefix}_method_application", f"{clean_name}: Method Selection & Formula Setup", 4.0, 5.0),
+            (f"skill_{prefix}_complex_derivation", f"{clean_name}: Multi-Step Problem Derivations", 3.0, 6.0),
+        ]
+
+
 DEFAULT_MODALITY_AFFINITIES = {
     "visual_flowchart": 0.88,
     "spot_the_bug": 0.84,
@@ -124,7 +172,7 @@ async def get_learning_twin_data(
     """
     if db_session is not None:
         from sqlalchemy import select, func
-        from backend.db.models import SkillTwinModel, ReassessmentLogModel
+        from backend.db.models import SkillTwinModel, ReassessmentLogModel, CourseModel
         stmt = select(SkillTwinModel).where(
             SkillTwinModel.student_id == student_id,
             SkillTwinModel.course_id == course_id
@@ -132,11 +180,13 @@ async def get_learning_twin_data(
         result = await db_session.execute(stmt)
         skill_records = result.scalars().all()
 
-        initial_skills = [
-            ("skill_parts_sign_expansion", "Integration by Parts: Bracket Sign Distribution", 4.0, 5.0),
-            ("skill_parts_vs_sub_decision", "Method Choice: Substitution vs Parts", 4.0, 5.0),
-            ("skill_ode_integrating_factor", "First-Order Linear ODE: Integrating Factor Setup", 3.0, 6.0),
-        ]
+        # Fetch course title for domain-specific initial skill modeling
+        course_stmt = select(CourseModel).where(CourseModel.id == course_id)
+        course_res = await db_session.execute(course_stmt)
+        course_rec = course_res.scalars().first()
+        course_title = course_rec.title if course_rec else ""
+
+        initial_skills = get_initial_skills_for_course(course_id, course_title)
         existing_skill_ids = {r.skill_id for r in skill_records}
         missing_skills = [s for s in initial_skills if s[0] not in existing_skill_ids]
 

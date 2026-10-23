@@ -17,6 +17,7 @@ import {
 import { NavTab } from '../components/layout/Shell';
 import { LearningTwinResponse, SkillMastery } from '../types/schema';
 import { useAuth } from '../context/AuthContext';
+import { useCourses } from '../context/CourseContext';
 
 interface DashboardPageProps {
   onNavigate: (tab: NavTab) => void;
@@ -24,17 +25,19 @@ interface DashboardPageProps {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
   const { user } = useAuth();
-  const [selectedCourse, setSelectedCourse] = useState<'MATH-301' | 'CS-210'>('MATH-301');
+  const { courses, activeCourse, activeCourseId, setActiveCourseId } = useCourses();
   const [readinessScore, setReadinessScore] = useState<number>(68.4);
   const [marksRecovered, setMarksRecovered] = useState<number>(8.0);
-  const [examDaysLeft] = useState<number>(5);
   const [twinData, setTwinData] = useState<LearningTwinResponse | null>(null);
 
+  const examDaysLeft = activeCourse?.target_exam_date
+    ? Math.max(1, Math.ceil((new Date(activeCourse.target_exam_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 5;
+
   useEffect(() => {
-    const courseId = selectedCourse === 'MATH-301' ? 'course_calc_301' : 'course_cs_210';
     const activeStudentId = user?.id || 'std_rahul_99';
 
-    fetch(`/api/twin/profile?course_id=${courseId}&student_id=${activeStudentId}`)
+    fetch(`/api/twin/profile?course_id=${encodeURIComponent(activeCourseId)}&student_id=${activeStudentId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data) {
@@ -48,7 +51,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         }
       })
       .catch(() => {});
-  }, [selectedCourse, user?.id]);
+  }, [activeCourseId, user?.id]);
 
   const defaultSkills: SkillMastery[] = [
     {
@@ -108,36 +111,33 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           <div className="flex items-center space-x-2">
             <span className="text-xs font-mono uppercase text-[#8A8F98]">Current Course</span>
             <span className="text-xs font-semibold text-[#F7F8F8]">
-              {selectedCourse === 'MATH-301' ? 'MATH-301: Multivariable Calculus' : 'CS-210: Data Structures & Algorithms'}
+              {activeCourse?.title || 'Academic Subject'}
             </span>
           </div>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Upcoming Exam in {examDaysLeft} days • 5 topics tracked
+            Upcoming Exam in {examDaysLeft} days • {skillsList.length} topics tracked
           </p>
         </div>
 
-        {/* Course Switcher */}
-        <div className="inline-flex p-0.5 rounded-lg bg-[#121316] border border-white/[0.08]">
-          <button
-            onClick={() => setSelectedCourse('MATH-301')}
-            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-              selectedCourse === 'MATH-301'
-                ? 'bg-white/[0.08] text-white shadow-sm border border-white/[0.08]'
-                : 'text-[#8A8F98] hover:text-[#F7F8F8]'
-            }`}
-          >
-            Calculus III
-          </button>
-          <button
-            onClick={() => setSelectedCourse('CS-210')}
-            className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-              selectedCourse === 'CS-210'
-                ? 'bg-white/[0.08] text-white shadow-sm border border-white/[0.08]'
-                : 'text-[#8A8F98] hover:text-[#F7F8F8]'
-            }`}
-          >
-            Algorithms
-          </button>
+        {/* Dynamic Course Switcher Pills */}
+        <div className="inline-flex p-0.5 rounded-lg bg-[#121316] border border-white/[0.08] max-w-full overflow-x-auto">
+          {courses.slice(0, 4).map((c) => {
+            const isSelected = c.course_id === activeCourseId;
+            const shortName = c.title.split(':')[0];
+            return (
+              <button
+                key={c.course_id}
+                onClick={() => setActiveCourseId(c.course_id)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-all shrink-0 ${
+                  isSelected
+                    ? 'bg-white/[0.08] text-white shadow-sm border border-white/[0.08]'
+                    : 'text-[#8A8F98] hover:text-[#F7F8F8]'
+                }`}
+              >
+                {shortName}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -146,12 +146,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08]">
           <span className="text-[11px] font-mono text-[#8A8F98] uppercase">Target Exam Score</span>
           <div className="mt-1 flex items-baseline space-x-2">
-            <span className="text-2xl font-semibold font-mono tabular-nums text-[#F7F8F8]">75.0%</span>
-            <span className="text-[11px] text-[#8A8F98] font-mono">Grade B+</span>
+            <span className="text-2xl font-semibold font-mono tabular-nums text-[#F7F8F8]">
+              {(activeCourse?.target_score || 75).toFixed(1)}%
+            </span>
+            <span className="text-[11px] text-[#8A8F98] font-mono">
+              {(activeCourse?.target_score || 75) >= 85 ? 'Grade A' : 'Grade B+'}
+            </span>
           </div>
           <div className="mt-2 text-[11px] text-[#8A8F98] flex items-center gap-1">
             <Clock className="w-3 h-3 text-[#E59934]" />
-            <span>Final Exam: Oct 28</span>
+            <span>Final Exam: {activeCourse?.target_exam_date || 'Oct 28'}</span>
           </div>
         </div>
 
