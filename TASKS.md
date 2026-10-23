@@ -189,7 +189,7 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 5.4:** Verify all document badges and citations display instant slide numbers during demo walkthrough.
 
 #### P3: Stage 2 Pod (Intake & Probe)
-- [ ] **Task 5.5:** Verify Intake consultation runs smoothly without lag on live stage.
+- [✅ (Completed by P1)] **Task 5.5:** Verify Intake consultation runs smoothly without lag on live stage.
 
 #### P4: Stage 3 Pod (Forensics)
 - [ ] **Task 5.6:** Rehearse the live "Step Divergence & Uncertainty" interaction sequence.

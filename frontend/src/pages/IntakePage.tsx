@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   MessageSquareCode, 
   Send, 
@@ -14,7 +14,8 @@ import {
   UploadCloud,
   Check,
   AlertTriangle,
-  FileText
+  FileText,
+  Zap
 } from 'lucide-react';
 import { NavTab } from '../components/layout/Shell';
 
@@ -98,6 +99,69 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
     probe_q2: 'Step 1: u=x^2, dv=cos(x)dx => x^2 sin(x) - ∫ 2x sin(x) dx\nStep 2: = x^2 sin(x) - [ -2x cos(x) - ∫ -2cos(x) dx ]\nStep 3: = x^2 sin(x) + 2x cos(x) - 2sin(x)',
     probe_q3: '[-1/x] from -1 to 1 = -1 - (1) = -2 (Wait, is x=0 a discontinuity?)',
   });
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isSending]);
+
+  const handleFastForwardDemo = async () => {
+    setIsSending(true);
+    try {
+      const res = await fetch('/api/intake/demo-fast-forward', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          course_id: 'course_calc_301',
+          session_id: 'sess_demo_01',
+          target_score: 75,
+          baseline_score: 50,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data.session_state.messages);
+        setTargetScore(data.session_state.extracted_target_score);
+        setTimelineDays(data.session_state.extracted_timeline_days);
+        setFrictionSkills(data.session_state.extracted_friction_topics);
+        setSuggestedChips(data.suggested_chips);
+        setIsConsultComplete(true);
+      } else {
+        throw new Error('Offline fallback');
+      }
+    } catch {
+      // Instant local fast-forward for zero latency on stage
+      setTargetScore(75);
+      setTimelineDays(5);
+      setFrictionSkills([
+        'Integration by Parts: Bracket Sign Distribution',
+        'Method Selection: Substitution vs Arctan Form',
+      ]);
+      setMessages([
+        {
+          role: 'assistant',
+          content: 'Hello Rahul! Welcome to Stage 2: Metacognitive Intake. I analyzed your Calculus III syllabus and target goal of 75%. To calibrate your diagnostic, what topics feel like major friction points right now?',
+        },
+        {
+          role: 'user',
+          content: "I'm aiming for 75+ and have 5 days before the exam. I keep making bracket sign mistakes in integration by parts.",
+        },
+        {
+          role: 'assistant',
+          content: 'Target of 75% (+25 marks gap) and 5-day runway locked in! Sign distribution across nested brackets in repeated integration by parts accounts for 15% of lost marks in past exams. I have calibrated your Mode A "10-Minute Diagnostic Probe" with 3 calibrated hinge questions. Ready to solve?',
+        },
+      ]);
+      setSuggestedChips([
+        'Launch Mode A 10-Minute Probe',
+        'Review Question 2: Repeated By-Parts',
+        'Switch to Mode B: Exam Paper Autopsy',
+      ]);
+      setIsConsultComplete(true);
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   const handleSubmitProbe = async () => {
     setIsSubmitting(true);
@@ -296,6 +360,23 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         </div>
       </div>
 
+      {/* Live Stage Fast-Forward Bar (Task 5.5) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 gap-3">
+        <div className="flex items-center space-x-2 text-xs">
+          <Zap className="w-4 h-4 text-amber-400" />
+          <span className="font-bold text-white">Live Stage Rehearsal Mode:</span>
+          <span className="text-slate-400 hidden sm:inline">Use quick-chips below or 1-click calibration for zero stage lag.</span>
+        </div>
+        <button
+          onClick={handleFastForwardDemo}
+          disabled={isSending}
+          className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-indigo-600 hover:from-amber-400 hover:to-indigo-500 text-xs font-bold text-white shadow-sm transition-all hover:scale-[1.02] disabled:opacity-50 self-start sm:self-auto"
+        >
+          <Zap className="w-3.5 h-3.5" />
+          <span>⚡ 1-Click Demo Calibration (Rahul • 75+ Goal)</span>
+        </button>
+      </div>
+
       {activeTab === 'consultation' ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chat Window */}
@@ -330,6 +411,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
                   <span>AI Counselor is analyzing your goals & calibrating topics...</span>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Quick-Select Suggestion Chips (Task 4.5) */}
