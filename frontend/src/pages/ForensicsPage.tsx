@@ -52,21 +52,21 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
     matchedTrap?: string;
   } | null>(null);
 
-  // Live Socratic Chat state
+  // Socratic Chat state
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'ai' | 'user'; text: string; citation?: string }>>([
     {
       role: 'ai',
-      text: 'Hello! I localized your marks leak in Question 3 to Step 3. Method selection was sound, but you inverted a minus sign while expanding the inner bracket. Ask me anything about this step!',
+      text: 'Hi Rahul! You did great setting up integration by parts in Steps 1 and 2. In Step 3, you flipped a minus sign when expanding the inner bracket. Ask me anything to understand how to fix it!',
       citation: 'Prof Kapoor Lecture Notes — Module 2, Slide 19',
     },
   ]);
   const [chatInput, setChatInput] = useState<string>('');
   const [isAiReplying, setIsAiReplying] = useState<boolean>(false);
   const [suggestedFollowup, setSuggestedFollowup] = useState<string>(
-    'Would you like to try expanding -(A - B) to see where the sign inverted?'
+    'How should I distribute the outer minus sign across -(uv - int v du)?'
   );
 
-  // Dynamic Step List state
+  // Step List state
   const [steps, setSteps] = useState<StepItem[]>([
     {
       index: 1,
@@ -95,31 +95,29 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
       marksAwarded: 0.0,
       marksPossible: 2.0,
       status: 'diverged',
-      divergenceReason: 'Sign distribution error on expanding inner bracket. Outer minus was inverted across the -∫ term.',
+      divergenceReason: 'Sign error: The outer minus sign was not correctly distributed across the inner bracket.',
       citedSourceTitle: 'Prof Kapoor Lecture Notes - Module 2',
       citedSlide: 19,
     },
     {
       index: 4,
       submitted: '= x² sin(x) + 2x cos(x) - 2sin(x)',
-      expected: 'Final simplified antiderivative with integration constant: x² sin(x) + 2x cos(x) - 2sin(x) + C',
+      expected: 'Final simplified antiderivative with constant: x² sin(x) + 2x cos(x) - 2sin(x) + C',
       marksAwarded: 1.0,
       marksPossible: 4.0,
       status: 'carried_forward_error',
-      divergenceReason: 'Omitted integration constant (+ C) and final term sign affected by Step 3 algebraic leak.',
+      divergenceReason: 'Omitted constant (+ C) and final term sign was affected by the Step 3 minus sign slip.',
       citedSourceTitle: 'Prof Kapoor Lecture Notes - Module 2',
       citedSlide: 20,
     },
   ]);
 
-  // Live Derivation Testing Modal
+  // Test Solution Modal
   const [showAnalyzeModal, setShowAnalyzeModal] = useState<boolean>(false);
   const [modalInputWork, setModalInputWork] = useState<string>(
     'u = x^2, dv = cos(x)dx\n= x^2 sin(x) - \\int 2x sin(x) dx\n= x^2 sin(x) - [ -2x cos(x) - \\int -2cos(x) dx ]\n= x^2 sin(x) + 2x cos(x) - 2sin(x)'
   );
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
-
-  const activeStepItem = steps.find((s) => s.index === selectedStep) || steps[2];
 
   const handleSendChat = async (customQuery?: string) => {
     const query = customQuery || chatInput;
@@ -257,21 +255,21 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
 
   return (
     <div className="space-y-5 font-sans pb-12">
-      {/* Top Header Card (Linear Minimal Style) */}
+      {/* Top Header Card */}
       <div className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl bg-[#121316] border border-white/[0.08] gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#EB5757] bg-[#EB5757]/10 px-1.5 py-0.5 rounded border border-[#EB5757]/20">
-              Stage 3 • Forensic Step-Diff
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#E59934] bg-[#E59934]/10 px-1.5 py-0.5 rounded border border-[#E59934]/20">
+              Exam Mistake Analysis
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">#sub_math_9042</span>
+            <span className="text-xs font-mono text-[#8A8F98]">Midterm Question 3</span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <GitCompare className="w-4 h-4 text-[#5E6AD2]" />
             Question 3: Repeated Integration by Parts
           </h1>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Target Skill: Multi-Iteration Sign Distribution • 10 Marks
+            Evaluate ∫ x² cos(x) dx • Method chosen was correct, but a minus sign slipped in Step 3.
           </p>
         </div>
 
@@ -281,11 +279,11 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
             className="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg bg-[#08090a] hover:bg-white/[0.04] text-[#F7F8F8] text-xs font-medium border border-white/[0.08] transition-all"
           >
             <PlusCircle className="w-3.5 h-3.5 text-[#5E6AD2]" />
-            <span>Test Derivation</span>
+            <span>Test My Solution</span>
           </button>
 
           <div className="px-3 py-1.5 rounded-lg bg-[#08090a] border border-white/[0.08] text-right">
-            <p className="text-[9px] font-mono uppercase text-[#8A8F98]">Marks Awarded</p>
+            <p className="text-[9px] font-mono uppercase text-[#8A8F98]">Score</p>
             <p className="text-sm font-mono font-semibold text-[#E59934] tabular-nums">5.0 / 10.0</p>
           </div>
 
@@ -293,7 +291,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
             onClick={onNavigateToRecovery}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all shadow-[0_2px_8px_rgba(94,106,210,0.3)]"
           >
-            <span>Recovery Map</span>
+            <span>See Action Plan</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -310,7 +308,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
           }`}
         >
           <GitCompare className="w-3.5 h-3.5" />
-          <span>Step-by-Step Diff & Socratic Copilot</span>
+          <span>Step-by-Step Comparison & AI Tutor</span>
         </button>
 
         <button
@@ -322,25 +320,25 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
           }`}
         >
           <PieChart className="w-3.5 h-3.5" />
-          <span>Cognitive Error Fingerprint</span>
+          <span>Why You Lose Marks (Error Patterns)</span>
         </button>
       </div>
 
-      {/* TAB 1: SIDE-BY-SIDE STEP DIFF & SOCRATIC COPILOT */}
+      {/* TAB 1: SIDE-BY-SIDE STEP DIFF & AI TUTOR */}
       {activeTab === 'step_diff' && (
         <div className="space-y-4">
-          {/* Divergence Notification Banner */}
+          {/* Mistake Found Callout Banner */}
           <div className="p-3.5 rounded-xl bg-[#121316] border-l-2 border-l-[#E59934] border border-white/[0.08] flex items-start space-x-3">
             <AlertTriangle className="w-4 h-4 text-[#E59934] shrink-0 mt-0.5" />
             <div className="flex-1 text-xs">
               <div className="flex items-center space-x-2">
-                <span className="font-medium text-[#F7F8F8]">Divergence Point: Step 3</span>
+                <span className="font-medium text-[#F7F8F8]">Mistake Found in Step 3</span>
                 <span className="px-1.5 py-0.5 rounded bg-[#E59934]/15 text-[#E59934] font-mono text-[10px]">
-                  Procedural Calculation (Sign Inversion)
+                  Minus Sign Distribution Slip
                 </span>
               </div>
               <p className="text-[#8A8F98] mt-1 leading-relaxed text-[11px]">
-                Integration method selection was correct. Divergence was triggered when distributing the negative sign across nested inner brackets during the second iteration.
+                Your method selection was correct. The mistake happened when multiplying the outer negative sign across the inner bracket during the second iteration.
               </p>
             </div>
           </div>
@@ -348,19 +346,19 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
           {cropConfirmedAlert && (
             <div className="p-2.5 rounded-lg bg-[#27C57E]/10 border border-[#27C57E]/20 flex items-center space-x-2 text-xs text-[#27C57E]">
               <CheckCircle className="w-3.5 h-3.5" />
-              <span>OCR crop verification locked: &ldquo;{confirmedCropValue}&rdquo; confirmed.</span>
+              <span>Handwriting confirmed as &ldquo;{confirmedCropValue}&rdquo;.</span>
             </div>
           )}
 
-          {/* Main Grid: Diff on Left (7 cols), Socratic Chat on Right (5 cols) */}
+          {/* Main Grid: Steps on Left (7 cols), AI Tutor on Right (5 cols) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Step Diff Table */}
+            {/* Step Comparison Table */}
             <div className="lg:col-span-7 space-y-3">
               <div className="flex items-center justify-between px-1">
                 <span className="text-[10px] font-mono uppercase tracking-wider text-[#8A8F98]">
-                  Derivation Verification ({steps.length} Steps)
+                  Step Comparison ({steps.length} Steps)
                 </span>
-                <span className="text-[11px] text-[#8A8F98]">Select a step to inspect</span>
+                <span className="text-[11px] text-[#8A8F98]">Click a step to ask the AI Tutor</span>
               </div>
 
               <div className="space-y-2">
@@ -389,17 +387,17 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                           <span className="font-mono text-xs font-semibold text-[#8A8F98]">Step {s.index}</span>
                           {isSatisfied && (
                             <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#27C57E]/10 text-[#27C57E] border border-[#27C57E]/20">
-                              <CheckCircle2 className="w-3 h-3" /> Satisfied (+{s.marksAwarded} M)
+                              <CheckCircle2 className="w-3 h-3" /> Correct (+{s.marksAwarded} M)
                             </span>
                           )}
                           {isDiverged && (
                             <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#E59934]/15 text-[#E59934] border border-[#E59934]/30">
-                              <XCircle className="w-3 h-3" /> Diverged (0/{s.marksPossible} M)
+                              <XCircle className="w-3 h-3" /> Mistake Here (0/{s.marksPossible} M)
                             </span>
                           )}
                           {isCarried && (
                             <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#EB5757]/10 text-[#EB5757] border border-[#EB5757]/20">
-                              <AlertTriangle className="w-3 h-3" /> Carried Error (+{s.marksAwarded} M)
+                              <AlertTriangle className="w-3 h-3" /> Consequential Error (+{s.marksAwarded} M)
                             </span>
                           )}
                         </div>
@@ -413,36 +411,36 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                                 title: s.citedSourceTitle || 'Prof Kapoor Lecture Notes — Module 2',
                                 slide: s.citedSlide!,
                                 quote: 'Pitfall Alert: When repeating integration by parts, always enclose the entire second iteration in brackets before distributing the outer minus sign.',
-                                tip: 'Review Slide 19: Check bracket distribution.',
-                                matchedTrap: 'Sign Inversion in Second Integration by Parts',
+                                tip: 'Keep outer brackets intact until every inner term is integrated.',
+                                matchedTrap: 'Sign Inversion in Second Iteration',
                               });
                             }}
                             className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-[#5E6AD2]/10 text-[#5E6AD2] border border-[#5E6AD2]/30 hover:bg-[#5E6AD2]/20 transition-all"
                           >
                             <BookOpen className="w-3 h-3" />
-                            <span>Slide {s.citedSlide}</span>
+                            <span>Lecture Slide {s.citedSlide}</span>
                             <ExternalLink className="w-2.5 h-2.5 opacity-70" />
                           </button>
                         )}
                       </div>
 
-                      {/* Work Grid */}
+                      {/* Work Comparison */}
                       <div className="space-y-2 text-xs">
                         <div>
                           <span className="text-[10px] font-mono uppercase text-[#8A8F98]">
-                            Student Written Step:
+                            What You Wrote:
                           </span>
                           <div className="mt-1 p-2 rounded bg-[#08090a] border border-white/[0.06] font-mono text-xs text-[#F7F8F8]">
                             {s.submitted}
                           </div>
                         </div>
 
-                        {/* OCR Uncertainty Crop trigger for Step 3 */}
+                        {/* Handwriting Check trigger for Step 3 */}
                         {isDiverged && (
                           <div className="mt-2 p-2.5 rounded-lg bg-[#08090a] border border-[#E59934]/30 flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                               <Eye className="w-3.5 h-3.5 text-[#E59934]" />
-                              <span className="text-[11px] text-[#8A8F98]">Handwriting Ambiguity:</span>
+                              <span className="text-[11px] text-[#8A8F98]">Handwriting Check:</span>
                               <span className="font-mono text-[11px] text-[#E59934] font-semibold">{confirmedCropValue}</span>
                             </div>
                             <button
@@ -452,14 +450,14 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                               }}
                               className="px-2 py-0.5 rounded text-[10px] font-mono bg-[#E59934]/15 hover:bg-[#E59934]/25 text-[#E59934] border border-[#E59934]/30 transition-all"
                             >
-                              Verify Crop
+                              Confirm Handwriting
                             </button>
                           </div>
                         )}
 
                         <div>
                           <span className="text-[10px] font-mono uppercase text-[#8A8F98]">
-                            Rubric Model Requirement:
+                            Model Solution:
                           </span>
                           <div className="mt-1 p-2 rounded bg-[#08090a] border border-white/[0.06] font-mono text-xs text-[#8A8F98]">
                             {s.expected}
@@ -479,15 +477,16 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
               </div>
             </div>
 
-            {/* Right Column: Socratic Copilot Drawer */}
+            {/* Right Column: AI Study Tutor Drawer */}
             <div className="lg:col-span-5 rounded-xl bg-[#121316] border border-white/[0.08] flex flex-col h-[650px] overflow-hidden">
               <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <MessageSquareCode className="w-4 h-4 text-[#5E6AD2]" />
-                  <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Socratic Copilot</h3>
+                  <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">AI Study Tutor</h3>
                 </div>
-                <span className="text-[10px] font-mono text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded">
-                  Grounded in RAG
+                <span className="text-[10px] text-[#27C57E] flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#27C57E]" />
+                  Grounded in Slides
                 </span>
               </div>
 
@@ -517,7 +516,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                 ))}
                 {isAiReplying && (
                   <div className="p-2.5 rounded-lg bg-[#08090a] border border-white/[0.06] text-xs text-[#8A8F98] animate-pulse">
-                    Synthesizing pedagogical step guidance...
+                    Tutor is explaining the step...
                   </div>
                 )}
               </div>
@@ -542,7 +541,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSendChat()}
-                  placeholder="Ask why Step 3 failed..."
+                  placeholder="Ask the tutor why Step 3 failed..."
                   className="flex-1 bg-[#121316] border border-white/[0.08] focus:border-[#5E6AD2] rounded-lg px-3 py-2 text-xs text-[#F7F8F8] outline-none"
                 />
                 <button
@@ -558,7 +557,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
         </div>
       )}
 
-      {/* TAB 2: COGNITIVE ERROR FINGERPRINT */}
+      {/* TAB 2: ERROR PATTERNS FINGERPRINT */}
       {activeTab === 'fingerprint' && (
         <ErrorFingerprint
           courseId="course_calc_301"
@@ -568,13 +567,13 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
         />
       )}
 
-      {/* Crop Uncertainty Selector Modal */}
+      {/* Handwriting Crop Check Modal */}
       {showCropSelector && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#121316] border border-white/[0.1] rounded-xl max-w-md w-full p-5 shadow-2xl">
-            <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Verify Handwriting Crop</h3>
+            <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Confirm Handwriting</h3>
             <p className="text-xs text-[#8A8F98] mt-1">
-              VLM flagged confidence of 0.74 on minus sign. Select the confirmed value:
+              Please select which expression matches what you wrote on paper:
             </p>
             <div className="mt-4 space-y-2">
               {['-2x cos(x)', '+2x cos(x)', '-(2x) cos(x)'].map((opt) => (
@@ -603,7 +602,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#121316] border border-white/[0.1] rounded-xl max-w-lg w-full p-5 shadow-2xl">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-              <span className="text-xs font-mono text-[#5E6AD2]">Slide {activeCitationModal.slide} Citation</span>
+              <span className="text-xs font-mono text-[#5E6AD2]">Lecture Slide {activeCitationModal.slide}</span>
               <button onClick={() => setActiveCitationModal(null)} className="text-[#8A8F98] hover:text-white text-xs">Close</button>
             </div>
             <h4 className="text-sm font-medium text-[#F7F8F8] mt-3">{activeCitationModal.title}</h4>
@@ -611,17 +610,18 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
               &ldquo;{activeCitationModal.quote}&rdquo;
             </div>
             {activeCitationModal.tip && (
-              <p className="text-xs text-[#27C57E] mt-3">Tip: {activeCitationModal.tip}</p>
+              <p className="text-xs text-[#27C57E] mt-3">Professor&apos;s Advice: {activeCitationModal.tip}</p>
             )}
           </div>
         </div>
       )}
 
-      {/* Test Derivation Modal */}
+      {/* Test Solution Modal */}
       {showAnalyzeModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#121316] border border-white/[0.1] rounded-xl max-w-lg w-full p-5 shadow-2xl">
-            <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Test Custom Derivation</h3>
+            <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Test Your Solution</h3>
+            <p className="text-xs text-[#8A8F98] mt-1">Paste your steps to see if the mistake is resolved:</p>
             <textarea
               value={modalInputWork}
               onChange={(e) => setModalInputWork(e.target.value)}
@@ -635,7 +635,7 @@ export const ForensicsPage: React.FC<ForensicsPageProps> = ({ onNavigateToRecove
                 disabled={isAnalyzing}
                 className="px-3 py-1.5 rounded-lg bg-[#5E6AD2] text-xs font-medium text-white"
               >
-                {isAnalyzing ? 'Analyzing...' : 'Run Divergence Detector'}
+                {isAnalyzing ? 'Checking...' : 'Check My Steps'}
               </button>
             </div>
           </div>

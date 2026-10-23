@@ -155,16 +155,16 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded border border-[#27C57E]/20">
-              Stage 7 • Reassessment & Twin Lock-In
+              Skill Verification • Earn Back Marks
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">Skill #{skillId}</span>
+            <span className="text-xs font-mono text-[#8A8F98]">Practice Problem</span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-[#27C57E]" />
-            Remediation Verification Drill
+            Practice Problem & Verification
           </h1>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Solve this isomorphic problem to mathematically update your Bayesian Twin and recover marks.
+            Solve this practice question correctly to earn back marks and update your exam readiness.
           </p>
         </div>
 
@@ -174,14 +174,14 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
               onClick={onReturnToRecovery}
               className="px-3 py-1.5 rounded-lg bg-[#08090a] hover:bg-white/[0.04] text-[#F7F8F8] text-xs font-medium border border-white/[0.08] transition-all"
             >
-              Back to Roadmap
+              Back to Study Plan
             </button>
           )}
           <button
             onClick={onReturnToDashboard}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all shadow-[0_2px_8px_rgba(94,106,210,0.3)]"
           >
-            <span>Mission Control</span>
+            <span>Back to Dashboard</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -189,18 +189,18 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
 
       {/* Main Grid: Problem on Left (5 cols), Editor on Right (7 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Isomorphic Question */}
+        {/* Left Column: Practice Question */}
         <div className="lg:col-span-5 space-y-3">
           <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08] space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-              <span className="text-xs font-mono uppercase text-[#F7F8F8]">Isomorphic Problem</span>
+              <span className="text-xs font-mono uppercase text-[#F7F8F8]">Practice Exam Question</span>
               <span className="text-[10px] font-mono text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded">
                 +{question?.maximum_marks || 10} Marks
               </span>
             </div>
 
             {isLoadingQuestion ? (
-              <div className="py-8 text-center text-xs text-[#8A8F98]">Loading isomorphic drill...</div>
+              <div className="py-8 text-center text-xs text-[#8A8F98]">Loading practice drill...</div>
             ) : (
               <div className="space-y-3">
                 <div className="p-3.5 rounded-lg bg-[#08090a] border border-white/[0.06] font-mono text-xs text-[#F7F8F8] leading-relaxed">
@@ -209,7 +209,7 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
 
                 <div>
                   <span className="text-[10px] font-mono uppercase text-[#8A8F98] block mb-1.5">
-                    Model Marking Rubric:
+                    Official Rubric Steps:
                   </span>
                   <div className="space-y-1">
                     {question?.rubric_steps.map((step, idx) => (
@@ -232,7 +232,7 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
         <div className="lg:col-span-7 space-y-3">
           <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08] space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-              <span className="text-xs font-mono uppercase text-[#F7F8F8]">Your Mathematical Derivation</span>
+              <span className="text-xs font-mono uppercase text-[#F7F8F8]">Your Step-by-Step Solution</span>
               <button
                 onClick={handlePreFillSample}
                 className="text-[11px] font-mono text-[#5E6AD2] hover:underline"
@@ -257,13 +257,13 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
             />
 
             <div className="flex items-center justify-between pt-2">
-              <span className="text-[11px] text-[#8A8F98]">Submitting updates your personal Learning Twin in SQLite</span>
+              <span className="text-[11px] text-[#8A8F98]">Your solution is automatically checked against the exam rubric</span>
               <button
                 onClick={handleVerify}
                 disabled={isVerifying}
                 className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-[#27C57E] hover:bg-[#20A668] text-[#08090a] text-xs font-semibold transition-all shadow-[0_2px_8px_rgba(39,197,126,0.3)] disabled:opacity-50"
               >
-                <span>{isVerifying ? 'Evaluating Solution...' : 'Verify & Lock In Twin'}</span>
+                <span>{isVerifying ? 'Checking Solution...' : 'Submit & Check Solution'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>

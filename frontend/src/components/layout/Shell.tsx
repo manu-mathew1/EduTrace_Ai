@@ -12,7 +12,8 @@ import {
   ChevronDown,
   ChevronRight,
   Activity,
-  User
+  User,
+  GraduationCap
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -30,43 +31,44 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
 
   const navItems = [
     { id: 'dashboard', label: 'Overview', icon: Compass, key: '1' },
-    { id: 'ingestion', label: 'Ingestion', icon: UploadCloud, key: '2' },
-    { id: 'intake', label: 'Intake Probe', icon: MessageSquareCode, key: '3' },
-    { id: 'forensics', label: 'Step-Diff', icon: GitCompare, key: '4' },
-    { id: 'recovery', label: 'Recovery ROI', icon: TrendingUp, key: '5' },
-    { id: 'studio', label: 'Studio', icon: Sparkles, key: '6' },
-    { id: 'reassessment', label: 'Verify Drill', icon: ShieldCheck, key: '7' },
+    { id: 'ingestion', label: 'Materials', icon: UploadCloud, key: '2' },
+    { id: 'intake', label: 'Diagnostic Check', icon: MessageSquareCode, key: '3' },
+    { id: 'forensics', label: 'Step Analysis', icon: GitCompare, key: '4' },
+    { id: 'recovery', label: 'Action Plan', icon: TrendingUp, key: '5' },
+    { id: 'studio', label: 'Study Studio', icon: Sparkles, key: '6' },
+    { id: 'reassessment', label: 'Skill Check', icon: ShieldCheck, key: '7' },
   ];
 
   const currentTabLabel = navItems.find((item) => item.id === currentTab)?.label || 'Overview';
+  const courseTitle = user?.primary_course_id === 'course_econ_macro' ? 'Macroeconomics 202' : 'Calculus III (MATH-301)';
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08090a] text-[#F7F8F8] font-sans antialiased selection:bg-[#5E6AD2]/30 selection:text-white">
-      {/* Linear Low-Profile Header (48px height) */}
+      {/* Low-Profile Student Header (48px height) */}
       <header className="h-12 border-b border-white/[0.08] bg-[#08090a]/80 backdrop-blur-md sticky top-0 z-50 flex items-center px-4 justify-between transition-all">
-        {/* Left: Brand & Linear Breadcrumbs */}
+        {/* Left: Brand & Course Context */}
         <div className="flex items-center space-x-3">
           <button 
             onClick={() => onSelectTab('dashboard')}
             className="flex items-center space-x-2 text-white hover:opacity-80 transition-opacity focus:outline-none"
           >
             <div className="w-6 h-6 rounded-md bg-[#5E6AD2] flex items-center justify-center shadow-[0_0_12px_rgba(94,106,210,0.4)]">
-              <BrainCircuit className="w-3.5 h-3.5 text-white" />
+              <GraduationCap className="w-3.5 h-3.5 text-white" />
             </div>
             <span className="font-semibold text-sm tracking-tight text-[#F7F8F8]">EduTrace</span>
           </button>
 
           <span className="text-white/20 text-xs font-mono">/</span>
 
-          {/* Breadcrumb Workspace Indicator */}
+          {/* Student Breadcrumb */}
           <div className="hidden sm:flex items-center space-x-1.5 text-xs text-[#8A8F98]">
-            <span className="hover:text-white transition-colors cursor-default">Calculus 301</span>
+            <span className="hover:text-white transition-colors cursor-default">{courseTitle}</span>
             <ChevronRight className="w-3 h-3 text-white/30" />
             <span className="text-[#F7F8F8] font-medium">{currentTabLabel}</span>
           </div>
         </div>
 
-        {/* Center: Linear Segmented Navigation */}
+        {/* Center: Simplified Navigation */}
         <nav className="hidden md:flex items-center space-x-1 bg-[#121316] p-0.5 rounded-lg border border-white/[0.06]">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -91,13 +93,13 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
           })}
         </nav>
 
-        {/* Right: Telemetry Badge, Persona Switcher & Account */}
+        {/* Right: Readiness Badge & Student Profile */}
         <div className="flex items-center space-x-2.5">
-          {/* Linear Status Pill */}
+          {/* Student-Facing Readiness Pill */}
           <div className="hidden lg:flex items-center space-x-2 px-2.5 py-1 rounded-full bg-[#121316] border border-white/[0.08] text-xs">
             <span className="w-1.5 h-1.5 rounded-full bg-[#27C57E] shadow-[0_0_8px_rgba(39,197,126,0.6)]" />
-            <span className="text-[#8A8F98] text-[11px]">Twin Belief:</span>
-            <span className="font-mono text-[11px] font-semibold text-[#27C57E]">58.5%</span>
+            <span className="text-[#8A8F98] text-[11px]">Exam Readiness:</span>
+            <span className="font-mono text-[11px] font-semibold text-[#27C57E]">68%</span>
           </div>
 
           {/* Persona Menu Trigger */}
@@ -110,7 +112,7 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
                 {user?.avatar_url ? (
                   <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
-                  user?.name?.charAt(0) || 'U'
+                  user?.name?.charAt(0) || 'S'
                 )}
               </div>
               <span className="hidden sm:inline text-xs font-medium text-[#F7F8F8] max-w-[90px] truncate">
@@ -119,11 +121,11 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
               <ChevronDown className="w-3 h-3 text-[#8A8F98]" />
             </button>
 
-            {/* Linear Persona Switcher Dropdown */}
+            {/* Persona Switcher Dropdown */}
             {showPersonaMenu && (
               <div className="absolute right-0 top-10 w-64 rounded-xl bg-[#121316] border border-white/[0.1] shadow-2xl p-1.5 z-50 animate-fadeIn">
                 <div className="px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-[#8A8F98]">
-                  Switch Student Twin
+                  Switch Demo Account
                 </div>
                 <div className="space-y-0.5 my-1">
                   {personas.map((p) => {
@@ -182,23 +184,17 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
         {children}
       </main>
 
-      {/* Linear Low-Profile Status Bar */}
-      <footer className="border-t border-white/[0.06] bg-[#08090a] py-2.5 text-[11px] text-[#8A8F98]">
+      {/* Clean Student-Facing Footer */}
+      <footer className="border-t border-white/[0.06] bg-[#08090a] py-3 text-[11px] text-[#8A8F98]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center space-x-3">
-            <span className="inline-flex items-center gap-1.5 text-white/70">
-              <Activity className="w-3 h-3 text-[#27C57E]" />
-              <span>Multi-Worker Cluster Active</span>
-            </span>
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 rounded-full bg-[#27C57E]" />
+            <span className="text-[#F7F8F8]">EduTrace AI</span>
             <span className="text-white/20">•</span>
-            <span className="font-mono text-white/50">4 Workers (Uvicorn)</span>
-            <span className="text-white/20">•</span>
-            <span>SQLite Master DB</span>
+            <span>Personalized Academic Diagnostic & Mastery Platform</span>
           </div>
-          <div className="flex items-center space-x-3 font-mono text-[10px] text-white/40">
-            <span>Team Cognix</span>
-            <span>•</span>
-            <span>EduTrace v1.0 Enterprise</span>
+          <div className="text-white/50 text-[11px]">
+            Target Exam Date: Oct 28 • All progress automatically saved
           </div>
         </div>
       </footer>

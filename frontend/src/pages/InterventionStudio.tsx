@@ -186,16 +186,16 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded border border-[#27C57E]/20">
-              Stage 5 & 6 • Recovery ROI & Studio
+              Score Booster • Interactive Studio
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">MATH 301</span>
+            <span className="text-xs font-mono text-[#8A8F98]">Calculus III</span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-[#27C57E]" />
-            Marks Recovery Map & Multimodal Studio
+            Score Booster & Study Studio
           </h1>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Prioritizes high-yield remediation to bridge baseline (52%) to target (75%).
+            Targets the highest-impact topics so you can gain the most marks with the least study time.
           </p>
         </div>
 
@@ -207,7 +207,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
                 viewMode === 'recovery' ? 'bg-white/[0.08] text-white' : 'text-[#8A8F98] hover:text-white'
               }`}
             >
-              5. Recovery Map
+              Action Plan
             </button>
             <button
               onClick={() => { setViewMode('studio'); onNavigateToStudio?.(); }}
@@ -215,7 +215,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
                 viewMode === 'studio' ? 'bg-white/[0.08] text-white' : 'text-[#8A8F98] hover:text-white'
               }`}
             >
-              6. Studio
+              Practice Lessons
             </button>
             <button
               onClick={() => setViewMode('all')}
@@ -223,12 +223,12 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
                 viewMode === 'all' ? 'bg-white/[0.08] text-white' : 'text-[#8A8F98] hover:text-white'
               }`}
             >
-              Unified
+              Show All
             </button>
           </div>
 
           <div className="px-3 py-1.5 rounded-lg bg-[#08090a] border border-white/[0.08] text-right">
-            <p className="text-[9px] font-mono uppercase text-[#8A8F98]">Total Recoverable</p>
+            <p className="text-[9px] font-mono uppercase text-[#8A8F98]">Marks to Recover</p>
             <p className="text-xs font-mono font-semibold text-[#27C57E] tabular-nums">+19.0 Marks</p>
           </div>
 
@@ -239,14 +239,14 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
         </div>
       </div>
 
-      {/* STAGE 5: RECOVERY ROADMAP TABLE */}
+      {/* RECOVERY ROADMAP TABLE */}
       {(viewMode === 'recovery' || viewMode === 'all') && (
         <div className="rounded-xl bg-[#121316] border border-white/[0.08] overflow-hidden">
           <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
             <span className="text-xs font-mono uppercase text-[#F7F8F8]">
-              Remediation Priority Roadmap (Ranked by ROI)
+              Topics Ranked by Exam Score Impact
             </span>
-            <span className="text-[11px] font-mono text-[#8A8F98]">Click row to load Studio</span>
+            <span className="text-[11px] font-mono text-[#8A8F98]">Click row to open interactive lesson</span>
           </div>
 
           <div className="divide-y divide-white/[0.04]">
@@ -264,15 +264,15 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
                   }`}
                 >
                   <div className="flex items-center space-x-3 min-w-0 flex-1 pr-4">
-                    <span className="font-mono text-xs font-semibold text-[#8A8F98]">P{item.rank}</span>
+                    <span className="font-mono text-xs font-semibold text-[#8A8F98]">#{item.rank}</span>
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-[#F7F8F8] truncate">{item.name}</p>
                       <div className="flex items-center gap-2 mt-0.5 text-[10px] font-mono text-[#8A8F98]">
                         <span className="text-[#E59934]">{item.errorType}</span>
                         <span>•</span>
-                        <span>Weight: {item.examWeight}%</span>
+                        <span>Exam Weight: {item.examWeight}%</span>
                         <span>•</span>
-                        <span>Time: {item.timeMins}m</span>
+                        <span>Est. Time: {item.timeMins}m</span>
                       </div>
                     </div>
                   </div>
@@ -290,7 +290,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
                       }}
                       className="px-2.5 py-1 rounded bg-white/[0.06] hover:bg-white/[0.12] text-[11px] text-[#F7F8F8] transition-all flex items-center gap-1"
                     >
-                      <span>Studio</span>
+                      <span>Open Lesson</span>
                       <ChevronRight className="w-3 h-3" />
                     </button>
                   </div>
@@ -301,13 +301,13 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
         </div>
       )}
 
-      {/* STAGE 6: MULTIMODAL STUDIO PLAYER */}
+      {/* MULTIMODAL STUDIO PLAYER */}
       {(viewMode === 'studio' || viewMode === 'all') && (
         <div className="rounded-xl bg-[#121316] border border-white/[0.08] overflow-hidden space-y-4 p-5">
           {/* Studio Navigation & Modality Tabs */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
             <div>
-              <span className="text-[10px] font-mono uppercase text-[#5E6AD2]">Active Learning Unit</span>
+              <span className="text-[10px] font-mono uppercase text-[#5E6AD2]">Current Topic</span>
               <h3 className="text-sm font-semibold text-[#F7F8F8] mt-0.5">
                 {studioContent?.skill_name || 'Integration by Parts: Bracket Sign Distribution'}
               </h3>
@@ -320,7 +320,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
                   activeTab === 'flowchart' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-[#8A8F98] hover:text-white'
                 }`}
               >
-                1. Flowchart
+                1. Decision Flowchart
               </button>
               <button
                 onClick={() => setActiveTab('bug')}
@@ -336,7 +336,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
                   activeTab === 'analogy' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-[#8A8F98] hover:text-white'
                 }`}
               >
-                3. Analogy
+                3. Concept Analogy
               </button>
               <button
                 onClick={() => setActiveTab('audio')}
@@ -344,28 +344,86 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
                   activeTab === 'audio' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-[#8A8F98] hover:text-white'
                 }`}
               >
-                4. 60s Audio
+                4. 60s Audio Recap
               </button>
             </div>
           </div>
 
           {/* TAB 1: FLOWCHART */}
           {activeTab === 'flowchart' && (
-            <div className="p-4 rounded-xl bg-[#08090a] border border-white/[0.06] space-y-3">
+            <div className="p-4 rounded-xl bg-[#08090a] border border-white/[0.06] space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase text-[#F7F8F8]">Decision Tree • Canonical Flowchart</span>
-                <span className="text-[10px] font-mono text-[#8A8F98]">Mermaid Syntax Engine</span>
+                <div>
+                  <span className="text-xs font-mono uppercase text-[#F7F8F8]">Visual Decision Guide</span>
+                  <p className="text-xs text-[#8A8F98] mt-0.5">Follow this sequence during your exam to avoid losing marks on by-parts.</p>
+                </div>
+                <span className="text-[10px] font-mono text-[#27C57E] bg-[#27C57E]/10 px-2 py-0.5 rounded border border-[#27C57E]/20">
+                  Golden Rule
+                </span>
               </div>
-              <div className="p-4 rounded-lg bg-[#121316] border border-white/[0.06] font-mono text-xs text-[#27C57E] whitespace-pre overflow-x-auto">
-{studioContent?.flowchart_mermaid_code || `graph TD
-  A[Evaluate Integral] --> B{Product of Two Unlike Functions?}
-  B -->|Yes| C[Apply Integration by Parts: uv - ∫v du]
-  B -->|No| D[Check Substitution or Standard Form]
-  C --> E[First Iteration: Set u = x^2, dv = cos x dx]
-  E --> F{Second Iteration Needed?}
-  F -->|Yes| G[CRITICAL: Enclose entire 2nd iteration in [ brackets ]]
-  G --> H[Distribute Outer Minus Sign: - [ -2x cos x + 2 sin x ]]
-  H --> I[Result: +2x cos x - 2 sin x + C]`}
+
+              {/* Visual Step-by-Step Flow Cards */}
+              <div className="space-y-3">
+                <div className="p-3 rounded-lg bg-[#121316] border border-white/[0.06] flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#5E6AD2]/20 text-[#5E6AD2] font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    1
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-semibold text-[#F7F8F8]">Check Problem Type</h4>
+                    <p className="text-xs text-[#8A8F98] mt-0.5">
+                      Does the integrand contain a product of two distinct functions (e.g. algebraic $x^2$ and trigonometric $\cos x$)? If yes, use Integration by Parts: $\int u \, dv = uv - \int v \, du$.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-[#121316] border border-white/[0.06] flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#5E6AD2]/20 text-[#5E6AD2] font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    2
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-semibold text-[#F7F8F8]">First Iteration Setup</h4>
+                    <p className="text-xs text-[#8A8F98] mt-0.5">
+                      Choose $u = x^2$ (differentiates to lower degree) and $dv = \cos(x)\, dx$. This gives:
+                      <span className="block mt-1 font-mono text-[11px] text-[#27C57E]">
+                        $x^2 \sin(x) - \int 2x \sin(x) \, dx$
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-[#E59934]/10 border border-[#E59934]/30 flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#E59934]/20 text-[#E59934] font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    3
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-semibold text-[#F7F8F8]">Critical Checkpoint: Second Iteration Brackets</h4>
+                      <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#E59934]/20 text-[#E59934]">High Trap Risk</span>
+                    </div>
+                    <p className="text-xs text-[#8A8F98] mt-0.5 leading-relaxed">
+                      Before evaluating $\int 2x \sin(x) \, dx$, immediately write an outer bracket:
+                      <span className="block mt-1 font-mono text-[11px] text-[#E59934]">
+                        {'= x² sin(x) - [ (second by-parts result) ]'}
+                      </span>
+                      Leaving out the brackets causes a minus sign flip that loses full marks!
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-[#121316] border border-white/[0.06] flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#5E6AD2]/20 text-[#5E6AD2] font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">
+                    4
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-semibold text-[#F7F8F8]">Distribute Outer Minus Sign & Finalize</h4>
+                    <p className="text-xs text-[#8A8F98] mt-0.5">
+                      Multiply the outer negative sign into every inner term:
+                      <span className="block mt-1 font-mono text-[11px] text-[#27C57E]">
+                        $= x^2 \sin(x) - [ -2x \cos(x) + 2 \sin(x) ] = x^2 \sin(x) + 2x \cos(x) - 2 \sin(x) + C$
+                      </span>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -467,14 +525,14 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
             </div>
           )}
 
-          {/* Bottom Action: Proceed to Reassessment Drill */}
+          {/* Bottom Action: Proceed to Practice Drill */}
           <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-            <span className="text-xs text-[#8A8F98]">Ready to verify your recovery?</span>
+            <span className="text-xs text-[#8A8F98]">Ready to test your understanding?</span>
             <button
               onClick={onNavigateToReassessment}
               className="flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-[#27C57E] hover:bg-[#20A668] text-[#08090a] text-xs font-semibold transition-all shadow-[0_2px_8px_rgba(39,197,126,0.3)]"
             >
-              <span>Take Isomorphic Verification Drill</span>
+              <span>Take Quick Practice Test (+8 Marks)</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>

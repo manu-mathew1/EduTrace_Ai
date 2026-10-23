@@ -41,7 +41,7 @@ const DEFAULT_QUESTIONS: Question[] = [
     id: 'probe_q1',
     text: 'Evaluate the integrals: ∫ (x / (1 + x²)) dx  vs  ∫ (1 / (1 + x²)) dx',
     skill: 'Method Selection: Substitution vs Arctan Form',
-    trap: 'Tests whether student impulsively applies u-substitution to both or spots standard form',
+    trap: 'Check whether to apply u-substitution or recognize standard arctan form',
     time: 3,
     marks: 5,
   },
@@ -49,15 +49,15 @@ const DEFAULT_QUESTIONS: Question[] = [
     id: 'probe_q2',
     text: 'Evaluate using Integration by Parts: ∫ x² e^(-x) dx',
     skill: 'Bracket Sign Inversion & Multi-Iteration Distribution',
-    trap: 'Tests repeated minus sign distribution across brackets in second iteration',
+    trap: 'Watch for negative sign distribution across inner brackets during the 2nd iteration',
     time: 4,
     marks: 10,
   },
   {
     id: 'probe_q3',
     text: 'Evaluate ∫_{-1}^{1} (1 / x²) dx. Is the standard power rule directly applicable?',
-    skill: 'Conceptual Boundary & Discontinuity Check',
-    trap: 'Tests if student blindly computes [-1/x] or notices infinite discontinuity at x=0',
+    skill: 'Checking Discontinuities & Boundaries',
+    trap: 'Notice the vertical asymptote / infinite discontinuity at x = 0',
     time: 3,
     marks: 5,
   },
@@ -68,7 +68,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
     {
       role: 'assistant',
       content:
-        'Hello Rahul! Welcome to Stage 2: Metacognitive Intake. I analyzed your Calculus III syllabus and target goal of 75%. To calibrate your diagnostic, what topics feel like major friction points right now?',
+        'Hello Rahul! Let’s set up your study plan for Calculus III. You’re aiming for 75% on the upcoming midterm. What topics or problem types feel trickiest right now?',
     },
   ]);
   const [input, setInput] = useState('');
@@ -77,26 +77,24 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
   const [activeTab, setActiveTab] = useState<'consultation' | 'probe'>('consultation');
   const [diagnosticMode, setDiagnosticMode] = useState<'mode_a' | 'mode_b'>('mode_a');
   const [confirmedCropValue, setConfirmedCropValue] = useState<string>('-2x cos(x)');
-  const [isCropConfirmed, setIsCropConfirmed] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [targetScore, setTargetScore] = useState<number>(75);
   const [timelineDays, setTimelineDays] = useState<number>(5);
   const [frictionSkills, setFrictionSkills] = useState<string[]>([
     'Integration by Parts: Bracket Sign Distribution',
-    'Method Selection: Substitution vs Arctan Form',
+    'Method Choice: Substitution vs Arctan Form',
   ]);
   const [suggestedChips, setSuggestedChips] = useState<string[]>([
     "I'm aiming for 75+",
     "Have 5 days left",
-    "Bracket sign mistakes in parts",
-    "Method selection: substitution vs parts",
-    "Integrating factor in linear ODEs",
+    "Bracket sign mistakes in by-parts",
+    "Knowing when to use substitution vs parts",
   ]);
   const [questions, setQuestions] = useState<Question[]>(DEFAULT_QUESTIONS);
   const [userAnswers, setUserAnswers] = useState<Record<string, string>>({
     probe_q1: 'Part 1: u = 1+x^2, du = 2xdx => (1/2)ln|1+x^2|. Part 2: arctan(x) + C',
     probe_q2: 'Step 1: u=x^2, dv=cos(x)dx => x^2 sin(x) - ∫ 2x sin(x) dx\nStep 2: = x^2 sin(x) - [ -2x cos(x) - ∫ -2cos(x) dx ]\nStep 3: = x^2 sin(x) + 2x cos(x) - 2sin(x)',
-    probe_q3: '[-1/x] from -1 to 1 = -1 - (1) = -2 (Wait, is x=0 a discontinuity?)',
+    probe_q3: '[-1/x] from -1 to 1 = -1 - (1) = -2 (Wait, x=0 has a vertical asymptote)',
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -134,12 +132,12 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
       setTimelineDays(5);
       setFrictionSkills([
         'Integration by Parts: Bracket Sign Distribution',
-        'Method Selection: Substitution vs Arctan Form',
+        'Method Choice: Substitution vs Arctan Form',
       ]);
       setMessages([
         {
           role: 'assistant',
-          content: 'Hello Rahul! Welcome to Stage 2: Metacognitive Intake. I analyzed your Calculus III syllabus and target goal of 75%. To calibrate your diagnostic, what topics feel like major friction points right now?',
+          content: 'Hello Rahul! Let’s set up your study plan for Calculus III. You’re aiming for 75% on the upcoming midterm. What topics or problem types feel trickiest right now?',
         },
         {
           role: 'user',
@@ -147,13 +145,12 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         },
         {
           role: 'assistant',
-          content: 'Target of 75% (+25 marks gap) and 5-day runway locked in! Sign distribution across nested brackets in repeated integration by parts accounts for 15% of lost marks in past exams. I have calibrated your Mode A "10-Minute Diagnostic Probe" with 3 calibrated hinge questions. Ready to solve?',
+          content: 'Target of 75% (+25 marks gap) and 5-day runway locked in! Sign mistakes when distributing outer negatives across inner brackets account for up to 15% of lost marks on midterm papers. I have prepared a quick 3-question checkup. Ready to start?',
         },
       ]);
       setSuggestedChips([
-        'Launch Mode A 10-Minute Probe',
-        'Review Question 2: Repeated By-Parts',
-        'Switch to Mode B: Exam Paper Autopsy',
+        'Start 10-Minute Checkup',
+        'Review Repeated By-Parts',
       ]);
       setIsConsultComplete(true);
     } finally {
@@ -181,23 +178,6 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
     } finally {
       setIsSubmitting(false);
       onNavigateToForensics();
-    }
-  };
-
-  const handleConfirmCrop = async (val: string) => {
-    setConfirmedCropValue(val);
-    setIsCropConfirmed(true);
-    try {
-      await fetch('/api/intake/mode-b/confirm-crop', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          crop_id: 'crop_q3_step3',
-          confirmed_value: val,
-        }),
-      });
-    } catch {
-      // offline fallback
     }
   };
 
@@ -250,16 +230,16 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#5E6AD2] bg-[#5E6AD2]/10 px-1.5 py-0.5 rounded border border-[#5E6AD2]/20">
-              Stage 2 • Intake & Diagnostic Probe
+              Diagnostic Check
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">Session #sess_calc_301</span>
+            <span className="text-xs font-mono text-[#8A8F98]">Calculus III</span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <MessageSquareCode className="w-4 h-4 text-[#5E6AD2]" />
-            Metacognitive Intake & Calibrated Diagnostic
+            Goal Setting & Diagnostic Checkup
           </h1>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Extracts target score, exam runway, and serves a 10-minute calibrated hinge probe.
+            Set your target grade and take a short 10-minute quiz to reveal where you can recover the most marks.
           </p>
         </div>
 
@@ -270,14 +250,14 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#08090a] hover:bg-white/[0.04] text-[#F7F8F8] text-xs font-medium border border-white/[0.08] transition-all"
           >
             <Zap className="w-3.5 h-3.5 text-[#E59934]" />
-            <span>Fast-Forward Demo</span>
+            <span>Fast-Forward Goal</span>
           </button>
 
           <button
             onClick={() => setActiveTab('probe')}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all shadow-[0_2px_8px_rgba(94,106,210,0.3)]"
           >
-            <span>Open Diagnostic Probe</span>
+            <span>Start 10-Min Quiz</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -294,7 +274,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
           }`}
         >
           <MessageSquareCode className="w-3.5 h-3.5" />
-          <span>Metacognitive Consultation</span>
+          <span>Study Plan Consultation</span>
         </button>
 
         <button
@@ -306,7 +286,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
           }`}
         >
           <Sliders className="w-3.5 h-3.5" />
-          <span>Calibrated Diagnostic Probe ({questions.length} Hinge Questions)</span>
+          <span>10-Minute Quiz ({questions.length} Questions)</span>
         </button>
       </div>
 
@@ -316,8 +296,11 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
           {/* Left Column: Chat Conversation Thread (2 Cols) */}
           <div className="lg:col-span-2 rounded-xl bg-[#121316] border border-white/[0.08] flex flex-col h-[520px] overflow-hidden">
             <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-              <span className="text-xs font-mono uppercase text-[#F7F8F8]">3-Turn Intake Consultation</span>
-              <span className="text-[10px] font-mono text-[#27C57E]">LLM Agent Active</span>
+              <span className="text-xs font-mono uppercase text-[#F7F8F8]">Tutor Consultation</span>
+              <span className="text-[10px] text-[#27C57E] flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#27C57E]" />
+                Online
+              </span>
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto space-y-3">
@@ -347,7 +330,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
                   <button
                     key={i}
                     onClick={() => {
-                      if (chip.includes('Mode A') || chip.includes('Probe')) {
+                      if (chip.includes('Checkup') || chip.includes('Quiz')) {
                         setActiveTab('probe');
                       } else {
                         setMessages((prev) => [...prev, { role: 'user', content: chip }]);
@@ -373,7 +356,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
                     setInput('');
                   }
                 }}
-                placeholder="Reply to intake consultant..."
+                placeholder="Share your goals or difficult topics..."
                 className="flex-1 bg-[#121316] border border-white/[0.08] focus:border-[#5E6AD2] rounded-lg px-3 py-2 text-xs text-[#F7F8F8] outline-none"
               />
               <button
@@ -390,30 +373,30 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
             </div>
           </div>
 
-          {/* Right Column: Extracted Parameter Lock Card */}
+          {/* Right Column: Goal Summary Card */}
           <div className="space-y-4">
             <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08] space-y-3">
-              <span className="text-[11px] font-mono uppercase text-[#8A8F98]">Consultation State</span>
+              <span className="text-[11px] font-mono uppercase text-[#8A8F98]">Your Target Profile</span>
               <div className="p-3 rounded-lg bg-[#08090a] border border-white/[0.06] space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[#8A8F98]">Locked Target:</span>
-                  <span className="font-mono font-semibold text-[#27C57E]">{targetScore}%</span>
+                  <span className="text-[#8A8F98]">Target Grade:</span>
+                  <span className="font-mono font-semibold text-[#27C57E]">{targetScore}% (Grade B+)</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#8A8F98]">Timeline Runway:</span>
-                  <span className="font-mono text-[#F7F8F8]">{timelineDays} Days</span>
+                  <span className="text-[#8A8F98]">Runway:</span>
+                  <span className="font-mono text-[#F7F8F8]">{timelineDays} Days to Exam</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[#8A8F98]">Status:</span>
                   <span className="font-mono text-[10px] text-[#27C57E]">
-                    {isConsultComplete ? 'CALIBRATION LOCKED' : 'CONVERSING'}
+                    {isConsultComplete ? 'READY FOR QUIZ' : 'SETTING GOALS'}
                   </span>
                 </div>
               </div>
 
               <div>
                 <span className="text-[10px] font-mono uppercase text-[#8A8F98] block mb-1.5">
-                  Friction Topics Isolated:
+                  Identified Priority Topics:
                 </span>
                 <div className="space-y-1">
                   {frictionSkills.map((topic, i) => (
@@ -429,7 +412,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
                 onClick={() => setActiveTab('probe')}
                 className="w-full py-2 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5"
               >
-                <span>Open Diagnostic Probe</span>
+                <span>Take 10-Minute Quiz</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -437,10 +420,10 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
         </div>
       )}
 
-      {/* TAB 2: CALIBRATED DIAGNOSTIC PROBE */}
+      {/* TAB 2: DIAGNOSTIC PROBE QUIZ */}
       {activeTab === 'probe' && (
         <div className="space-y-4">
-          {/* Dual-Mode Selector */}
+          {/* Quiz Mode Selector */}
           <div className="flex items-center justify-between p-3 rounded-xl bg-[#121316] border border-white/[0.08]">
             <div className="flex items-center space-x-2">
               <button
@@ -451,7 +434,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
                     : 'text-[#8A8F98] hover:text-[#F7F8F8]'
                 }`}
               >
-                Mode A: 10-Minute Calibrated Probe
+                10-Minute Checkup (3 Questions)
               </button>
               <button
                 onClick={() => setDiagnosticMode('mode_b')}
@@ -461,7 +444,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
                     : 'text-[#8A8F98] hover:text-[#F7F8F8]'
                 }`}
               >
-                Mode B: Exam Paper Autopsy (Upload)
+                Upload Past Exam Paper
               </button>
             </div>
             <span className="text-[11px] font-mono text-[#8A8F98]">10 mins • 20 Marks Total</span>
@@ -489,7 +472,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
 
                     <div className="text-[11px] text-[#8A8F98] flex items-center gap-1.5">
                       <HelpCircle className="w-3.5 h-3.5 text-[#5E6AD2]" />
-                      <span>Cognitive Trap Tested: {q.trap}</span>
+                      <span>Key Concept Tested: {q.trap}</span>
                     </div>
 
                     <div>
@@ -512,7 +495,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
                   disabled={isSubmitting}
                   className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all shadow-[0_2px_8px_rgba(94,106,210,0.3)]"
                 >
-                  <span>{isSubmitting ? 'Transmitting to Forensics...' : 'Submit to Stage 3 Forensics'}</span>
+                  <span>{isSubmitting ? 'Evaluating Answers...' : 'Submit Answers & See Breakdown'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -522,18 +505,18 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
           {/* MODE B VIEW */}
           {diagnosticMode === 'mode_b' && (
             <div className="p-6 rounded-xl bg-[#121316] border border-white/[0.08] space-y-4">
-              <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Mode B: Exam Paper Upload Autopsy</h3>
+              <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Upload Graded Paper Scan</h3>
               <p className="text-xs text-[#8A8F98]">
-                Upload your graded paper or midterm exam scan. The forensic VLM pipeline will extract crops and perform step-diff against official rubric criteria.
+                Upload your scanned midterm test sheet. EduTrace will analyze each question line-by-line against the official answer key to reveal your exact marks leaks.
               </p>
 
               <div className="p-4 rounded-lg bg-[#08090a] border border-white/[0.06] space-y-2">
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-[#8A8F98]">Question Paper:</span>
+                  <span className="text-[#8A8F98]">Exam Question Paper:</span>
                   <span className="text-[#F7F8F8]">Midterm_2024_Calc3.pdf</span>
                 </div>
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-[#8A8F98]">Handwritten Answer Scan:</span>
+                  <span className="text-[#8A8F98]">Your Handwritten Sheet:</span>
                   <span className="text-[#F7F8F8]">Rahul_AnswerSheet_Scan.pdf</span>
                 </div>
               </div>
@@ -543,7 +526,7 @@ export const IntakePage: React.FC<IntakePageProps> = ({ onNavigateToForensics })
                 disabled={isSubmitting}
                 className="w-full py-2.5 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all flex items-center justify-center gap-2"
               >
-                <span>Run Exam Paper Autopsy & Launch Step-Diff</span>
+                <span>Analyze Handwritten Exam Paper</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>

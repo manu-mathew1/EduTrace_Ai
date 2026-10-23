@@ -87,15 +87,15 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
     switch (type) {
       case 'procedural_calculation':
         return {
-          label: 'Procedural Calculation',
+          label: 'Calculation & Minus Signs',
           subtitle: 'Sign distribution, algebraic manipulation, bracket inversions',
           color: '#E59934',
           remedyModality: 'Spot-the-Bug Interactive Micro-Drill',
-          pedagogyTip: 'Enclose iterated terms in brackets before distributing negative coefficients.',
+          pedagogyTip: 'Enclose repeated iterations in brackets before distributing outer negative signs.',
         };
       case 'method_selection':
         return {
-          label: 'Method Selection',
+          label: 'Method & Formula Selection',
           subtitle: 'Selecting ineffective formulas, premature substitution before standard form',
           color: '#5E6AD2',
           remedyModality: 'Visual Decision Flowchart & Pattern Matrix',
@@ -103,7 +103,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
         };
       case 'rubric_omission':
         return {
-          label: 'Rubric Omission',
+          label: 'Missing Notation & Steps',
           subtitle: 'Omission of integration constant (+C), boundary states, or final units',
           color: '#4DA0FF',
           remedyModality: 'Rubric Checkpoint Self-Audit Protocol',
@@ -112,7 +112,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
       case 'conceptual_misunderstanding':
       default:
         return {
-          label: 'Conceptual Misunderstanding',
+          label: 'Core Concept Gaps',
           subtitle: 'Violations of fundamental theorems (e.g. FTC across singularities)',
           color: '#EB5757',
           remedyModality: 'Intuitive Real-World Analogy & Boundary Sandbox',
@@ -124,7 +124,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
   if (!data) {
     return (
       <div className="p-8 rounded-xl bg-[#121316] border border-white/[0.08] text-center text-xs text-[#8A8F98]">
-        Computing cognitive error fingerprint...
+        Analyzing mistake patterns...
       </div>
     );
   }
@@ -139,16 +139,16 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#5E6AD2] bg-[#5E6AD2]/10 px-1.5 py-0.5 rounded border border-[#5E6AD2]/20">
-              Stage 4 • Cognitive Error Taxonomy
+              Mistake Patterns • What Went Wrong
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">Longitudinal Analysis</span>
+            <span className="text-xs font-mono text-[#8A8F98]">Analysis Across Tests</span>
           </div>
           <h2 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <PieChart className="w-4 h-4 text-[#5E6AD2]" />
-            Cognitive Error Fingerprint
+            Your Mistake Analysis
           </h2>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Identifies systemic recurring mental habits draining marks across past tests.
+            Pinpoints the recurring patterns where you lose the most marks, so you can fix them before exam day.
           </p>
         </div>
 
@@ -173,7 +173,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
         {/* Left Column: Taxonomy Categories (2 Cols) */}
         <div className="lg:col-span-2 rounded-xl bg-[#121316] border border-white/[0.08] overflow-hidden">
           <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
-            <span className="text-xs font-mono uppercase text-[#F7F8F8]">Error Categories</span>
+            <span className="text-xs font-mono uppercase text-[#F7F8F8]">Mistake Categories</span>
             <span className="text-[10px] font-mono text-[#8A8F98]">Click row to inspect</span>
           </div>
 
@@ -216,13 +216,13 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
 
         {/* Right Column: Remediation Recommendation */}
         <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08] space-y-3">
-          <span className="text-[10px] font-mono uppercase text-[#8A8F98]">Recommended Remediation</span>
+          <span className="text-[10px] font-mono uppercase text-[#8A8F98]">How to Fix This</span>
           
           <div className="p-3 rounded-lg bg-[#08090a] border border-white/[0.06] space-y-2">
             <span className="text-xs font-medium text-[#F7F8F8]">{activeConfig.label}</span>
             <p className="text-xs text-[#8A8F98] leading-relaxed">{activeConfig.pedagogyTip}</p>
             <div className="pt-2 border-t border-white/[0.04] text-[11px] text-[#27C57E]">
-              Modality: {activeConfig.remedyModality}
+              Recommended Practice: {activeConfig.remedyModality}
             </div>
           </div>
 
@@ -233,7 +233,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
             }}
             className="w-full py-2 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5"
           >
-            <span>Proceed to Recovery ROI Map</span>
+            <span>View Recommended Study Plan</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>

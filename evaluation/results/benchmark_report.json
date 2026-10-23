@@ -4,8 +4,8 @@
   "divergence_localization_accuracy": 1.0,
   "taxonomy_macro_f1": 0.977,
   "marks_estimation_mae": 0.0,
-  "total_evaluation_time_ms": 10.57,
-  "average_latency_per_case_ms": 0.7,
+  "total_evaluation_time_ms": 2.07,
+  "average_latency_per_case_ms": 0.14,
   "target_thresholds_met": true,
   "category_breakdown": {
     "procedural_calculation": {
@@ -46,7 +46,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 5.0,
       "estimated_marks": 5.0,
-      "latency_ms": 0.73
+      "latency_ms": 0.15
     },
     {
       "case_id": "case_calc_02",
@@ -60,7 +60,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 1.0,
       "estimated_marks": 1.0,
-      "latency_ms": 0.78
+      "latency_ms": 0.14
     },
     {
       "case_id": "case_calc_03",
@@ -74,7 +74,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 0.0,
       "estimated_marks": 0.0,
-      "latency_ms": 0.73
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_04",
@@ -88,7 +88,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 1.0,
       "estimated_marks": 1.0,
-      "latency_ms": 0.65
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_05",
@@ -102,7 +102,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 4.0,
       "estimated_marks": 4.0,
-      "latency_ms": 0.86
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_06",
@@ -116,7 +116,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 0.0,
       "estimated_marks": 0.0,
-      "latency_ms": 0.71
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_07",
@@ -130,7 +130,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 2.0,
       "estimated_marks": 2.0,
-      "latency_ms": 0.63
+      "latency_ms": 0.14
     },
     {
       "case_id": "case_calc_08",
@@ -144,7 +144,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 1.0,
       "estimated_marks": 1.0,
-      "latency_ms": 0.6
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_09",
@@ -158,7 +158,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 0.0,
       "estimated_marks": 0.0,
-      "latency_ms": 0.61
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_10",
@@ -172,7 +172,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 0.0,
       "estimated_marks": 0.0,
-      "latency_ms": 0.63
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_11",
@@ -186,7 +186,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 0.0,
       "estimated_marks": 0.0,
-      "latency_ms": 0.56
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_12",
@@ -200,7 +200,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 2.0,
       "estimated_marks": 2.0,
-      "latency_ms": 0.59
+      "latency_ms": 0.14
     },
     {
       "case_id": "case_calc_13",
@@ -214,7 +214,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 1.0,
       "estimated_marks": 1.0,
-      "latency_ms": 0.68
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_14",
@@ -228,7 +228,7 @@
       "taxonomy_accurate": false,
       "expected_marks": 5.0,
       "estimated_marks": 5.0,
-      "latency_ms": 0.7
+      "latency_ms": 0.13
     },
     {
       "case_id": "case_calc_15",
@@ -242,7 +242,7 @@
       "taxonomy_accurate": true,
       "expected_marks": 1.0,
       "estimated_marks": 1.0,
-      "latency_ms": 0.82
+      "latency_ms": 0.15
     }
   ]
 }

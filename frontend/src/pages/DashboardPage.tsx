@@ -5,15 +5,14 @@ import {
   Sparkles, 
   ArrowRight, 
   CheckCircle2, 
-  BrainCircuit, 
   Clock, 
   ShieldCheck, 
   ChevronRight, 
-  Activity, 
   Layers, 
   Zap, 
   HelpCircle,
-  AlertTriangle
+  AlertTriangle,
+  BookOpen
 } from 'lucide-react';
 import { NavTab } from '../components/layout/Shell';
 import { LearningTwinResponse, SkillMastery } from '../types/schema';
@@ -48,7 +47,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           }
         }
       })
-      .catch((e) => console.warn('Using baseline twin', e));
+      .catch(() => {});
   }, [selectedCourse, user?.id]);
 
   const defaultSkills: SkillMastery[] = [
@@ -107,17 +106,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 border-b border-white/[0.06]">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-mono uppercase text-[#8A8F98]">Track</span>
+            <span className="text-xs font-mono uppercase text-[#8A8F98]">Current Course</span>
             <span className="text-xs font-semibold text-[#F7F8F8]">
               {selectedCourse === 'MATH-301' ? 'MATH-301: Multivariable Calculus' : 'CS-210: Data Structures & Algorithms'}
             </span>
           </div>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Exam target in {examDaysLeft} days • Bayesian posterior updated 3m ago
+            Upcoming Exam in {examDaysLeft} days • 5 topics tracked
           </p>
         </div>
 
-        {/* Minimal Linear Course Switcher */}
+        {/* Course Switcher */}
         <div className="inline-flex p-0.5 rounded-lg bg-[#121316] border border-white/[0.08]">
           <button
             onClick={() => setSelectedCourse('MATH-301')}
@@ -127,7 +126,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 : 'text-[#8A8F98] hover:text-[#F7F8F8]'
             }`}
           >
-            MATH-301
+            Calculus III
           </button>
           <button
             onClick={() => setSelectedCourse('CS-210')}
@@ -137,30 +136,30 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                 : 'text-[#8A8F98] hover:text-[#F7F8F8]'
             }`}
           >
-            CS-210
+            Algorithms
           </button>
         </div>
       </div>
 
-      {/* 4-Metric Key Performance Indicator Bar */}
+      {/* 4-Metric Student Telemetry Bar */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08]">
           <span className="text-[11px] font-mono text-[#8A8F98] uppercase">Target Exam Score</span>
           <div className="mt-1 flex items-baseline space-x-2">
             <span className="text-2xl font-semibold font-mono tabular-nums text-[#F7F8F8]">75.0%</span>
-            <span className="text-[11px] text-[#8A8F98] font-mono">B+ Target</span>
+            <span className="text-[11px] text-[#8A8F98] font-mono">Grade B+</span>
           </div>
           <div className="mt-2 text-[11px] text-[#8A8F98] flex items-center gap-1">
             <Clock className="w-3 h-3 text-[#E59934]" />
-            <span>Target Exam: Oct 28</span>
+            <span>Final Exam: Oct 28</span>
           </div>
         </div>
 
         <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08]">
-          <span className="text-[11px] font-mono text-[#8A8F98] uppercase">Bayesian Readiness</span>
+          <span className="text-[11px] font-mono text-[#8A8F98] uppercase">Estimated Readiness</span>
           <div className="mt-1 flex items-baseline space-x-2">
-            <span className="text-2xl font-semibold font-mono tabular-nums text-[#F7F8F8]">{readinessScore.toFixed(1)}%</span>
-            <span className="text-[11px] text-[#27C57E] font-mono font-medium">↑ +14.2%</span>
+            <span className="text-2xl font-semibold font-mono tabular-nums text-[#F7F8F8]">{readinessScore.toFixed(0)}%</span>
+            <span className="text-[11px] text-[#27C57E] font-mono font-medium">↑ +14% this week</span>
           </div>
           <div className="mt-2.5 w-full bg-white/[0.06] rounded-full h-1 overflow-hidden">
             <div 
@@ -178,35 +177,35 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
           <div className="mt-2 text-[11px] text-[#8A8F98] flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3 text-[#27C57E]" />
-            <span>Locked in SQLite DB</span>
+            <span>Added to projected score</span>
           </div>
         </div>
 
         <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08]">
-          <span className="text-[11px] font-mono text-[#8A8F98] uppercase">Remaining Gap</span>
+          <span className="text-[11px] font-mono text-[#8A8F98] uppercase">Gap to Goal</span>
           <div className="mt-1 flex items-baseline space-x-2">
             <span className="text-2xl font-semibold font-mono tabular-nums text-[#E59934]">6.6</span>
-            <span className="text-[11px] text-[#8A8F98] font-mono">Marks to Target</span>
+            <span className="text-[11px] text-[#8A8F98] font-mono">Marks needed</span>
           </div>
           <div className="mt-2 text-[11px] text-[#8A8F98]">
-            <span>Rank #1 action recovers +8.0</span>
+            <span>Rank #1 practice yields +8.0</span>
           </div>
         </div>
       </div>
 
-      {/* Main Grid: Twin Skill Matrix & Action Roadmap */}
+      {/* Main Grid: Topic Mastery Matrix & Action Plan */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column (2 Cols): Linear-Grade Skill Table */}
+        {/* Left Column (2 Cols): Student-Friendly Topic Mastery List */}
         <div className="lg:col-span-2 rounded-xl bg-[#121316] border border-white/[0.08] overflow-hidden">
           <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-[#5E6AD2]" />
               <h2 className="text-xs font-mono uppercase tracking-wider text-[#F7F8F8]">
-                Bayesian Learning Twin • Skill Mastery Matrix
+                Topic Mastery Breakdown
               </h2>
             </div>
-            <span className="text-[11px] text-[#8A8F98] font-mono">
-              Beta Credible Intervals [90%]
+            <span className="text-[11px] text-[#8A8F98]">
+              Updated from your latest checks & exams
             </span>
           </div>
 
@@ -215,8 +214,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               const isMastered = skill.mastery_percentage >= 75;
               const isProgress = skill.mastery_percentage >= 50 && skill.mastery_percentage < 75;
               const statusColor = isMastered ? '#27C57E' : isProgress ? '#E59934' : '#EB5757';
-              const low = skill.confidence_interval ? (skill.confidence_interval[0] * 100).toFixed(0) : '40';
-              const high = skill.confidence_interval ? (skill.confidence_interval[1] * 100).toFixed(0) : '70';
+              const statusLabel = isMastered ? 'Mastered' : isProgress ? 'In Progress' : 'Needs Practice';
+              const statusBadgeClass = isMastered 
+                ? 'bg-[#27C57E]/10 text-[#27C57E] border-[#27C57E]/20'
+                : isProgress 
+                ? 'bg-[#E59934]/10 text-[#E59934] border-[#E59934]/20'
+                : 'bg-[#EB5757]/10 text-[#EB5757] border-[#EB5757]/20';
 
               return (
                 <div 
@@ -232,13 +235,22 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                       <p className="text-xs font-medium text-[#F7F8F8] truncate group-hover:text-white">
                         {skill.skill_name}
                       </p>
-                      <span className="text-[10px] font-mono text-[#8A8F98]">
-                        α={skill.alpha.toFixed(1)} β={skill.beta.toFixed(1)} • Range: [{low}% – {high}%]
-                      </span>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${statusBadgeClass}`}>
+                          {statusLabel}
+                        </span>
+                        <span className="text-[10px] text-[#8A8F98]">
+                          {isMastered 
+                            ? 'Ready for exam' 
+                            : isProgress 
+                            ? 'Review recommended' 
+                            : 'Primary marks recovery target'}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Visual Confidence Bar */}
+                  {/* Clean Visual Mastery Progress */}
                   <div className="hidden sm:flex items-center space-x-3 shrink-0">
                     <div className="w-24 bg-white/[0.04] h-1.5 rounded-full overflow-hidden relative">
                       <div 
@@ -249,14 +261,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                         }}
                       />
                     </div>
-                    <span className="text-xs font-mono tabular-nums text-[#F7F8F8] w-12 text-right">
+                    <span className="text-xs font-mono tabular-nums text-[#F7F8F8] w-10 text-right">
                       {skill.mastery_percentage.toFixed(0)}%
                     </span>
                     <button
                       onClick={() => onNavigate('studio')}
                       className="opacity-0 group-hover:opacity-100 px-2 py-1 rounded bg-white/[0.08] hover:bg-white/[0.12] text-[11px] text-white transition-all"
                     >
-                      Remediate
+                      Practice
                     </button>
                   </div>
                 </div>
@@ -265,17 +277,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Right Column: High-ROI Marks Recovery Queue */}
+        {/* Right Column: Highest-Yield Next Actions */}
         <div className="space-y-4">
           <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08]">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
               <div className="flex items-center space-x-2">
                 <span className="w-2 h-2 rounded-full bg-[#E59934]" />
                 <h3 className="text-xs font-mono uppercase tracking-wider text-[#F7F8F8]">
-                  High-ROI Actions
+                  Recommended Practice
                 </h3>
               </div>
-              <span className="text-[10px] font-mono text-[#27C57E]">+14.0 M Available</span>
+              <span className="text-[10px] font-mono text-[#27C57E]">+14.0 Marks to Recover</span>
             </div>
 
             <div className="mt-3 space-y-2.5">
@@ -285,19 +297,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#EB5757]/10 text-[#EB5757] border border-[#EB5757]/20">
-                    PRIORITY #1 • FORENSICS
+                    TOP PRIORITY • EXAM FIX
                   </span>
                   <span className="text-xs font-mono font-semibold text-[#27C57E]">+8.0 Marks</span>
                 </div>
                 <h4 className="text-xs font-medium text-[#F7F8F8] mt-2 group-hover:text-[#5E6AD2] transition-colors">
-                  Bracket Sign Distribution (Step 3)
+                  Bracket Sign Distribution (Question 3)
                 </h4>
                 <p className="text-[11px] text-[#8A8F98] mt-1 line-clamp-2">
-                  Divergence localized in midterm paper. Resolving inner bracket signs secures 8 marks in 20 mins.
+                  You lost 5 marks on Question 3 due to a minus sign flip in Step 3. Review the fix in 10 minutes.
                 </p>
                 <div className="mt-2.5 flex items-center justify-between text-[11px] text-[#8A8F98] pt-2 border-t border-white/[0.04]">
-                  <span>Est. Time: 20 mins</span>
-                  <span className="flex items-center gap-1 text-[#5E6AD2]">Inspect Diff <ArrowRight className="w-3 h-3" /></span>
+                  <span>10 mins review</span>
+                  <span className="flex items-center gap-1 text-[#5E6AD2]">Inspect Mistake <ArrowRight className="w-3 h-3" /></span>
                 </div>
               </div>
 
@@ -307,55 +319,55 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#E59934]/10 text-[#E59934] border border-[#E59934]/20">
-                    PRIORITY #2 • STUDIO
+                    PRACTICE DRILL
                   </span>
                   <span className="text-xs font-mono font-semibold text-[#27C57E]">+4.0 Marks</span>
                 </div>
                 <h4 className="text-xs font-medium text-[#F7F8F8] mt-2 group-hover:text-[#5E6AD2] transition-colors">
-                  Trigonometric Radical Form
+                  Trigonometric Radical Forms
                 </h4>
                 <p className="text-[11px] text-[#8A8F98] mt-1 line-clamp-2">
-                  Learn triangle substitution pattern via Flowchart and Spot-the-Bug interactive drill.
+                  Master when to substitute with sine versus tangent using our visual flowchart and spot-the-bug drill.
                 </p>
                 <div className="mt-2.5 flex items-center justify-between text-[11px] text-[#8A8F98] pt-2 border-t border-white/[0.04]">
-                  <span>Est. Time: 15 mins</span>
+                  <span>15 mins drill</span>
                   <span className="flex items-center gap-1 text-[#5E6AD2]">Open Studio <ArrowRight className="w-3 h-3" /></span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Quick Workflow Jumper */}
+          {/* Quick Learning Jumper */}
           <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08]">
-            <span className="text-[11px] font-mono uppercase text-[#8A8F98]">Pipeline Stages</span>
+            <span className="text-[11px] font-mono uppercase text-[#8A8F98]">Quick Access</span>
             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
               <button
                 onClick={() => onNavigate('ingestion')}
                 className="p-2.5 rounded-lg bg-[#08090a] border border-white/[0.06] hover:border-white/[0.12] text-left transition-all"
               >
-                <p className="font-medium text-[#F7F8F8]">1. Ingestion</p>
+                <p className="font-medium text-[#F7F8F8]">Course Materials</p>
                 <p className="text-[10px] text-[#8A8F98]">Syllabus & Slides</p>
               </button>
               <button
                 onClick={() => onNavigate('intake')}
                 className="p-2.5 rounded-lg bg-[#08090a] border border-white/[0.06] hover:border-white/[0.12] text-left transition-all"
               >
-                <p className="font-medium text-[#F7F8F8]">2. Intake Probe</p>
-                <p className="text-[10px] text-[#8A8F98]">10-Min Calibrated</p>
+                <p className="font-medium text-[#F7F8F8]">Diagnostic Check</p>
+                <p className="text-[10px] text-[#8A8F98]">10-Min Quick Quiz</p>
               </button>
               <button
                 onClick={() => onNavigate('forensics')}
                 className="p-2.5 rounded-lg bg-[#08090a] border border-white/[0.06] hover:border-white/[0.12] text-left transition-all"
               >
-                <p className="font-medium text-[#F7F8F8]">3. Step-Diff</p>
-                <p className="text-[10px] text-[#8A8F98]">Side-by-side VLM</p>
+                <p className="font-medium text-[#F7F8F8]">Step Analysis</p>
+                <p className="text-[10px] text-[#8A8F98]">See Where You Slipped</p>
               </button>
               <button
                 onClick={() => onNavigate('reassessment')}
                 className="p-2.5 rounded-lg bg-[#08090a] border border-white/[0.06] hover:border-white/[0.12] text-left transition-all"
               >
-                <p className="font-medium text-[#F7F8F8]">7. Verify Drill</p>
-                <p className="text-[10px] text-[#8A8F98]">Isomorphic test</p>
+                <p className="font-medium text-[#F7F8F8]">Skill Check</p>
+                <p className="text-[10px] text-[#8A8F98]">Earn Back Marks</p>
               </button>
             </div>
           </div>

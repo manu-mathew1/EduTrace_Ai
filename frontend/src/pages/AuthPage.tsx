@@ -46,21 +46,21 @@ export const AuthPage: React.FC = () => {
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-[#F7F8F8]">EduTrace AI</h1>
         <p className="text-xs text-[#8A8F98] mt-1 max-w-sm mx-auto">
-          Academic Forensic & Bayesian Metacognitive Intervention Platform
+          AI Exam Diagnostic & Personalized Grade Recovery
         </p>
       </div>
 
       <div className="mt-7 sm:mx-auto sm:w-full sm:max-w-4xl z-10 px-4">
-        {/* Judge Fast-Track Persona Bar (Linear Card Style) */}
+        {/* Demo Student Personas Bar */}
         <div className="mb-6 p-4 rounded-xl bg-[#121316] border border-white/[0.08] shadow-2xl">
           <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center space-x-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E59934] shadow-[0_0_8px_rgba(229,153,52,0.6)]" />
               <span className="text-[11px] font-mono uppercase tracking-wider text-[#F7F8F8]">
-                Judge Fast-Track • 1-Click Multi-Tenant Personas
+                Quick Demo • Explore as a Sample Student
               </span>
             </div>
-            <span className="text-[11px] text-[#8A8F98] font-mono">Instant session token switch</span>
+            <span className="text-[11px] text-[#8A8F98] font-mono">1-click instant login</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
@@ -187,7 +187,7 @@ export const AuthPage: React.FC = () => {
               disabled={isSubmitting}
               className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-semibold shadow-[0_2px_8px_rgba(94,106,210,0.3)] transition-all disabled:opacity-50 mt-2"
             >
-              <span>{isSubmitting ? 'Authenticating...' : tab === 'signin' ? 'Sign In to Workspace' : 'Create Account & Launch Twin'}</span>
+              <span>{isSubmitting ? 'Signing in...' : tab === 'signin' ? 'Sign In to Workspace' : 'Create Student Account'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </form>

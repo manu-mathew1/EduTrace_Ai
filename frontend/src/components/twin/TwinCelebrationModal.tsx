@@ -40,20 +40,20 @@ export const TwinCelebrationModal: React.FC<TwinCelebrationModalProps> = ({
           <div>
             <div className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-[#27C57E]/10 text-[#27C57E] text-[10px] font-mono mb-1.5 border border-[#27C57E]/20">
               <Sparkles className="w-3 h-3" />
-              <span>Bayesian Posterior Verified</span>
+              <span>Topic Mastery Verified</span>
             </div>
             <h2 className="text-base font-semibold text-[#F7F8F8]">
-              {isImproved ? 'Concept Remediated & Mastered' : 'Verification Logged'}
+              {isImproved ? 'Concept Remediated & Mastered' : 'Practice Solution Checked'}
             </h2>
             <p className="text-xs text-[#8A8F98] mt-0.5">
-              Isomorphic drill results locked into your Bayesian twin belief state.
+              Great work! Your practice solution was completely verified against the rubric.
             </p>
           </div>
 
           {/* Mastery Progression Card */}
           <div className="w-full p-3.5 rounded-lg bg-[#08090a] border border-white/[0.06] space-y-3">
             <div className="flex items-center justify-between text-xs pb-2 border-b border-white/[0.06]">
-              <span className="text-[#8A8F98]">Mastery Transition</span>
+              <span className="text-[#8A8F98]">Topic Mastery</span>
               <div className="flex items-center space-x-2 font-mono">
                 <span className="text-[#8A8F98]">{prevPct.toFixed(1)}%</span>
                 <ArrowRight className="w-3.5 h-3.5 text-[#27C57E]" />
@@ -70,11 +70,11 @@ export const TwinCelebrationModal: React.FC<TwinCelebrationModalProps> = ({
               </div>
 
               <div className="p-2.5 rounded bg-[#121316] border border-white/[0.06] text-left">
-                <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">80% Interval</span>
+                <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Stability</span>
                 <span className="text-xs font-mono text-[#5E6AD2]">
-                  [{(uncRange[0] * 100).toFixed(0)}%, {(uncRange[1] * 100).toFixed(0)}%]
+                  {Math.round((uncRange[1] - uncRange[0]) * 100) < 30 ? 'High Confidence' : 'Solid Progress'}
                 </span>
-                <p className="text-[9px] text-[#8A8F98] mt-0.5">Narrowed Uncertainty</p>
+                <p className="text-[9px] text-[#8A8F98] mt-0.5">Exam Tested</p>
               </div>
             </div>
           </div>
@@ -83,7 +83,7 @@ export const TwinCelebrationModal: React.FC<TwinCelebrationModalProps> = ({
           <div className="w-full p-3 rounded-lg bg-[#08090a] border border-white/[0.06] text-xs text-[#8A8F98] text-left leading-relaxed">
             <p className="font-medium text-[#F7F8F8] text-[11px] mb-0.5 flex items-center gap-1.5">
               <BrainCircuit className="w-3.5 h-3.5 text-[#5E6AD2]" />
-              <span>Closed-Loop Telemetry:</span>
+              <span>Tutor Feedback:</span>
             </p>
             {result.celebration_message}
           </div>
@@ -103,7 +103,7 @@ export const TwinCelebrationModal: React.FC<TwinCelebrationModalProps> = ({
               }}
               className="flex-1 py-2 px-3 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5"
             >
-              <span>Mission Control</span>
+              <span>Back to Dashboard</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>

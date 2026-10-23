@@ -108,7 +108,7 @@ const DEFAULT_SLIDES: SlideItem[] = [
     page_number: 17,
     quote: 'Pitfall Alert: Do not attempt u-substitution when the integrand matches standard inverse trigonometric derivative 1/(1+x^2). Always inspect degree of numerator vs denominator before initiating substitution.',
     matched_trap: 'Method Selection: Impulsive Substitution',
-    pedagogical_remediation_tip: 'Review Slide 17: Check polynomial degree numerator vs denominator before initiating substitution.',
+    pedagogical_remediation_tip: 'Check polynomial degree of numerator vs denominator before deciding to substitute.',
   },
   {
     chunk_id: 'chunk_kapoor_slide19',
@@ -119,7 +119,7 @@ const DEFAULT_SLIDES: SlideItem[] = [
     page_number: 19,
     quote: 'Pitfall Alert: When repeating integration by parts, always enclose the entire second iteration in brackets before distributing the outer minus sign. The minus sign in front of the second iteration applies to both terms inside the formula.',
     matched_trap: 'Nested Bracket Minus Sign Inversion',
-    pedagogical_remediation_tip: 'Review Slide 19: Always enclose the entire second iteration in brackets before distributing the outer minus sign.',
+    pedagogical_remediation_tip: 'Always enclose the entire second iteration in brackets before distributing the outer minus sign.',
   },
   {
     chunk_id: 'chunk_kapoor_slide22',
@@ -130,7 +130,7 @@ const DEFAULT_SLIDES: SlideItem[] = [
     page_number: 22,
     quote: "Linear First-Order Differential Equations: Always put into canonical standard form y' + P(x)y = Q(x) by dividing through by the leading coefficient before calculating the integrating factor I(x) = exp(int P(x) dx).",
     matched_trap: 'Leading Coefficient Normalization Omission',
-    pedagogical_remediation_tip: "Review Slide 22: Always divide by leading coefficient to isolate y' before calculating exp(∫ P(x) dx).",
+    pedagogical_remediation_tip: "Divide by the leading coefficient to isolate y' before calculating the integrating factor.",
   },
   {
     chunk_id: 'chunk_kapoor_slide25',
@@ -141,7 +141,7 @@ const DEFAULT_SLIDES: SlideItem[] = [
     page_number: 25,
     quote: 'Critical Warning: Never apply the Fundamental Theorem of Calculus blindly across an infinite discontinuity or singularity (e.g. 1/x^2 at x=0). You must split the integral into two improper limit integrals.',
     matched_trap: 'Blind FTC Application Across Infinite Discontinuity',
-    pedagogical_remediation_tip: 'Review Slide 25: Never apply FTC across an infinite singularity. Split into improper limit integrals.',
+    pedagogical_remediation_tip: 'Never apply FTC across an infinite singularity. Split into two separate limit integrals.',
   },
 ];
 
@@ -157,11 +157,6 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
   const [inspectingDoc, setInspectingDoc] = useState<ClassifiedDoc | null>(null);
   const [slides, setSlides] = useState<SlideItem[]>(DEFAULT_SLIDES);
   const [selectedSlide, setSelectedSlide] = useState<SlideItem | null>(DEFAULT_SLIDES[2]);
-  const [slideFilter, setSlideFilter] = useState<string>('');
-  const [testSearchInput, setTestSearchInput] = useState<string>('bracket minus sign');
-  const [testedMatch, setTestedMatch] = useState<any>(null);
-  const [instantLatencyMs, setInstantLatencyMs] = useState<number>(3.4);
-  const [copiedQuote, setCopiedQuote] = useState(false);
 
   useEffect(() => {
     fetch('/api/documents/triage?course_id=course_calc_301')
@@ -268,18 +263,17 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
     setDocuments((prev) => prev.filter((d) => d.id !== id));
   };
 
-  const getTypeBadge = (type: string, conf: number) => {
-    const pct = Math.round(conf * 100);
+  const getTypeBadge = (type: string) => {
     switch (type) {
       case 'syllabus':
-        return <span className="font-mono text-[10px] text-[#4DA0FF] bg-[#4DA0FF]/10 px-1.5 py-0.5 rounded border border-[#4DA0FF]/20">Syllabus ({pct}%)</span>;
+        return <span className="font-mono text-[10px] text-[#4DA0FF] bg-[#4DA0FF]/10 px-1.5 py-0.5 rounded border border-[#4DA0FF]/20">Course Syllabus</span>;
       case 'past_paper':
-        return <span className="font-mono text-[10px] text-[#E59934] bg-[#E59934]/10 px-1.5 py-0.5 rounded border border-[#E59934]/20">Past Paper ({pct}%)</span>;
+        return <span className="font-mono text-[10px] text-[#E59934] bg-[#E59934]/10 px-1.5 py-0.5 rounded border border-[#E59934]/20">Past Exam</span>;
       case 'rubric':
-        return <span className="font-mono text-[10px] text-[#5E6AD2] bg-[#5E6AD2]/10 px-1.5 py-0.5 rounded border border-[#5E6AD2]/20">Rubric ({pct}%)</span>;
+        return <span className="font-mono text-[10px] text-[#5E6AD2] bg-[#5E6AD2]/10 px-1.5 py-0.5 rounded border border-[#5E6AD2]/20">Marking Scheme</span>;
       case 'lecture_notes':
       default:
-        return <span className="font-mono text-[10px] text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded border border-[#27C57E]/20">Lecture Notes ({pct}%)</span>;
+        return <span className="font-mono text-[10px] text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded border border-[#27C57E]/20">Lecture Notes</span>;
     }
   };
 
@@ -290,16 +284,16 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#4DA0FF] bg-[#4DA0FF]/10 px-1.5 py-0.5 rounded border border-[#4DA0FF]/20">
-              Stage 1 • Smart Ingestion & RAG
+              Course Library
             </span>
-            <span className="text-xs font-mono text-[#8A8F98]">course_calc_301</span>
+            <span className="text-xs font-mono text-[#8A8F98]">Calculus III</span>
           </div>
           <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
             <UploadCloud className="w-4 h-4 text-[#5E6AD2]" />
-            Multi-Document Ingestion & Automated Triage
+            Course Documents & References
           </h1>
           <p className="text-xs text-[#8A8F98] mt-0.5">
-            Auto-categorizes course materials and constructs indexed vector stores for sub-50ms citation lookup.
+            Your uploaded lecture slides and past exams are used to ground AI tutor explanations and cite exact slide numbers.
           </p>
         </div>
 
@@ -307,7 +301,7 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
           onClick={onNavigateToIntake}
           className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all shadow-[0_2px_8px_rgba(94,106,210,0.3)]"
         >
-          <span>Launch Intake Probe</span>
+          <span>Take Diagnostic Check</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -316,7 +310,7 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
       <div className="p-3.5 rounded-xl bg-[#121316] border border-white/[0.08] flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-4 text-xs">
           <div>
-            <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Baseline Score</span>
+            <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Current Score</span>
             <input
               type="number"
               value={baselineScore}
@@ -325,7 +319,7 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
             />
           </div>
           <div>
-            <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Target Score</span>
+            <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Goal Score</span>
             <input
               type="number"
               value={targetScore}
@@ -334,7 +328,7 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
             />
           </div>
           <div>
-            <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Target Exam Date</span>
+            <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Exam Date</span>
             <input
               type="date"
               value={examDate}
@@ -345,9 +339,9 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
         </div>
 
         <div className="text-right">
-          <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Identified Gap</span>
+          <span className="text-[10px] font-mono uppercase text-[#8A8F98] block">Marks to Recover</span>
           <span className="text-sm font-mono font-semibold text-[#E59934]">
-            {Math.max(0, targetScore - baselineScore)} Marks
+            +{Math.max(0, targetScore - baselineScore)} Marks
           </span>
         </div>
       </div>
@@ -365,21 +359,24 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
         }`}
       >
         <UploadCloud className="w-8 h-8 text-[#5E6AD2] mx-auto mb-2" />
-        <p className="text-xs font-medium text-[#F7F8F8]">Drag & drop course PDFs, past papers, or slides</p>
-        <p className="text-[11px] text-[#8A8F98] mt-0.5">Supports multi-page PDF documents. Zero manual tagging required.</p>
+        <p className="text-xs font-medium text-[#F7F8F8]">Drop your course PDFs or lecture slides here</p>
+        <p className="text-[11px] text-[#8A8F98] mt-0.5">Syllabus, midterms, and note slides are automatically recognized.</p>
         <label className="mt-3 inline-block px-3 py-1.5 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-xs font-medium cursor-pointer transition-all">
-          <span>Browse Files</span>
+          <span>Upload Files</span>
           <input type="file" multiple accept=".pdf" onChange={handleFileInput} className="hidden" />
         </label>
       </div>
 
-      {/* Ingested Documents List (Linear Table) */}
+      {/* Course Files List */}
       <div className="rounded-xl bg-[#121316] border border-white/[0.08] overflow-hidden">
         <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
           <span className="text-xs font-mono uppercase text-[#F7F8F8]">
-            Triaged Documents ({documents.length})
+            Course Files ({documents.length})
           </span>
-          <span className="text-[11px] font-mono text-[#27C57E]">ChromaDB Indexed</span>
+          <span className="text-[11px] text-[#27C57E] flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Ready for Analysis</span>
+          </span>
         </div>
 
         <div className="divide-y divide-white/[0.04]">
@@ -390,7 +387,7 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
                 <div className="min-w-0">
                   <p className="text-xs font-medium text-[#F7F8F8] truncate">{doc.filename}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    {getTypeBadge(doc.type, doc.confidence)}
+                    {getTypeBadge(doc.type)}
                     <span className="text-[10px] font-mono text-[#8A8F98]">{doc.pageCount} Pages</span>
                     <span className="text-[10px] text-[#8A8F98] truncate hidden md:inline">
                       • Topics: {doc.topics.slice(0, 2).join(', ')}
@@ -404,7 +401,7 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
                   onClick={() => openSlideInspector(doc)}
                   className="px-2.5 py-1 rounded bg-white/[0.06] hover:bg-white/[0.1] text-[11px] text-[#F7F8F8] transition-all"
                 >
-                  Inspect Slides
+                  View Slides
                 </button>
                 <button
                   onClick={() => removeDoc(doc.id)}
@@ -424,16 +421,10 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
           <div className="bg-[#121316] border border-white/[0.1] rounded-xl max-w-2xl w-full p-5 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
               <div>
-                <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Slide Citation Inspector</h3>
+                <h3 className="text-xs font-mono uppercase text-[#F7F8F8]">Lecture Slide Notes</h3>
                 <p className="text-xs text-[#8A8F98]">{inspectingDoc.filename}</p>
               </div>
               <button onClick={() => setInspectingDoc(null)} className="text-[#8A8F98] hover:text-white text-xs">Close</button>
-            </div>
-
-            {/* Sub-50ms Telemetry Pill */}
-            <div className="p-2 rounded-lg bg-[#08090a] border border-white/[0.06] flex items-center justify-between text-[11px] font-mono">
-              <span className="text-[#8A8F98]">Vector Search SLA:</span>
-              <span className="text-[#27C57E] font-semibold">{instantLatencyMs}ms (SLA &lt; 50ms)</span>
             </div>
 
             {/* Slide Details */}
@@ -442,7 +433,7 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-[#5E6AD2]">Slide {selectedSlide.slide_number}</span>
                   <span className="text-[10px] font-mono text-[#E59934] bg-[#E59934]/10 px-1.5 py-0.5 rounded">
-                    {selectedSlide.matched_trap}
+                    Common Pitfall: {selectedSlide.matched_trap}
                   </span>
                 </div>
                 <p className="text-xs text-[#F7F8F8] font-mono leading-relaxed bg-white/[0.02] p-2.5 rounded">
@@ -450,13 +441,13 @@ export const IngestionPage: React.FC<IngestionPageProps> = ({ onNavigateToIntake
                 </p>
                 {selectedSlide.pedagogical_remediation_tip && (
                   <p className="text-[11px] text-[#27C57E]">
-                    Remediation: {selectedSlide.pedagogical_remediation_tip}
+                    Professor&apos;s Advice: {selectedSlide.pedagogical_remediation_tip}
                   </p>
                 )}
               </div>
             )}
 
-            {/* Slide List */}
+            {/* Slide Index List */}
             <div className="flex-1 overflow-y-auto divide-y divide-white/[0.04] max-h-48">
               {slides.map((s) => (
                 <div
