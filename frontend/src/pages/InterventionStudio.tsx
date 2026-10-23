@@ -18,6 +18,7 @@ import {
   Award,
   Zap,
   BookOpen,
+  ChevronRight
 } from 'lucide-react';
 import { MultimodalStudioContent } from '../types/schema';
 
@@ -36,7 +37,7 @@ interface PriorityItem {
   examWeight: number;
   timeMins: number;
   marksRecoverable: number;
-  recommendedModality: 'spot_the_bug' | 'flowchart' | 'analogy' | 'audio';
+  recommendedModality: 'bug' | 'flowchart' | 'analogy' | 'audio';
 }
 
 export const InterventionStudio: React.FC<InterventionStudioProps> = ({
@@ -50,12 +51,10 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
   const [activeTab, setActiveTab] = useState<'flowchart' | 'bug' | 'analogy' | 'audio'>('flowchart');
 
   useEffect(() => {
-    if (initialMode) {
-      setViewMode(initialMode);
-    }
+    if (initialMode) setViewMode(initialMode);
   }, [initialMode]);
 
-  // Audio Player State (Proposal #006)
+  // Audio Player State
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
   const [audioProgress, setAudioProgress] = useState<number>(0);
   const [isAudioMuted, setIsAudioMuted] = useState<boolean>(false);
@@ -73,7 +72,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
       examWeight: 15.0,
       timeMins: 20,
       marksRecoverable: 8.0,
-      recommendedModality: 'spot_the_bug',
+      recommendedModality: 'bug',
     },
     {
       rank: 2,
@@ -100,7 +99,6 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
   const [priorities, setPriorities] = useState<PriorityItem[]>(defaultPriorities);
   const [studioContent, setStudioContent] = useState<MultimodalStudioContent | null>(null);
 
-  // Live recovery map fetch from backend API
   useEffect(() => {
     fetch('/api/recovery/map?baseline_score=52&target_score=75')
       .then((res) => (res.ok ? res.json() : null))
@@ -116,29 +114,23 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
             marksRecoverable: p.potential_marks_recoverable,
             recommendedModality: p.recommended_modality === 'visual_flowchart' ? 'flowchart' :
                                  p.recommended_modality === 'real_world_analogy' ? 'analogy' :
-                                 p.recommended_modality === 'audio_deconstruction' ? 'audio' : 'spot_the_bug',
+                                 p.recommended_modality === 'audio_deconstruction' ? 'audio' : 'bug',
           }));
           setPriorities(mapped);
         }
       })
-      .catch(() => {
-        // Fallback to default calibrated list
-      });
+      .catch(() => {});
   }, []);
 
-  // Live studio content fetch grounded in lecture notes (Task 4.3)
   useEffect(() => {
     fetch(`/api/interventions/${selectedSkillId}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data) {
-          setStudioContent(data);
-        }
+        if (data) setStudioContent(data);
       })
       .catch(() => {});
   }, [selectedSkillId]);
 
-  // Audio animation ticker
   useEffect(() => {
     let interval: any;
     if (isPlayingAudio) {
@@ -170,9 +162,7 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
           "Hey! Here is your 60-second golden rule. Always enclose repeated iterations in brackets before distributing outer signs.";
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
         utterance.rate = 1.05;
-        utterance.onend = () => {
-          setIsPlayingAudio(false);
-        };
+        utterance.onend = () => setIsPlayingAudio(false);
         window.speechSynthesis.speak(utterance);
       }
     }
@@ -190,465 +180,306 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn pb-16">
-      {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between p-5 rounded-2xl bg-slate-900 border border-slate-800 gap-4">
+    <div className="space-y-6 font-sans pb-16">
+      {/* Top Header Card */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl bg-[#121316] border border-white/[0.08] gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              {viewMode === 'recovery' ? 'Stage 5: Marks Recovery Map' : viewMode === 'studio' ? 'Stage 6: Multimodal Intervention Studio' : 'Stage 5 & 6 Marks Recovery & Studio'}
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded border border-[#27C57E]/20">
+              Stage 5 & 6 • Recovery ROI & Studio
             </span>
-            <span className="text-xs font-mono text-slate-400">MATH 301 • Midterm Remediation</span>
+            <span className="text-xs font-mono text-[#8A8F98]">MATH 301</span>
           </div>
-          <h2 className="text-xl font-bold text-white mt-1.5 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-emerald-400" />
-            {viewMode === 'recovery' ? 'High-Yield Marks Recovery Map' : viewMode === 'studio' ? 'Multimodal Intervention Studio' : 'Marks Recovery Map & Multimodal Studio'}
-          </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Bridging your baseline (52%) to target (75%) by prioritizing high-yield cognitive leak repairs.
+          <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-[#27C57E]" />
+            Marks Recovery Map & Multimodal Studio
+          </h1>
+          <p className="text-xs text-[#8A8F98] mt-0.5">
+            Prioritizes high-yield remediation to bridge baseline (52%) to target (75%).
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Stage View Mode Switcher */}
-          <div className="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800 text-xs font-semibold">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="inline-flex p-0.5 rounded-lg bg-[#08090a] border border-white/[0.06] text-xs">
             <button
               onClick={() => { setViewMode('recovery'); onNavigateToRecovery?.(); }}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                viewMode === 'recovery' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`px-2.5 py-1 rounded-md transition-all ${
+                viewMode === 'recovery' ? 'bg-white/[0.08] text-white' : 'text-[#8A8F98] hover:text-white'
               }`}
             >
               5. Recovery Map
             </button>
             <button
               onClick={() => { setViewMode('studio'); onNavigateToStudio?.(); }}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                viewMode === 'studio' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              className={`px-2.5 py-1 rounded-md transition-all ${
+                viewMode === 'studio' ? 'bg-white/[0.08] text-white' : 'text-[#8A8F98] hover:text-white'
               }`}
             >
-              6. Studio Players
+              6. Studio
             </button>
             <button
               onClick={() => setViewMode('all')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                viewMode === 'all' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
+              className={`px-2.5 py-1 rounded-md transition-all ${
+                viewMode === 'all' ? 'bg-white/[0.08] text-white' : 'text-[#8A8F98] hover:text-white'
               }`}
             >
-              Unified View
+              Unified
             </button>
           </div>
 
-          <div className="px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-right">
-            <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Recoverable</p>
-            <p className="text-lg font-black text-emerald-400">+19 Marks</p>
+          <div className="px-3 py-1.5 rounded-lg bg-[#08090a] border border-white/[0.08] text-right">
+            <p className="text-[9px] font-mono uppercase text-[#8A8F98]">Total Recoverable</p>
+            <p className="text-xs font-mono font-semibold text-[#27C57E] tabular-nums">+19.0 Marks</p>
           </div>
-          <div className="px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-right">
-            <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Study Time</p>
-            <p className="text-lg font-black text-indigo-400">75 Mins</p>
+
+          <div className="px-3 py-1.5 rounded-lg bg-[#08090a] border border-white/[0.08] text-right">
+            <p className="text-[9px] font-mono uppercase text-[#8A8F98]">Total Study Time</p>
+            <p className="text-xs font-mono font-semibold text-[#5E6AD2] tabular-nums">75 Mins</p>
           </div>
         </div>
       </div>
 
-      {/* Stage 5: Marks Recovery ROI Prioritizer Table */}
+      {/* STAGE 5: RECOVERY ROADMAP TABLE */}
       {(viewMode === 'recovery' || viewMode === 'all') && (
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Award className="w-4 h-4 text-amber-400" />
-            Remediation Priority Roadmap (Ranked by ROI = Weight × Burden × Velocity)
-          </h3>
-          <span className="text-[11px] text-slate-500">Select row or click Launch Studio to train</span>
-        </div>
+        <div className="rounded-xl bg-[#121316] border border-white/[0.08] overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-xs font-mono uppercase text-[#F7F8F8]">
+              Remediation Priority Roadmap (Ranked by ROI)
+            </span>
+            <span className="text-[11px] font-mono text-[#8A8F98]">Click row to load Studio</span>
+          </div>
 
-        <div className="grid grid-cols-1 gap-3">
-          {priorities.map((item) => {
-            const isSelected = selectedSkillId === item.id;
-            return (
-              <div
-                key={item.id}
-                onClick={() => setSelectedSkillId(item.id)}
-                className={`cursor-pointer rounded-xl border p-4 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                  isSelected
-                    ? 'bg-slate-900 border-indigo-500 shadow-md shadow-indigo-500/10'
-                    : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
-                }`}
-              >
-                <div className="flex items-start space-x-3.5">
-                  <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
-                      item.rank === 1
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                        : 'bg-slate-800 text-slate-400'
-                    }`}
-                  >
-                    #{item.rank}
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h4 className="text-sm font-bold text-white">{item.name}</h4>
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-medium">
-                        {item.errorType}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-4 mt-1 text-xs text-slate-400">
-                      <span>Exam Weight: <strong className="text-slate-200">{item.examWeight}%</strong></span>
-                      <span>•</span>
-                      <span>Fix Time: <strong className="text-slate-200">{item.timeMins} mins</strong></span>
-                      <span>•</span>
-                      <span className="text-indigo-400">Modality: {item.recommendedModality.replace(/_/g, ' ')}</span>
+          <div className="divide-y divide-white/[0.04]">
+            {priorities.map((item) => {
+              const isSelected = selectedSkillId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    setSelectedSkillId(item.id);
+                    setActiveTab(item.recommendedModality);
+                  }}
+                  className={`px-4 py-3 flex items-center justify-between cursor-pointer transition-colors ${
+                    isSelected ? 'bg-[#5E6AD2]/10 border-l-2 border-l-[#5E6AD2]' : 'hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3 min-w-0 flex-1 pr-4">
+                    <span className="font-mono text-xs font-semibold text-[#8A8F98]">P{item.rank}</span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-[#F7F8F8] truncate">{item.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5 text-[10px] font-mono text-[#8A8F98]">
+                        <span className="text-[#E59934]">{item.errorType}</span>
+                        <span>•</span>
+                        <span>Weight: {item.examWeight}%</span>
+                        <span>•</span>
+                        <span>Time: {item.timeMins}m</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between md:justify-end space-x-3">
-                  <div className="text-right">
-                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
-                      +{item.marksRecoverable} Marks
+                  <div className="flex items-center space-x-3 shrink-0">
+                    <span className="text-xs font-mono font-semibold text-[#27C57E] tabular-nums">
+                      +{item.marksRecoverable} M
                     </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedSkillId(item.id);
+                        setActiveTab(item.recommendedModality);
+                        setViewMode('studio');
+                      }}
+                      className="px-2.5 py-1 rounded bg-white/[0.06] hover:bg-white/[0.12] text-[11px] text-[#F7F8F8] transition-all flex items-center gap-1"
+                    >
+                      <span>Studio</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </button>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedSkillId(item.id);
-                      setViewMode('studio');
-                      onNavigateToStudio?.();
-                    }}
-                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-sm"
-                  >
-                    <span>Launch Studio</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
       )}
 
-      {/* Stage 6: Multimodal Intervention Studio */}
+      {/* STAGE 6: MULTIMODAL STUDIO PLAYER */}
       {(viewMode === 'studio' || viewMode === 'all') && (
-      <div className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
-        {/* Studio Tabs */}
-        <div className="border-b border-slate-800 p-4 bg-slate-950/60 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center space-x-2">
-            <Zap className="w-4 h-4 text-indigo-400" />
-            <span className="text-xs font-bold text-white uppercase tracking-wider">
-              Multimodal Studio: {priorities.find((p) => p.id === selectedSkillId)?.name}
-            </span>
+        <div className="rounded-xl bg-[#121316] border border-white/[0.08] overflow-hidden space-y-4 p-5">
+          {/* Studio Navigation & Modality Tabs */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+            <div>
+              <span className="text-[10px] font-mono uppercase text-[#5E6AD2]">Active Learning Unit</span>
+              <h3 className="text-sm font-semibold text-[#F7F8F8] mt-0.5">
+                {studioContent?.skill_name || 'Integration by Parts: Bracket Sign Distribution'}
+              </h3>
+            </div>
+
+            <div className="inline-flex p-0.5 rounded-lg bg-[#08090a] border border-white/[0.06] text-xs">
+              <button
+                onClick={() => setActiveTab('flowchart')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+                  activeTab === 'flowchart' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-[#8A8F98] hover:text-white'
+                }`}
+              >
+                1. Flowchart
+              </button>
+              <button
+                onClick={() => setActiveTab('bug')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+                  activeTab === 'bug' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-[#8A8F98] hover:text-white'
+                }`}
+              >
+                2. Spot-The-Bug
+              </button>
+              <button
+                onClick={() => setActiveTab('analogy')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+                  activeTab === 'analogy' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-[#8A8F98] hover:text-white'
+                }`}
+              >
+                3. Analogy
+              </button>
+              <button
+                onClick={() => setActiveTab('audio')}
+                className={`px-3 py-1.5 rounded-md font-medium transition-all ${
+                  activeTab === 'audio' ? 'bg-white/[0.08] text-white shadow-sm' : 'text-[#8A8F98] hover:text-white'
+                }`}
+              >
+                4. 60s Audio
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 space-x-1">
-            <button
-              onClick={() => setActiveTab('flowchart')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'flowchart'
-                  ? 'bg-indigo-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              1. Visual Flowchart
-            </button>
-            <button
-              onClick={() => setActiveTab('bug')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'bug'
-                  ? 'bg-indigo-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              2. Spot-The-Bug Drill
-            </button>
-            <button
-              onClick={() => setActiveTab('analogy')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'analogy'
-                  ? 'bg-indigo-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              3. Real-World Analogy
-            </button>
-            <button
-              onClick={() => setActiveTab('audio')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeTab === 'audio'
-                  ? 'bg-indigo-600 text-white shadow'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              4. 60s Audio Deconstruction
-            </button>
-          </div>
-        </div>
-
-        {/* Grounded Lecture Note Callout Banner (Task 4.3) */}
-        {studioContent?.lecture_grounding_quote && (
-          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-start space-x-3 text-xs animate-fadeIn">
-            <BookOpen className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" />
-            <div className="space-y-1">
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-indigo-300">Grounded in Professor's Lecture Notes:</span>
-                {studioContent.lecture_citations?.[0]?.slide_number && (
-                  <span className="px-1.5 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-mono text-[10px]">
-                    Slide {studioContent.lecture_citations[0].slide_number}
-                  </span>
-                )}
-                {studioContent.lecture_citations?.[0]?.title && (
-                  <span className="text-[10px] text-slate-400 truncate max-w-xs">
-                    {studioContent.lecture_citations[0].title}
-                  </span>
-                )}
+          {/* TAB 1: FLOWCHART */}
+          {activeTab === 'flowchart' && (
+            <div className="p-4 rounded-xl bg-[#08090a] border border-white/[0.06] space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono uppercase text-[#F7F8F8]">Decision Tree • Canonical Flowchart</span>
+                <span className="text-[10px] font-mono text-[#8A8F98]">Mermaid Syntax Engine</span>
               </div>
-              <p className="text-slate-300 italic font-serif leading-relaxed">
-                "{studioContent.lecture_grounding_quote}"
+              <div className="p-4 rounded-lg bg-[#121316] border border-white/[0.06] font-mono text-xs text-[#27C57E] whitespace-pre overflow-x-auto">
+{studioContent?.flowchart_mermaid_code || `graph TD
+  A[Evaluate Integral] --> B{Product of Two Unlike Functions?}
+  B -->|Yes| C[Apply Integration by Parts: uv - ∫v du]
+  B -->|No| D[Check Substitution or Standard Form]
+  C --> E[First Iteration: Set u = x^2, dv = cos x dx]
+  E --> F{Second Iteration Needed?}
+  F -->|Yes| G[CRITICAL: Enclose entire 2nd iteration in [ brackets ]]
+  G --> H[Distribute Outer Minus Sign: - [ -2x cos x + 2 sin x ]]
+  H --> I[Result: +2x cos x - 2 sin x + C]`}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: SPOT-THE-BUG */}
+          {activeTab === 'bug' && (
+            <div className="p-4 rounded-xl bg-[#08090a] border border-white/[0.06] space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono uppercase text-[#F7F8F8]">Spot-The-Bug Interactive Drill</span>
+                <span className="text-[10px] font-mono text-[#E59934]">Click the flawed line</span>
+              </div>
+
+              <div className="space-y-2">
+                {[
+                  { step: 1, text: '∫ x² e^(-x) dx = -x² e^(-x) - ∫ -2x e^(-x) dx' },
+                  { step: 2, text: '= -x² e^(-x) + 2 ∫ x e^(-x) dx' },
+                  { step: 3, text: '= -x² e^(-x) + 2 [ -x e^(-x) - ∫ e^(-x) dx ]  (Sign Error Here!)' },
+                  { step: 4, text: '= -x² e^(-x) - 2x e^(-x) - 2 e^(-x) + C' },
+                ].map((s) => (
+                  <button
+                    key={s.step}
+                    onClick={() => handleBugSelection(s.step)}
+                    className={`w-full p-3 rounded-lg border text-left text-xs font-mono transition-all flex items-center justify-between ${
+                      selectedBugStep === s.step
+                        ? s.step === 3
+                          ? 'bg-[#27C57E]/10 border-[#27C57E] text-[#F7F8F8]'
+                          : 'bg-[#EB5757]/10 border-[#EB5757] text-[#F7F8F8]'
+                        : 'bg-[#121316] border-white/[0.06] hover:border-white/[0.12] text-[#8A8F98]'
+                    }`}
+                  >
+                    <span>Step {s.step}: {s.text}</span>
+                    {selectedBugStep === s.step && (
+                      <span className="text-[10px] font-mono">
+                        {s.step === 3 ? 'BUG FOUND ✅' : 'CLEAN ❌'}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {bugFeedback && (
+                <div className="p-3 rounded-lg bg-[#121316] border border-white/[0.08] text-xs leading-relaxed text-[#F7F8F8]">
+                  {bugFeedback}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: ANALOGY */}
+          {activeTab === 'analogy' && (
+            <div className="p-4 rounded-xl bg-[#08090a] border border-white/[0.06] space-y-3">
+              <span className="text-xs font-mono uppercase text-[#F7F8F8]">
+                {studioContent?.analogy_title || 'The Russian Nesting Doll & Bank Overdraft Analogy'}
+              </span>
+              <p className="text-xs text-[#8A8F98] leading-relaxed">
+                {studioContent?.analogy_content ||
+                  'Think of repeated integration by parts like opening a series of locked boxes. The outer negative sign is a tax on the entire second box. If you open the inner box without checking the tax rate, you inadvertently invert your savings into debt. Always maintain the outer container brackets until every inner calculation is resolved!'}
               </p>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Studio Tab Contents */}
-        <div className="p-6">
-          {/* TAB 1: VISUAL FLOWCHART */}
-          {activeTab === 'flowchart' && (
-            <div className="space-y-5 animate-fadeIn">
+          {/* TAB 4: 60S AUDIO */}
+          {activeTab === 'audio' && (
+            <div className="p-5 rounded-xl bg-[#08090a] border border-white/[0.06] space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-white">Visual Decision Flowchart</h4>
-                  <p className="text-xs text-slate-400">Step-by-step logic guardrails for repeated integration by parts.</p>
+                  <span className="text-xs font-mono uppercase text-[#F7F8F8]">60-Second Audio Deconstruction</span>
+                  <p className="text-xs text-[#8A8F98] mt-0.5">Rapid audio walkthrough designed for pre-exam review.</p>
                 </div>
-                <span className="text-xs px-2.5 py-1 rounded bg-indigo-500/10 text-indigo-300 font-mono">
-                  Procedural Guardrail
-                </span>
+
+                <button
+                  onClick={togglePlayAudio}
+                  className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all"
+                >
+                  {isPlayingAudio ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  <span>{isPlayingAudio ? 'Pause' : 'Play Deconstruction'}</span>
+                </button>
               </div>
 
-              <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
-                <div className="flex flex-col items-center space-y-3 font-mono text-xs">
-                  {/* Step A */}
-                  <div className="p-3 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-center w-full max-w-md shadow-sm">
-                    <strong>Step 1:</strong> Apply ∫ u dv = uv - ∫ v du
-                  </div>
-                  <div className="w-0.5 h-4 bg-slate-700" />
-
-                  {/* Decision B */}
-                  <div className="p-3 rounded-lg bg-indigo-950/50 border border-indigo-500/50 text-indigo-200 text-center w-full max-w-md">
-                    ❓ <strong>Decision:</strong> Does the second integral contain another product?
-                  </div>
-                  <div className="w-0.5 h-4 bg-slate-700" />
-
-                  {/* Branch C (YES) */}
-                  <div className="p-3.5 rounded-lg bg-rose-950/40 border border-rose-500/40 text-rose-200 text-center w-full max-w-md font-bold">
-                    ⚠️ STOP: Wrap in Giant Square Brackets!
-                    <div className="text-[11px] font-normal text-rose-300 mt-1">
-                      - [ u₂ v₂ - ∫ v₂ du₂ ]
-                    </div>
-                  </div>
-                  <div className="w-0.5 h-4 bg-slate-700" />
-
-                  {/* Step D */}
-                  <div className="p-3 rounded-lg bg-slate-900 border border-slate-700 text-slate-300 text-center w-full max-w-md">
-                    Evaluate everything inside the inner brackets completely
-                  </div>
-                  <div className="w-0.5 h-4 bg-slate-700" />
-
-                  {/* Step E */}
-                  <div className="p-3 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 text-center w-full max-w-md font-semibold">
-                    LAST STEP: Distribute outer negative across inner terms + C
-                  </div>
+              {/* Progress & Animated Waveform */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-[11px] font-mono text-[#8A8F98]">
+                  <span>0:{audioProgress < 10 ? `0${audioProgress}` : audioProgress}</span>
+                  <span>1:00</span>
                 </div>
+                <div className="w-full bg-white/[0.06] h-1.5 rounded-full overflow-hidden">
+                  <div
+                    className="bg-[#27C57E] h-full transition-all duration-300"
+                    style={{ width: `${(audioProgress / 60) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 rounded-lg bg-[#121316] border border-white/[0.06] text-xs font-mono text-[#8A8F98] leading-relaxed">
+                &ldquo;{studioContent?.audio_summary_script ||
+                  'Golden Rule: Whenever you perform repeated integration by parts, wrap iteration two inside brackets immediately. The minus sign in front applies to both uv and the integral term!'}
+                &rdquo;
               </div>
             </div>
           )}
 
-          {/* TAB 2: SPOT-THE-BUG DRILL */}
-          {activeTab === 'bug' && (
-            <div className="space-y-5 animate-fadeIn">
-              <div>
-                <h4 className="text-sm font-bold text-white">Spot-The-Bug Diagnostic Drill</h4>
-                <p className="text-xs text-slate-400">
-                  Click on the step where the student made an algebraic or procedural leak:
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-xs">
-                <p className="font-semibold text-slate-300 mb-3">
-                  Problem: Evaluate ∫ x e^(-x) dx
-                </p>
-
-                <div className="space-y-2.5">
-                  <div
-                    onClick={() => handleBugSelection(1)}
-                    className={`cursor-pointer p-3 rounded-lg border font-mono transition-all ${
-                      selectedBugStep === 1
-                        ? 'bg-slate-800 border-indigo-500 text-white'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <strong>Step 1:</strong> u = x, dv = e^(-x)dx  ⟹  du = dx, v = -e^(-x)
-                  </div>
-
-                  <div
-                    onClick={() => handleBugSelection(2)}
-                    className={`cursor-pointer p-3 rounded-lg border font-mono transition-all ${
-                      selectedBugStep === 2
-                        ? 'bg-slate-800 border-indigo-500 text-white'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <strong>Step 2:</strong> = -x e^(-x) - ∫ -e^(-x) dx
-                  </div>
-
-                  <div
-                    onClick={() => handleBugSelection(3)}
-                    className={`cursor-pointer p-3 rounded-lg border font-mono transition-all ${
-                      selectedBugStep === 3
-                        ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300'
-                        : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800'
-                    }`}
-                  >
-                    <strong>Step 3:</strong> = -x e^(-x) - e^(-x) + C  <span className="text-amber-400 text-[11px] ml-2">[Click here if bug is here]</span>
-                  </div>
-                </div>
-
-                {bugFeedback && (
-                  <div
-                    className={`mt-4 p-3 rounded-lg border text-xs font-medium leading-relaxed ${
-                      selectedBugStep === 3
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                        : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
-                    }`}
-                  >
-                    {bugFeedback}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: REAL-WORLD ANALOGY */}
-          {activeTab === 'analogy' && (
-            <div className="space-y-4 animate-fadeIn">
-              <div className="flex items-center space-x-2 text-indigo-400">
-                <Brain className="w-5 h-5" />
-                <h4 className="text-sm font-bold text-white">The Nested Suitcase Rule</h4>
-              </div>
-
-              <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 text-xs leading-relaxed text-slate-300 space-y-3">
-                <p>
-                  Imagine packing a smaller toiletry suitcase inside a giant travel suitcase. The outer minus sign in front of the second integration is a security lock on the outer suitcase.
-                </p>
-                <div className="p-3 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-indigo-200">
-                  &ldquo;If you unlock the outer suitcase while the items inside the toiletry bag are still loose, things will get mixed up. Always keep the toiletry bag sealed in giant brackets <code>[ ... ]</code> until all calculations inside are 100% finished.&rdquo;
-                </div>
-                <p>
-                  Only when the inner integral is completely evaluated do you distribute the outer negative sign across each individual term. This prevents 90% of sign flips!
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: 60S AUDIO DECONSTRUCTION (Proposal #006 Waveform Visualizer) */}
-          {activeTab === 'audio' && (
-            <div className="space-y-5 animate-fadeIn">
-              <div>
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Volume2 className="w-4 h-4 text-indigo-400" />
-                  60-Second Audio Deconstruction
-                </h4>
-                <p className="text-xs text-slate-400">
-                  Concise verbal breakdown synthesized for quick auditory review.
-                </p>
-              </div>
-
-              {/* Audio Player Card with Animated Waveform (Proposal #006) */}
-              <div className="p-5 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <button
-                      onClick={togglePlayAudio}
-                      className="w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30 transition-all"
-                    >
-                      {isPlayingAudio ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
-                    </button>
-                    <div>
-                      <p className="text-xs font-bold text-white">Repeated Parts: The Bracket Rule</p>
-                      <p className="text-[10px] text-slate-400">Duration: 0:{audioProgress < 10 ? `0${audioProgress}` : audioProgress} / 1:00</p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => setIsAudioMuted(!isAudioMuted)}
-                    className="p-2 rounded-lg bg-slate-900 text-slate-400 hover:text-white"
-                  >
-                    {isAudioMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-                  </button>
-                </div>
-
-                {/* Animated Waveform Bars (Feature Proposal #006) */}
-                <div className="h-16 flex items-center justify-center gap-1 bg-slate-900/60 rounded-xl px-4 border border-slate-800/80 overflow-hidden">
-                  {[24, 40, 18, 52, 35, 60, 44, 28, 50, 64, 30, 48, 58, 22, 38, 55, 32, 45, 62, 26, 42, 54, 36, 48, 30].map(
-                    (height, idx) => {
-                      const isAnimated = isPlayingAudio;
-                      const dynamicHeight = isAnimated
-                        ? Math.max(12, Math.min(60, height + Math.sin(audioProgress * 2 + idx) * 20))
-                        : height * 0.4;
-
-                      return (
-                        <div
-                          key={idx}
-                          style={{ height: `${dynamicHeight}px` }}
-                          className={`w-1.5 rounded-full transition-all duration-200 ${
-                            isPlayingAudio
-                              ? 'bg-gradient-to-t from-indigo-500 to-violet-400'
-                              : 'bg-slate-700'
-                          }`}
-                        />
-                      );
-                    }
-                  )}
-                </div>
-
-                {/* Transcript Readout */}
-                <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-300 italic leading-relaxed">
-                  &ldquo;Never try to distribute minus signs in your head. Professor Kapoor calls this the bracket trap. Whenever you apply the formula a second time, immediately drop a giant pair of square brackets around the whole thing: minus, open bracket, u-two v-two minus the integral of v-two du-two, close bracket. Evaluate everything inside first, and only multiply the negative sign on your final line.&rdquo;
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Studio Bottom Action */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
-          <div className="flex items-center space-x-2 text-xs text-slate-400">
-            <Clock className="w-4 h-4 text-indigo-400" />
-            <span>Estimated time to lock in mastery: <strong>5 mins</strong></span>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            {viewMode === 'studio' && (
-              <button
-                onClick={() => {
-                  setViewMode('recovery');
-                  onNavigateToRecovery?.();
-                }}
-                className="px-3.5 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
-              >
-                ← Back to Roadmap
-              </button>
-            )}
+          {/* Bottom Action: Proceed to Reassessment Drill */}
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
+            <span className="text-xs text-[#8A8F98]">Ready to verify your recovery?</span>
             <button
               onClick={onNavigateToReassessment}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:brightness-110 shadow-lg shadow-emerald-600/20 transition-all"
+              className="flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-[#27C57E] hover:bg-[#20A668] text-[#08090a] text-xs font-semibold transition-all shadow-[0_2px_8px_rgba(39,197,126,0.3)]"
             >
-              <span>Lock in +8 Marks with Reassessment</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Take Isomorphic Verification Drill</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
-      </div>
       )}
     </div>
   );
 };
-
-export default InterventionStudio;

@@ -7,7 +7,6 @@ import {
   ShieldAlert,
   ArrowRight,
   Sparkles,
-  Info,
   CheckCircle2,
   BrainCircuit,
 } from 'lucide-react';
@@ -16,15 +15,14 @@ import { ErrorFingerprintResponse, ErrorTaxonomy } from '../../types/schema';
 interface ErrorFingerprintProps {
   courseId?: string;
   onNavigateToRecovery?: () => void;
-  onSelectCategory?: (errorType: string) => void;
+  onSelectSkill?: (skillId: string) => void;
 }
 
 export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
   courseId = 'course_calc_301',
   onNavigateToRecovery,
-  onSelectCategory,
+  onSelectSkill,
 }) => {
-  const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<ErrorFingerprintResponse | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
@@ -32,7 +30,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
     let isMounted = true;
     const fetchFingerprint = async () => {
       try {
-        const res = await fetch(`/api/submissions/fingerprint?course_id=${encodeURIComponent(courseId)}`);
+        const res = await fetch(`/api/fingerprint?course_id=${encodeURIComponent(courseId)}`);
         if (res.ok) {
           const json = await res.json();
           if (isMounted) {
@@ -45,7 +43,6 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
         console.warn('Using fallback baseline for fingerprint', e);
       }
 
-      // High-fidelity fallback baseline
       if (isMounted) {
         setData({
           course_id: courseId,
@@ -58,7 +55,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
               count: 8,
               percentage: 53.3,
               marks_lost_total: 18.0,
-              example_question_ids: ['q3_integration_by_parts', 'q7_line_integrals', 'q11_determinant'],
+              example_question_ids: ['q3_integration_by_parts', 'q7_line_integrals'],
             },
             {
               error_type: 'method_selection' as ErrorTaxonomy,
@@ -78,7 +75,6 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
         });
         setSelectedType('procedural_calculation');
       }
-      if (isMounted) setLoading(false);
     };
 
     fetchFingerprint();
@@ -93,11 +89,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
         return {
           label: 'Procedural Calculation',
           subtitle: 'Sign distribution, algebraic manipulation, bracket inversions',
-          color: 'from-amber-500 to-orange-500',
-          textColor: 'text-amber-400',
-          bgColor: 'bg-amber-500/10',
-          borderColor: 'border-amber-500/30',
-          barColor: 'bg-amber-500',
+          color: '#E59934',
           remedyModality: 'Spot-the-Bug Interactive Micro-Drill',
           pedagogyTip: 'Enclose iterated terms in brackets before distributing negative coefficients.',
         };
@@ -105,11 +97,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
         return {
           label: 'Method Selection',
           subtitle: 'Selecting ineffective formulas, premature substitution before standard form',
-          color: 'from-violet-500 to-indigo-500',
-          textColor: 'text-violet-400',
-          bgColor: 'bg-violet-500/10',
-          borderColor: 'border-violet-500/30',
-          barColor: 'bg-violet-500',
+          color: '#5E6AD2',
           remedyModality: 'Visual Decision Flowchart & Pattern Matrix',
           pedagogyTip: 'Compare polynomial degree of numerator vs denominator before initiating substitution.',
         };
@@ -117,11 +105,7 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
         return {
           label: 'Rubric Omission',
           subtitle: 'Omission of integration constant (+C), boundary states, or final units',
-          color: 'from-sky-500 to-blue-500',
-          textColor: 'text-sky-400',
-          bgColor: 'bg-sky-500/10',
-          borderColor: 'border-sky-500/30',
-          barColor: 'bg-sky-500',
+          color: '#4DA0FF',
           remedyModality: 'Rubric Checkpoint Self-Audit Protocol',
           pedagogyTip: 'Always write `+ C` immediately when removing the final integral sign.',
         };
@@ -129,12 +113,8 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
       default:
         return {
           label: 'Conceptual Misunderstanding',
-          subtitle: 'Violations of fundamental theorems (e.g., FTC across infinite singularities)',
-          color: 'from-rose-500 to-pink-500',
-          textColor: 'text-rose-400',
-          bgColor: 'bg-rose-500/10',
-          borderColor: 'border-rose-500/30',
-          barColor: 'bg-rose-500',
+          subtitle: 'Violations of fundamental theorems (e.g. FTC across singularities)',
+          color: '#EB5757',
           remedyModality: 'Intuitive Real-World Analogy & Boundary Sandbox',
           pedagogyTip: 'Verify domain continuity before applying Fundamental Theorem of Calculus.',
         };
@@ -143,146 +123,90 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
 
   if (!data) {
     return (
-      <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 text-center animate-pulse">
-        <BrainCircuit className="w-8 h-8 text-indigo-400 mx-auto animate-spin" />
-        <p className="text-xs text-slate-400 mt-2">Computing longitudinal cognitive error fingerprint...</p>
+      <div className="p-8 rounded-xl bg-[#121316] border border-white/[0.08] text-center text-xs text-[#8A8F98]">
+        Computing cognitive error fingerprint...
       </div>
     );
   }
 
-  const primaryConfig = getTaxonomyConfig(data.primary_cognitive_leak);
   const activeDetail = data.breakdown.find((b) => b.error_type === selectedType) || data.breakdown[0];
   const activeConfig = getTaxonomyConfig(activeDetail?.error_type || 'procedural_calculation');
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Top Banner Card: Longitudinal Overview */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 relative overflow-hidden shadow-xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center gap-1">
-                <BrainCircuit className="w-3.5 h-3.5" /> Stage 4 Cognitive Error Fingerprint
-              </span>
-              <span className="text-xs font-mono text-slate-400">Longitudinal Analysis</span>
-            </div>
-            <h2 className="text-xl font-bold text-white mt-1.5 flex items-center gap-2">
-              <PieChart className="w-5 h-5 text-indigo-400" />
-              Root-Cause Cognitive Error Taxonomy
-            </h2>
-            <p className="text-xs text-slate-400 mt-1 max-w-xl">
-              EduTrace isolates the underlying cognitive habits draining your marks across past exams and diagnostic probes.
-            </p>
+    <div className="space-y-5 font-sans">
+      {/* Top Banner Card */}
+      <div className="p-5 rounded-xl bg-[#121316] border border-white/[0.08] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#5E6AD2] bg-[#5E6AD2]/10 px-1.5 py-0.5 rounded border border-[#5E6AD2]/20">
+              Stage 4 • Cognitive Error Taxonomy
+            </span>
+            <span className="text-xs font-mono text-[#8A8F98]">Longitudinal Analysis</span>
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-right">
-              <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Marks Lost</p>
-              <p className="text-xl font-black text-rose-400 flex items-center justify-end gap-1">
-                <TrendingDown className="w-4 h-4 text-rose-400" />
-                -{data.total_marks_lost.toFixed(1)}
-              </p>
-            </div>
-            <div className="px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-right">
-              <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Sample Size</p>
-              <p className="text-xl font-black text-white">{data.total_errors_analyzed} <span className="text-xs text-slate-400 font-normal">items</span></p>
-            </div>
-          </div>
+          <h2 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
+            <PieChart className="w-4 h-4 text-[#5E6AD2]" />
+            Cognitive Error Fingerprint
+          </h2>
+          <p className="text-xs text-[#8A8F98] mt-0.5">
+            Identifies systemic recurring mental habits draining marks across past tests.
+          </p>
         </div>
 
-        {/* Primary Cognitive Leak Callout */}
-        <div className="mt-5 p-4 rounded-xl bg-rose-950/20 border border-rose-500/30 flex items-start space-x-3.5">
-          <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-          <div className="flex-1 text-xs">
-            <div className="flex items-center space-x-2">
-              <span className="font-bold text-rose-300">Dominant Marks Drain Identified:</span>
-              <span className={`px-2 py-0.5 rounded font-mono text-[11px] font-bold ${primaryConfig.bgColor} ${primaryConfig.textColor} border ${primaryConfig.borderColor}`}>
-                {primaryConfig.label}
-              </span>
-              <span className="text-slate-400 text-[11px]">
-                (Accounts for {data.breakdown.find(b => b.error_type === data.primary_cognitive_leak)?.percentage || 53.3}% of lost marks)
-              </span>
-            </div>
-            <p className="text-slate-300 mt-1 leading-relaxed">
-              Your conceptual understanding is strong, but procedural sign-flips in multi-step derivations account for over half your grade loss. Resolving this single habit will recover up to <strong>+18.0 Marks</strong>.
+        <div className="flex items-center space-x-3">
+          <div className="px-3 py-1.5 rounded-lg bg-[#08090a] border border-white/[0.08] text-right">
+            <p className="text-[9px] font-mono uppercase text-[#8A8F98]">Marks Lost</p>
+            <p className="text-xs font-mono font-semibold text-[#EB5757] tabular-nums">
+              -{data.total_marks_lost.toFixed(1)} M
+            </p>
+          </div>
+          <div className="px-3 py-1.5 rounded-lg bg-[#08090a] border border-white/[0.08] text-right">
+            <p className="text-[9px] font-mono uppercase text-[#8A8F98]">Sample Size</p>
+            <p className="text-xs font-mono font-semibold text-[#F7F8F8] tabular-nums">
+              {data.total_errors_analyzed} Items
             </p>
           </div>
         </div>
       </div>
 
-      {/* Grid: Taxonomy Distribution Bars (Left 7 cols) & Deep Dive Card (Right 5 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Category Bars */}
-        <div className="lg:col-span-7 space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Layers className="w-4 h-4 text-slate-400" />
-              Taxonomy Breakdown (Click to inspect)
-            </h3>
-            <span className="text-[11px] text-slate-500">Sorted by mark loss impact</span>
+      {/* Main Breakdown Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Left Column: Taxonomy Categories (2 Cols) */}
+        <div className="lg:col-span-2 rounded-xl bg-[#121316] border border-white/[0.08] overflow-hidden">
+          <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+            <span className="text-xs font-mono uppercase text-[#F7F8F8]">Error Categories</span>
+            <span className="text-[10px] font-mono text-[#8A8F98]">Click row to inspect</span>
           </div>
 
-          <div className="space-y-3">
+          <div className="divide-y divide-white/[0.04]">
             {data.breakdown.map((item) => {
-              const config = getTaxonomyConfig(item.error_type);
+              const cfg = getTaxonomyConfig(item.error_type);
               const isSelected = selectedType === item.error_type;
 
               return (
                 <div
                   key={item.error_type}
-                  onClick={() => {
-                    setSelectedType(item.error_type);
-                    if (onSelectCategory) onSelectCategory(item.error_type);
-                  }}
-                  className={`cursor-pointer rounded-xl border p-4 transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-slate-900 border-indigo-500 shadow-lg shadow-indigo-500/10 scale-[1.01]'
-                      : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900'
+                  onClick={() => setSelectedType(item.error_type)}
+                  className={`p-4 cursor-pointer transition-colors ${
+                    isSelected ? 'bg-white/[0.03] border-l-2 border-l-[#5E6AD2]' : 'hover:bg-white/[0.01]'
                   }`}
                 >
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80">
+                  <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center space-x-2">
-                      <span className={`text-xs font-bold ${config.textColor}`}>
-                        {config.label}
-                      </span>
-                      {item.error_type === data.primary_cognitive_leak && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                          Primary Leak
-                        </span>
-                      )}
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cfg.color }} />
+                      <span className="text-xs font-medium text-[#F7F8F8]">{cfg.label}</span>
                     </div>
-                    <div className="flex items-center space-x-3 text-xs">
-                      <span className="font-mono text-slate-300 font-bold">{item.percentage}%</span>
-                      <span className="font-mono text-rose-400 font-bold">-{item.marks_lost_total.toFixed(1)} M</span>
-                    </div>
+                    <span className="text-xs font-mono font-semibold text-[#EB5757]">
+                      -{item.marks_lost_total.toFixed(1)} M ({item.percentage.toFixed(0)}%)
+                    </span>
                   </div>
 
-                  <p className="text-[11px] text-slate-400 mb-3">{config.subtitle}</p>
+                  <p className="text-[11px] text-[#8A8F98] ml-4">{cfg.subtitle}</p>
 
-                  {/* Progress Bar */}
-                  <div className="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+                  <div className="mt-2.5 ml-4 w-full bg-white/[0.04] h-1.5 rounded-full overflow-hidden">
                     <div
-                      className={`h-full ${config.barColor} transition-all duration-500`}
-                      style={{ width: `${Math.min(100, Math.max(5, item.percentage))}%` }}
+                      className="h-full rounded-full transition-all"
+                      style={{ width: `${item.percentage}%`, backgroundColor: cfg.color }}
                     />
-                  </div>
-
-                  {/* Example Question Badges */}
-                  <div className="mt-3 flex items-center justify-between text-[11px]">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-slate-500">Identified in:</span>
-                      {item.example_question_ids.map((qid) => (
-                        <span
-                          key={qid}
-                          className="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-800 font-mono text-slate-300 text-[10px]"
-                        >
-                          {qid}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="text-slate-400 font-mono text-[10px]">{item.count} occurrences</span>
                   </div>
                 </div>
               );
@@ -290,66 +214,30 @@ export const ErrorFingerprint: React.FC<ErrorFingerprintProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Deep-Dive Remediation Card */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 relative">
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
-              <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-indigo-400" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">Cognitive Mechanism</h4>
-                  <p className="text-[10px] text-slate-400 font-mono">{activeConfig.label}</p>
-                </div>
-              </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${activeConfig.bgColor} ${activeConfig.textColor} border ${activeConfig.borderColor}`}>
-                {activeDetail?.percentage}% of Total
-              </span>
-            </div>
-
-            <div className="space-y-3.5 text-xs">
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Root Cause Mechanism:</p>
-                <p className="text-slate-300 mt-1 leading-relaxed p-3 rounded-xl bg-slate-950 border border-slate-800/80">
-                  {activeConfig.subtitle}. Students often rush multi-line expansions without preserving enclosing parentheses, leading to an inverted algebraic sign that propagates across subsequent steps.
-                </p>
-              </div>
-
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Golden Remediation Rule:</p>
-                <div className="mt-1 p-3 rounded-xl bg-indigo-950/20 border border-indigo-500/30 text-indigo-300 leading-relaxed italic">
-                  &ldquo;{activeConfig.pedagogyTip}&rdquo;
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Recommended Intervention Modality:</p>
-                <div className="mt-1 p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span className="font-semibold text-slate-200">{activeConfig.remedyModality}</span>
-                  </div>
-                  <span className="text-[10px] text-indigo-400 font-mono font-bold">10 Mins</span>
-                </div>
-              </div>
-
-              {/* Action Button */}
-              {onNavigateToRecovery && (
-                <button
-                  onClick={onNavigateToRecovery}
-                  className="w-full mt-4 flex items-center justify-center space-x-2 py-3 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:brightness-110 text-white font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all"
-                >
-                  <span>Generate Personalized Recovery Plan</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              )}
+        {/* Right Column: Remediation Recommendation */}
+        <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08] space-y-3">
+          <span className="text-[10px] font-mono uppercase text-[#8A8F98]">Recommended Remediation</span>
+          
+          <div className="p-3 rounded-lg bg-[#08090a] border border-white/[0.06] space-y-2">
+            <span className="text-xs font-medium text-[#F7F8F8]">{activeConfig.label}</span>
+            <p className="text-xs text-[#8A8F98] leading-relaxed">{activeConfig.pedagogyTip}</p>
+            <div className="pt-2 border-t border-white/[0.04] text-[11px] text-[#27C57E]">
+              Modality: {activeConfig.remedyModality}
             </div>
           </div>
+
+          <button
+            onClick={() => {
+              if (onNavigateToRecovery) onNavigateToRecovery();
+              if (onSelectSkill) onSelectSkill('skill_parts_sign');
+            }}
+            className="w-full py-2 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all flex items-center justify-center gap-1.5"
+          >
+            <span>Proceed to Recovery ROI Map</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </div>
   );
 };
-
-export default ErrorFingerprint;

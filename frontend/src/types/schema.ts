@@ -285,8 +285,10 @@ export interface SkillMastery {
   alpha: number;
   beta: number;
   mastery_percentage: number;
-  uncertainty_range: number[];
-  last_tested_timestamp: string;
+  uncertainty_range?: number[];
+  confidence_interval?: number[];
+  status?: string;
+  last_tested_timestamp?: string;
 }
 
 export interface LearningTwinResponse {

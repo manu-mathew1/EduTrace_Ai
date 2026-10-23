@@ -37,7 +37,6 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
   const [showCelebration, setShowCelebration] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Fetch Isomorphic Question
   useEffect(() => {
     const fetchQuestion = async () => {
       setIsLoadingQuestion(true);
@@ -48,7 +47,6 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
           const data: ReassessmentQuestion = await res.json();
           setQuestion(data);
         } else {
-          // Fallback question
           setQuestion({
             reassessment_id: 'reassess_calc_01',
             skill_id: skillId,
@@ -64,7 +62,6 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
           });
         }
       } catch (e) {
-        console.warn('Reassessment question fetch offline:', e);
         setQuestion({
           reassessment_id: 'reassess_calc_01',
           skill_id: skillId,
@@ -86,7 +83,6 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
     fetchQuestion();
   }, [skillId]);
 
-  // Handle Isomorphic Solution Verification
   const handleVerify = async () => {
     if (!submittedWork.trim()) {
       setErrorMsg('Please write your derivation steps before submitting.');
@@ -114,7 +110,6 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
         setResult(data);
         setShowCelebration(true);
       } else {
-        // Fallback simulated outcome
         const isCorrect = submittedWork.includes('1/4') || submittedWork.includes('cos') || submittedWork.includes('+');
         const fallbackResult: ReassessmentResult = {
           reassessment_id: question?.reassessment_id || 'reassess_calc_01',
@@ -123,6 +118,7 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
           marks_awarded: isCorrect ? 9.5 : 4.0,
           marks_possible: 10.0,
           marks_recovered: isCorrect ? 8.0 : 2.0,
+          marks_recovered_secured: isCorrect ? 8.0 : 2.0,
           is_improved: isCorrect,
           previous_mastery_estimate: 44.4,
           new_mastery_estimate: isCorrect ? 77.8 : 48.0,
@@ -136,8 +132,7 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
         setResult(fallbackResult);
         setShowCelebration(true);
       }
-    } catch (e) {
-      console.error('Reassessment verification error:', e);
+    } catch {
       setErrorMsg('Could not reach verification engine. Check server connection.');
     } finally {
       setIsVerifying(false);
@@ -154,159 +149,129 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="space-y-6 font-sans pb-12">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl bg-[#121316] border border-white/[0.08] gap-4">
         <div>
-          <div className="flex items-center space-x-2 text-emerald-400 mb-1">
-            <ShieldCheck className="w-5 h-5" />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              Stage 7: Isomorphic Reassessment & Learning Twin Lock-in
+          <div className="flex items-center space-x-2">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded border border-[#27C57E]/20">
+              Stage 7 • Reassessment & Twin Lock-In
             </span>
+            <span className="text-xs font-mono text-[#8A8F98]">Skill #{skillId}</span>
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">
+          <h1 className="text-base font-semibold text-[#F7F8F8] mt-1 flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#27C57E]" />
             Remediation Verification Drill
           </h1>
-          <p className="text-xs text-slate-400 mt-1 max-w-2xl">
-            Solve this structurally comparable problem to prove conceptual remediation.
-            Passing this drill updates your Bayesian Student Twin and officially recovers your marks.
+          <p className="text-xs text-[#8A8F98] mt-0.5">
+            Solve this isomorphic problem to mathematically update your Bayesian Twin and recover marks.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center space-x-2">
           {onReturnToRecovery && (
             <button
               onClick={onReturnToRecovery}
-              className="px-3.5 py-1.5 rounded-xl border border-slate-800 bg-slate-900 text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              className="px-3 py-1.5 rounded-lg bg-[#08090a] hover:bg-white/[0.04] text-[#F7F8F8] text-xs font-medium border border-white/[0.08] transition-all"
             >
               Back to Roadmap
             </button>
           )}
           <button
             onClick={onReturnToDashboard}
-            className="px-3.5 py-1.5 rounded-xl border border-indigo-500/30 bg-indigo-500/10 text-xs font-bold text-indigo-300 hover:bg-indigo-500/20 transition-colors"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#5E6AD2] hover:bg-[#6F7CE8] text-white text-xs font-medium transition-all shadow-[0_2px_8px_rgba(94,106,210,0.3)]"
           >
-            Mission Control
+            <span>Mission Control</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Main Grid */}
+      {/* Main Grid: Problem on Left (5 cols), Editor on Right (7 cols) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Isomorphic Question & Rubric (5 cols) */}
-        <div className="lg:col-span-5 space-y-4">
-          <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" />
-                Isomorphic Question
-              </span>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                +{question?.maximum_marks || 10} Marks Possible
+        {/* Left Column: Isomorphic Question */}
+        <div className="lg:col-span-5 space-y-3">
+          <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08] space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+              <span className="text-xs font-mono uppercase text-[#F7F8F8]">Isomorphic Problem</span>
+              <span className="text-[10px] font-mono text-[#27C57E] bg-[#27C57E]/10 px-1.5 py-0.5 rounded">
+                +{question?.maximum_marks || 10} Marks
               </span>
             </div>
 
             {isLoadingQuestion ? (
-              <div className="py-12 flex flex-col items-center justify-center text-slate-500 text-xs gap-2">
-                <RefreshCw className="w-5 h-5 animate-spin text-indigo-400" />
-                <span>Generating isomorphic problem...</span>
-              </div>
+              <div className="py-8 text-center text-xs text-[#8A8F98]">Loading isomorphic drill...</div>
             ) : (
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80">
-                  <p className="text-sm font-semibold text-white leading-relaxed font-mono">
-                    {question?.question_text}
-                  </p>
+              <div className="space-y-3">
+                <div className="p-3.5 rounded-lg bg-[#08090a] border border-white/[0.06] font-mono text-xs text-[#F7F8F8] leading-relaxed">
+                  {question?.question_text}
                 </div>
 
-                <div className="space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5" />
-                    Canonical Rubric Expectations
-                  </h4>
-                  <ul className="space-y-2 text-xs">
+                <div>
+                  <span className="text-[10px] font-mono uppercase text-[#8A8F98] block mb-1.5">
+                    Model Marking Rubric:
+                  </span>
+                  <div className="space-y-1">
                     {question?.rubric_steps.map((step, idx) => (
-                      <li
+                      <div
                         key={idx}
-                        className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/60 text-slate-300 font-mono text-[11px] leading-relaxed flex items-start gap-2"
+                        className="p-2 rounded bg-[#08090a] border border-white/[0.04] text-[11px] font-mono text-[#8A8F98] flex items-start gap-2"
                       >
-                        <span className="text-indigo-400 font-bold shrink-0">{idx + 1}.</span>
-                        <span>{step}</span>
-                      </li>
+                        <span className="text-[#5E6AD2]">Step {idx + 1}:</span>
+                        <span className="truncate">{step}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Right Column: Solution Input & Verification Submission (7 cols) */}
-        <div className="lg:col-span-7 space-y-4">
-          <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <BrainCircuit className="w-4 h-4 text-emerald-400" />
-                  Your Step-by-Step Derivation
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Type each derivation line. Remember to enclose nested steps in brackets!
-                </p>
-              </div>
-
+        {/* Right Column: Solution Input Canvas */}
+        <div className="lg:col-span-7 space-y-3">
+          <div className="p-4 rounded-xl bg-[#121316] border border-white/[0.08] space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+              <span className="text-xs font-mono uppercase text-[#F7F8F8]">Your Mathematical Derivation</span>
               <button
-                type="button"
                 onClick={handlePreFillSample}
-                className="text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold underline flex items-center gap-1"
+                className="text-[11px] font-mono text-[#5E6AD2] hover:underline"
               >
-                <span>Load Sample Solution</span>
+                Pre-Fill Model Solution
               </button>
             </div>
+
+            {errorMsg && (
+              <div className="p-2.5 rounded-lg bg-[#EB5757]/10 border border-[#EB5757]/20 text-xs text-[#EB5757] flex items-center gap-2">
+                <AlertCircle className="w-3.5 h-3.5" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
 
             <textarea
               rows={8}
               value={submittedWork}
               onChange={(e) => setSubmittedWork(e.target.value)}
-              placeholder="Step 1: u = x, dv = cos(2x)dx ...&#10;Step 2: ...&#10;Step 3: ...&#10;Step 4: ..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-emerald-500 leading-relaxed shadow-inner"
+              placeholder="Write your derivation steps here line by line..."
+              className="w-full p-3 rounded-lg bg-[#08090a] border border-white/[0.08] font-mono text-xs text-[#F7F8F8] outline-none leading-relaxed"
             />
 
-            {errorMsg && (
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
-                <span>{errorMsg}</span>
-              </div>
-            )}
-
-            <div className="pt-2 flex items-center justify-between border-t border-slate-800">
-              <span className="text-[11px] text-slate-500">
-                Evaluation triggers immediate Bayesian Twin update
-              </span>
-
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-[11px] text-[#8A8F98]">Submitting updates your personal Learning Twin in SQLite</span>
               <button
                 onClick={handleVerify}
-                disabled={isVerifying || !submittedWork.trim()}
-                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 hover:brightness-110 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/25 transition-all"
+                disabled={isVerifying}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-[#27C57E] hover:bg-[#20A668] text-[#08090a] text-xs font-semibold transition-all shadow-[0_2px_8px_rgba(39,197,126,0.3)] disabled:opacity-50"
               >
-                {isVerifying ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Evaluating with Bayesian Engine...</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Submit & Verify Remediation</span>
-                  </>
-                )}
+                <span>{isVerifying ? 'Evaluating Solution...' : 'Verify & Lock In Twin'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Celebratory Learning Twin Modal */}
+      {/* Twin Verification Celebration Modal */}
       <TwinCelebrationModal
         isOpen={showCelebration}
         onClose={() => setShowCelebration(false)}
@@ -316,5 +281,3 @@ export const ReassessmentPage: React.FC<ReassessmentPageProps> = ({
     </div>
   );
 };
-
-export default ReassessmentPage;
