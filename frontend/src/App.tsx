@@ -25,10 +25,22 @@ export const App: React.FC = () => {
       {currentTab === 'forensics' && <ForensicsPage onNavigateToRecovery={() => setCurrentTab('recovery')} />}
 
       {/* Stage 5 Marks Recovery Roadmap (Pod P5) */}
-      {currentTab === 'recovery' && <InterventionStudio onNavigateToReassessment={() => setCurrentTab('reassessment')} />}
+      {currentTab === 'recovery' && (
+        <InterventionStudio
+          initialMode="recovery"
+          onNavigateToStudio={() => setCurrentTab('studio')}
+          onNavigateToReassessment={() => setCurrentTab('reassessment')}
+        />
+      )}
 
       {/* Stage 6 Multimodal Intervention Studio (Pod P5) */}
-      {currentTab === 'studio' && <InterventionStudio onNavigateToReassessment={() => setCurrentTab('reassessment')} />}
+      {currentTab === 'studio' && (
+        <InterventionStudio
+          initialMode="studio"
+          onNavigateToRecovery={() => setCurrentTab('recovery')}
+          onNavigateToReassessment={() => setCurrentTab('reassessment')}
+        />
+      )}
 
       {/* Stage 7 Reassessment & Learning Twin Lock-in (Pod P5) */}
       {currentTab === 'reassessment' && (

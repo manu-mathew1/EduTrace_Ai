@@ -355,7 +355,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
               </p>
             </div>
             <button
-              onClick={() => onNavigate('studio')}
+              onClick={() => onNavigate('reassessment')}
               className="mt-4 flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-xs font-bold text-white hover:brightness-110 transition-all shadow-sm shadow-emerald-600/20"
             >
               <span>Verify & Lock In Marks</span>

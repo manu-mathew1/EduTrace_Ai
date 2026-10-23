@@ -65,7 +65,7 @@ async def verify_reassessment(
     # Deterministic evaluation for verification demo
     work_clean = submission.submitted_work.lower()
     is_correct = ("+" in work_clean and "cos" in work_clean) or ("(1/4)" in work_clean) or ("-(-" in work_clean)
-    marks_awarded = 9.5 if is_correct else 4.0
+    marks_awarded = 10.0 if is_correct else 4.0
 
     result = await record_reassessment_outcome(
         reassessment_id=submission.reassessment_id,

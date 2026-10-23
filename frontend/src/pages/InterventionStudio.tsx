@@ -22,7 +22,10 @@ import {
 import { MultimodalStudioContent } from '../types/schema';
 
 interface InterventionStudioProps {
+  initialMode?: 'recovery' | 'studio' | 'all';
   onNavigateToReassessment?: () => void;
+  onNavigateToRecovery?: () => void;
+  onNavigateToStudio?: () => void;
 }
 
 interface PriorityItem {
@@ -36,9 +39,21 @@ interface PriorityItem {
   recommendedModality: 'spot_the_bug' | 'flowchart' | 'analogy' | 'audio';
 }
 
-export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNavigateToReassessment }) => {
+export const InterventionStudio: React.FC<InterventionStudioProps> = ({
+  initialMode = 'all',
+  onNavigateToReassessment,
+  onNavigateToRecovery,
+  onNavigateToStudio,
+}) => {
+  const [viewMode, setViewMode] = useState<'recovery' | 'studio' | 'all'>(initialMode);
   const [selectedSkillId, setSelectedSkillId] = useState<string>('skill_parts_sign');
   const [activeTab, setActiveTab] = useState<'flowchart' | 'bug' | 'analogy' | 'audio'>('flowchart');
+
+  useEffect(() => {
+    if (initialMode) {
+      setViewMode(initialMode);
+    }
+  }, [initialMode]);
 
   // Audio Player State (Proposal #006)
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
@@ -181,20 +196,48 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
         <div>
           <div className="flex items-center space-x-2">
             <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              Stage 5 & 6 Marks Recovery & Studio
+              {viewMode === 'recovery' ? 'Stage 5: Marks Recovery Map' : viewMode === 'studio' ? 'Stage 6: Multimodal Intervention Studio' : 'Stage 5 & 6 Marks Recovery & Studio'}
             </span>
             <span className="text-xs font-mono text-slate-400">MATH 301 • Midterm Remediation</span>
           </div>
           <h2 className="text-xl font-bold text-white mt-1.5 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-emerald-400" />
-            Marks Recovery Map & Multimodal Studio
+            {viewMode === 'recovery' ? 'High-Yield Marks Recovery Map' : viewMode === 'studio' ? 'Multimodal Intervention Studio' : 'Marks Recovery Map & Multimodal Studio'}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
             Bridging your baseline (52%) to target (75%) by prioritizing high-yield cognitive leak repairs.
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Stage View Mode Switcher */}
+          <div className="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800 text-xs font-semibold">
+            <button
+              onClick={() => { setViewMode('recovery'); onNavigateToRecovery?.(); }}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                viewMode === 'recovery' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              5. Recovery Map
+            </button>
+            <button
+              onClick={() => { setViewMode('studio'); onNavigateToStudio?.(); }}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                viewMode === 'studio' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              6. Studio Players
+            </button>
+            <button
+              onClick={() => setViewMode('all')}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                viewMode === 'all' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              Unified View
+            </button>
+          </div>
+
           <div className="px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-right">
             <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Recoverable</p>
             <p className="text-lg font-black text-emerald-400">+19 Marks</p>
@@ -207,13 +250,14 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
       </div>
 
       {/* Stage 5: Marks Recovery ROI Prioritizer Table */}
+      {(viewMode === 'recovery' || viewMode === 'all') && (
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <Award className="w-4 h-4 text-amber-400" />
             Remediation Priority Roadmap (Ranked by ROI = Weight × Burden × Velocity)
           </h3>
-          <span className="text-[11px] text-slate-500">Select any row to load into Multimodal Studio</span>
+          <span className="text-[11px] text-slate-500">Select row or click Launch Studio to train</span>
         </div>
 
         <div className="grid grid-cols-1 gap-3">
@@ -256,23 +300,34 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between md:justify-end space-x-4">
+                <div className="flex items-center justify-between md:justify-end space-x-3">
                   <div className="text-right">
                     <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full">
                       +{item.marksRecoverable} Marks
                     </span>
                   </div>
-                  <div className={`p-1.5 rounded-lg ${isSelected ? 'text-indigo-400' : 'text-slate-600'}`}>
-                    <ArrowRight className="w-4 h-4" />
-                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedSkillId(item.id);
+                      setViewMode('studio');
+                      onNavigateToStudio?.();
+                    }}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-sm"
+                  >
+                    <span>Launch Studio</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
       </div>
+      )}
 
       {/* Stage 6: Multimodal Intervention Studio */}
+      {(viewMode === 'studio' || viewMode === 'all') && (
       <div className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
         {/* Studio Tabs */}
         <div className="border-b border-slate-800 p-4 bg-slate-950/60 flex flex-wrap items-center justify-between gap-3">
@@ -569,15 +624,29 @@ export const InterventionStudio: React.FC<InterventionStudioProps> = ({ onNaviga
             <span>Estimated time to lock in mastery: <strong>5 mins</strong></span>
           </div>
 
-          <button
-            onClick={onNavigateToReassessment}
-            className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:brightness-110 shadow-lg shadow-emerald-600/20 transition-all"
-          >
-            <span>Lock in +8 Marks with Reassessment</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="flex items-center space-x-3">
+            {viewMode === 'studio' && (
+              <button
+                onClick={() => {
+                  setViewMode('recovery');
+                  onNavigateToRecovery?.();
+                }}
+                className="px-3.5 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                ← Back to Roadmap
+              </button>
+            )}
+            <button
+              onClick={onNavigateToReassessment}
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold hover:brightness-110 shadow-lg shadow-emerald-600/20 transition-all"
+            >
+              <span>Lock in +8 Marks with Reassessment</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
