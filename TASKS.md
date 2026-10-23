@@ -181,9 +181,9 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 ### Day 5: Demo Lock, 15-Case Benchmark, Backup Video & Pitch
 
 #### P1: Core Systems & Integration
-- [ ] **Task 5.1:** Full Code Freeze on `dev` $\to$ Merge to `main`. Tag `v1.0.0-hackathon`.
-- [ ] **Task 5.2:** Create one-click demo startup script (`./run_demo.sh`) and pre-seed demo database (`backend/scripts/seed_demo_data.py`).
-- [ ] **Task 5.3:** Finalize 3-Minute Live Demo Pitch Script & Slide Deck.
+- [✅] **Task 5.1:** Full Code Freeze on `dev` $\to$ Merge to `main`. Tag `v1.0.0-hackathon`.
+- [✅] **Task 5.2:** Create one-click demo startup script (`./run_demo.sh`) and pre-seed demo database (`backend/scripts/seed_demo_data.py`).
+- [✅] **Task 5.3:** Finalize 3-Minute Live Demo Pitch Script & Slide Deck.
 
 #### P2: Stage 1 Pod (Ingestion & RAG)
 - [ ] **Task 5.4:** Verify all document badges and citations display instant slide numbers during demo walkthrough.
