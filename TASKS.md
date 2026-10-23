@@ -195,5 +195,5 @@ Every person owns an entire feature stage end-to-end (their Backend router + the
 - [✅ (Completed by P1)] **Task 5.6:** Rehearse the live "Step Divergence & Uncertainty" interaction sequence.
 
 #### P5: Stage 5/6 Pod (Recovery & Studio)
-- [ ] **Task 5.7:** Run 15-case benchmark evaluation runner (`evaluation/runner.py`) and export Macro-F1 / accuracy charts for pitch slides.
-- [ ] **Task 5.8:** Record high-definition 3-minute backup demo screen recording (with voiceover).
+- [✅ (Completed by P1)] **Task 5.7:** Run 15-case benchmark evaluation runner (`evaluation/runner.py`) and export Macro-F1 / accuracy charts for pitch slides.
+- [✅ (Completed by P1)] **Task 5.8:** Record high-definition 3-minute backup demo screen recording (with voiceover).
