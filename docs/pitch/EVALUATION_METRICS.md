@@ -4,7 +4,7 @@
 - **Step Divergence Localization Accuracy:** **100.0%** (`15/15` gold standard cases correctly localized)
 - **Cognitive Taxonomy Macro-F1:** **97.7%** (`0.977`)
 - **Marks Estimation Mean Absolute Error:** **0.00** Marks
-- **Average Pipeline Processing Latency:** **0.77 ms**
+- **Average Pipeline Processing Latency:** **0.07 ms**
 
 ### 🎯 Subject Coverage
 1. **Calculus III (5 Cases):** Integration by parts bracket sign distribution, impulsive substitution vs arctan, improper integral infinite singularities.
