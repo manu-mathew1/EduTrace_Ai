@@ -9,6 +9,7 @@ import { ReassessmentPage } from './pages/ReassessmentPage';
 import { AuthPage } from './pages/AuthPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { CourseProvider } from './context/CourseContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -70,11 +71,13 @@ const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <CourseProvider>
-        <AppContent />
-      </CourseProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <CourseProvider>
+          <AppContent />
+        </CourseProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

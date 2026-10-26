@@ -16,10 +16,13 @@ import {
   GraduationCap,
   Plus,
   BookOpen,
-  Check
+  Check,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCourses } from '../../context/CourseContext';
+import { useTheme } from '../../context/ThemeContext';
 import { CreateCourseModal } from '../course/CreateCourseModal';
 
 export type NavTab = 'dashboard' | 'ingestion' | 'intake' | 'forensics' | 'recovery' | 'studio' | 'reassessment';
@@ -33,6 +36,7 @@ interface ShellProps {
 export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children }) => {
   const { user, logout, switchPersona, personas } = useAuth();
   const { courses, activeCourse, activeCourseId, setActiveCourseId } = useCourses();
+  const { theme, toggleTheme } = useTheme();
   const [showPersonaMenu, setShowPersonaMenu] = useState(false);
   const [showCourseMenu, setShowCourseMenu] = useState(false);
   const [showCreateCourseModal, setShowCreateCourseModal] = useState(false);
@@ -191,6 +195,26 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
               <span className="text-[#8A8F98] text-[11px]">Setup Pending</span>
             </div>
           )}
+
+          {/* Theme Switcher Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-[#121316] border border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.04] text-xs transition-all text-[#8A8F98] hover:text-[#F7F8F8]"
+            title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+            aria-label="Toggle light or dark theme"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-[#E59934] transition-transform hover:rotate-45" />
+                <span className="hidden sm:inline text-xs font-medium text-[#F7F8F8]">Light</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-[#5E6AD2] transition-transform hover:-rotate-12" />
+                <span className="hidden sm:inline text-xs font-medium text-[#F7F8F8]">Dark</span>
+              </>
+            )}
+          </button>
 
           {/* Persona Menu Trigger */}
           <div className="relative">

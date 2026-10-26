@@ -11,11 +11,15 @@ import {
   AlertCircle,
   BookOpen,
   Zap,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export const AuthPage: React.FC = () => {
   const { login, register, switchPersona, personas, authError } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [tab, setTab] = useState<'signin' | 'register'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,6 +39,28 @@ export const AuthPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#08090a] text-[#F7F8F8] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
+      {/* Top Right: Theme Switcher Toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <button
+          onClick={toggleTheme}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#121316] border border-white/[0.08] hover:border-white/[0.16] hover:bg-white/[0.04] text-xs transition-all shadow-sm text-[#8A8F98] hover:text-[#F7F8F8]"
+          title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+          aria-label="Toggle light or dark theme"
+        >
+          {theme === 'dark' ? (
+            <>
+              <Sun className="w-3.5 h-3.5 text-[#E59934] transition-transform hover:rotate-45" />
+              <span className="text-xs font-medium text-[#F7F8F8]">Light</span>
+            </>
+          ) : (
+            <>
+              <Moon className="w-3.5 h-3.5 text-[#5E6AD2] transition-transform hover:-rotate-12" />
+              <span className="text-xs font-medium text-[#F7F8F8]">Dark</span>
+            </>
+          )}
+        </button>
+      </div>
+
       {/* Subtle Linear top light-cone effect */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-gradient-to-b from-[#5E6AD2]/15 via-transparent to-transparent blur-3xl pointer-events-none" />
 
