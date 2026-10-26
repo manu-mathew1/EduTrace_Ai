@@ -20,68 +20,111 @@ interface CourseContextType {
 
 const CourseContext = createContext<CourseContextType | undefined>(undefined);
 
-const DEMO_COURSES: CourseResponse[] = [
-  {
-    course_id: 'course_calc_301',
-    title: 'Calculus III: Multivariable & Advanced Integration',
-    subject_archetype: KnowledgeArchetype.PROCEDURAL,
-    target_score: 75,
-    current_baseline: 50,
-    target_exam_date: '2026-10-28',
-    created_at: new Date().toISOString(),
-    is_calibrated: true,
-  },
-  {
-    course_id: 'course_cs_210',
-    title: 'CS 210: Data Structures & Algorithms',
-    subject_archetype: KnowledgeArchetype.PROCEDURAL,
-    target_score: 85,
-    current_baseline: 60,
-    target_exam_date: '2026-11-04',
-    created_at: new Date().toISOString(),
-    is_calibrated: true,
-  },
-  {
-    course_id: 'course_econ_202',
-    title: 'ECON 202: Intermediate Macroeconomics',
-    subject_archetype: KnowledgeArchetype.CONCEPTUAL,
-    target_score: 80,
-    current_baseline: 55,
-    target_exam_date: '2026-11-12',
-    created_at: new Date().toISOString(),
-    is_calibrated: true,
-  },
-];
+const getInitialCoursesForUser = (user: any): CourseResponse[] => {
+  if (!user) return [];
+  if (user.id === 'std_rahul_99') {
+    return [
+      {
+        course_id: 'course_calc_301',
+        title: 'Calculus III: Multivariable & Advanced Integration',
+        subject_archetype: KnowledgeArchetype.PROCEDURAL,
+        target_score: 75,
+        current_baseline: 50,
+        target_exam_date: '2026-10-28',
+        created_at: new Date().toISOString(),
+        user_id: 'std_rahul_99',
+        is_calibrated: true,
+      },
+    ];
+  }
+  if (user.id === 'std_priya_88') {
+    return [
+      {
+        course_id: 'course_econ_202',
+        title: 'ECON 202: Intermediate Macroeconomics',
+        subject_archetype: KnowledgeArchetype.CONCEPTUAL,
+        target_score: 80,
+        current_baseline: 55,
+        target_exam_date: '2026-11-12',
+        created_at: new Date().toISOString(),
+        user_id: 'std_priya_88',
+        is_calibrated: true,
+      },
+    ];
+  }
+  if (user.id === 'std_alex_77') {
+    return [
+      {
+        course_id: 'course_cs_210',
+        title: 'CS 210: Data Structures & Algorithms',
+        subject_archetype: KnowledgeArchetype.PROCEDURAL,
+        target_score: 85,
+        current_baseline: 60,
+        target_exam_date: '2026-11-04',
+        created_at: new Date().toISOString(),
+        user_id: 'std_alex_77',
+        is_calibrated: true,
+      },
+    ];
+  }
+  return [];
+};
 
 export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const isDemo = user?.id === 'std_rahul_99' || user?.id === 'std_priya_88' || user?.id === 'std_alex_77';
 
   const [courses, setCourses] = useState<CourseResponse[]>(() => {
-    return isDemo ? DEMO_COURSES : [];
+    return getInitialCoursesForUser(user);
   });
   const [activeCourseId, setActiveCourseIdState] = useState<string>(() => {
-    if (isDemo) {
+    if (user?.id === 'std_rahul_99') {
       return localStorage.getItem('edutrace_active_course') || 'course_calc_301';
     }
-    return localStorage.getItem('edutrace_active_course') || '';
+    if (user?.id === 'std_priya_88') {
+      return localStorage.getItem('edutrace_active_course') || 'course_econ_202';
+    }
+    if (user?.id === 'std_alex_77') {
+      return localStorage.getItem('edutrace_active_course') || 'course_cs_210';
+    }
+    return user?.primary_course_id || localStorage.getItem('edutrace_active_course') || '';
   });
   const [isLoadingCourses, setIsLoadingCourses] = useState<boolean>(true);
 
   const fetchCourses = async () => {
     try {
-      const url = user?.id ? `/api/courses?user_id=${encodeURIComponent(user.id)}` : '/api/courses';
-      const res = await fetch(url);
+      if (!user?.id) {
+        setCourses([]);
+        setActiveCourseIdState('');
+        return;
+      }
+
+      const token = localStorage.getItem('edutrace_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const url = `/api/courses?user_id=${encodeURIComponent(user.id)}`;
+      const res = await fetch(url, { headers });
       if (res.ok) {
         const data: CourseResponse[] = await res.json();
         if (Array.isArray(data)) {
-          setCourses(data);
-          if (data.length > 0) {
+          // Strictly filter to ensure only courses belonging to this student are displayed
+          const studentCourses = data.filter((c) => {
+            if (c.user_id) return c.user_id === user.id;
+            if (user.id === 'std_rahul_99') return c.course_id === 'course_calc_301';
+            if (user.id === 'std_priya_88') return c.course_id === 'course_econ_202' || c.course_id === 'course_econ_macro';
+            if (user.id === 'std_alex_77') return c.course_id === 'course_cs_210';
+            return false;
+          });
+
+          setCourses(studentCourses);
+          if (studentCourses.length > 0) {
             const saved = localStorage.getItem('edutrace_active_course');
-            if (saved && data.some((c) => c.course_id === saved)) {
+            if (saved && studentCourses.some((c) => c.course_id === saved)) {
               setActiveCourseIdState(saved);
             } else {
-              setActiveCourseIdState(data[0].course_id);
+              setActiveCourseIdState(studentCourses[0].course_id);
             }
           } else {
             setActiveCourseIdState('');
@@ -98,6 +141,21 @@ export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   useEffect(() => {
     fetchCourses();
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id) {
+      const initial = getInitialCoursesForUser(user);
+      if (initial.length > 0) {
+        setCourses((prev) => {
+          const belongsToCurrent = prev.every((c) => !c.user_id || c.user_id === user.id);
+          return belongsToCurrent && prev.length > 0 ? prev : initial;
+        });
+      }
+    } else {
+      setCourses([]);
+      setActiveCourseIdState('');
+    }
   }, [user?.id]);
 
   // When user switches persona or logs in, sync active course if user has a primary_course_id
@@ -153,9 +211,16 @@ export const CourseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         is_calibrated: false,
       };
 
-      const res = await fetch('/api/courses', {
+      const token = localStorage.getItem('edutrace_token');
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const url = user?.id ? `/api/courses?user_id=${encodeURIComponent(user.id)}` : '/api/courses';
+      const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload),
       });
 

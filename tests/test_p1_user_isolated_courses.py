@@ -83,3 +83,37 @@ def test_fresh_student_registration_and_isolated_evaluation():
     twin_res2 = client.get(f"/api/twin/profile?course_id={course_id}&student_id={user_id}")
     assert twin_res2.status_code == 200
     assert twin_res2.json()["is_calibrated"] is True
+
+
+def test_persona_cross_course_isolation():
+    """
+    Verifies that Rahul Sharma, Priya Patel, Alex Chen, and new students
+    NEVER see each other's enrolled subjects in the subjects list.
+    """
+    # 1. Rahul Sharma (std_rahul_99) should only see Calculus III
+    rahul_res = client.get("/api/courses?user_id=std_rahul_99")
+    assert rahul_res.status_code == 200
+    rahul_courses = rahul_res.json()
+    rahul_ids = [c["course_id"] for c in rahul_courses]
+    assert "course_calc_301" in rahul_ids
+    assert "course_cs_210" not in rahul_ids, "Rahul Sharma must NOT see CS 210!"
+    assert "course_econ_202" not in rahul_ids, "Rahul Sharma must NOT see ECON 202!"
+
+    # 2. Priya Patel (std_priya_88) should only see Macroeconomics
+    priya_res = client.get("/api/courses?user_id=std_priya_88")
+    assert priya_res.status_code == 200
+    priya_courses = priya_res.json()
+    priya_ids = [c["course_id"] for c in priya_courses]
+    assert "course_econ_202" in priya_ids
+    assert "course_calc_301" not in priya_ids, "Priya Patel must NOT see Calculus III!"
+    assert "course_cs_210" not in priya_ids, "Priya Patel must NOT see CS 210!"
+
+    # 3. Alex Chen (std_alex_77) should only see CS 210
+    alex_res = client.get("/api/courses?user_id=std_alex_77")
+    assert alex_res.status_code == 200
+    alex_courses = alex_res.json()
+    alex_ids = [c["course_id"] for c in alex_courses]
+    assert "course_cs_210" in alex_ids
+    assert "course_calc_301" not in alex_ids, "Alex Chen must NOT see Calculus III!"
+    assert "course_econ_202" not in alex_ids, "Alex Chen must NOT see ECON 202!"
+

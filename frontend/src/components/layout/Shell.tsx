@@ -86,31 +86,38 @@ export const Shell: React.FC<ShellProps> = ({ currentTab, onSelectTab, children 
                   Your Enrolled Subjects
                 </div>
                 <div className="space-y-0.5 my-1 max-h-56 overflow-y-auto">
-                  {courses.map((c) => {
-                    const isSelected = c.course_id === activeCourseId;
-                    return (
-                      <button
-                        key={c.course_id}
-                        onClick={() => {
-                          setActiveCourseId(c.course_id);
-                          setShowCourseMenu(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left text-xs transition-all ${
-                          isSelected
-                            ? 'bg-[#5E6AD2]/15 text-[#F7F8F8] border border-[#5E6AD2]/30 font-medium'
-                            : 'text-[#8A8F98] hover:text-[#F7F8F8] hover:bg-white/[0.04]'
-                        }`}
-                      >
-                        <div className="min-w-0 flex-1 pr-2">
-                          <p className="truncate text-xs font-medium text-[#F7F8F8]">{c.title}</p>
-                          <p className="text-[10px] text-[#8A8F98]">
-                            Goal: {c.target_score}% • Exam: {c.target_exam_date || 'TBD'}
-                          </p>
-                        </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[#27C57E] shrink-0" />}
-                      </button>
-                    );
-                  })}
+                  {courses.length === 0 ? (
+                    <div className="px-3 py-4 text-center">
+                      <p className="text-xs text-[#8A8F98]">No enrolled subjects yet.</p>
+                      <p className="text-[10px] text-white/40 mt-0.5">Click below to add your first subject.</p>
+                    </div>
+                  ) : (
+                    courses.map((c) => {
+                      const isSelected = c.course_id === activeCourseId;
+                      return (
+                        <button
+                          key={c.course_id}
+                          onClick={() => {
+                            setActiveCourseId(c.course_id);
+                            setShowCourseMenu(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left text-xs transition-all ${
+                            isSelected
+                              ? 'bg-[#5E6AD2]/15 text-[#F7F8F8] border border-[#5E6AD2]/30 font-medium'
+                              : 'text-[#8A8F98] hover:text-[#F7F8F8] hover:bg-white/[0.04]'
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1 pr-2">
+                            <p className="truncate text-xs font-medium text-[#F7F8F8]">{c.title}</p>
+                            <p className="text-[10px] text-[#8A8F98]">
+                              Goal: {c.target_score}% • Exam: {c.target_exam_date || 'TBD'}
+                            </p>
+                          </div>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-[#27C57E] shrink-0" />}
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
 
                 <div className="pt-1 mt-1 border-t border-white/[0.06]">

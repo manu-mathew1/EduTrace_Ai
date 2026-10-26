@@ -135,6 +135,39 @@
 
 ---
 
+### [Day 5 - 2026-10-26 15:40] - P1 (Tech Lead & Core Systems — Strict Multi-Tenant Enrolled Subject Isolation)
+- **Branch:** `dev` $\to$ `main`
+- **Objective / Task (Task 5.13):**
+  - Fix enrolled subjects list showing subjects of other students in header switcher dropdown (`Shell.tsx`) and Dashboard quick selector (`DashboardPage.tsx`).
+  - Guarantee absolute tenant isolation across all student personas and newly registered accounts.
+- **Root Cause Identified:**
+  - `backend/api/courses.py` previously contained a demo fallback query mapping Rahul Sharma (`std_rahul_99`) to `CourseModel.id.in_(["course_calc_301", "course_cs_210", "course_econ_202"])`, inadvertently forcing all benchmark courses into Rahul's enrolled subjects list.
+  - `frontend/src/context/CourseContext.tsx` statically initialized `courses` with `DEMO_COURSES` containing all 3 courses, which displayed before or during auth resolution.
+  - SQLite database had courses with differing `user_id` assignments and orphaned test records.
+- **Architectural Fixes Implemented:**
+  - **1. Backend Strict Query Isolation (`backend/api/courses.py`):**
+    - Updated `seed_default_courses` to associate `course_calc_301` with `std_rahul_99`, `course_cs_210` with `std_alex_77`, and `course_econ_202` with `std_priya_88`.
+    - Updated `list_courses` to strictly enforce single-persona isolation:
+      - `std_rahul_99` queries `(CourseModel.user_id == effective_user_id) | (CourseModel.id == "course_calc_301")`.
+      - `std_priya_88` queries `(CourseModel.user_id == effective_user_id) | (CourseModel.id.in_(["course_econ_202", "course_econ_macro"]))`.
+      - `std_alex_77` queries `(CourseModel.user_id == effective_user_id) | (CourseModel.id == "course_cs_210")`.
+      - Any real student queries strictly `CourseModel.user_id == effective_user_id`.
+  - **2. Client-Side Dynamic User Initialization & Defense-in-Depth (`frontend/src/context/CourseContext.tsx`):**
+    - Replaced static `DEMO_COURSES` with `getInitialCoursesForUser(user)` returning only that student's specific subject.
+    - Updated `fetchCourses()`: if unauthenticated, sets courses to `[]`; passes `?user_id=${user.id}` and `Authorization: Bearer ${token}`; filters response data so courses belonging to other users are rejected client-side.
+    - Updated `createNewCourse()` to pass user ID query param and `Authorization` bearer token header.
+  - **3. Shell Dropdown UI Polish (`frontend/src/components/layout/Shell.tsx`):**
+    - Added clean empty state indicator ("No enrolled subjects yet. Click below to add your first subject.") when `courses.length === 0`.
+  - **4. Twin Service Rounding Robustness (`backend/services/twin_service.py`):**
+    - Hardened `record_reassessment_outcome` against rounding saturation at high alpha levels.
+- **Verification & Deployment:**
+  - Added new integration test `test_persona_cross_course_isolation` in `tests/test_p1_user_isolated_courses.py` asserting that Rahul, Priya, Alex, and new users never see each other's courses.
+  - Rebuilt production frontend bundle: `npm run build` succeeded with zero TypeScript/Vite errors (3.97s).
+  - Pytest full suite: **85 / 85 tests passing (100% pass rate)**.
+  - Production uvicorn multi-worker daemon reloaded on `http://0.0.0.0:8000/`.
+
+---
+
 ### [Day 5 - 2026-10-24 00:30] - P1 (Tech Lead & Core Systems — Clean Zero-State Registration & Authentic Diagnostic Flow)
 - **Branch:** `dev` $\to$ `main`
 - **Objective / Task (Task 5.12):**

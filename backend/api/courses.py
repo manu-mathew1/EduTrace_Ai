@@ -39,7 +39,7 @@ async def seed_default_courses(db: AsyncSession) -> List[CourseModel]:
         ),
         CourseModel(
             id="course_cs_210",
-            user_id="std_priya_88",
+            user_id="std_alex_77",
             is_calibrated=True,
             title="CS 210: Data Structures & Algorithms",
             subject_archetype="procedural",
@@ -49,7 +49,7 @@ async def seed_default_courses(db: AsyncSession) -> List[CourseModel]:
         ),
         CourseModel(
             id="course_econ_202",
-            user_id="std_marcus_77",
+            user_id="std_priya_88",
             is_calibrated=True,
             title="ECON 202: Intermediate Macroeconomics",
             subject_archetype="conceptual",
@@ -98,9 +98,13 @@ async def list_courses(
     if effective_user_id:
         if effective_user_id in ["std_rahul_99", "demo"]:
             res = await db.execute(select(CourseModel).where(
-                (CourseModel.user_id == effective_user_id) | (CourseModel.id.in_(["course_calc_301", "course_cs_210", "course_econ_202"]))
+                (CourseModel.user_id == effective_user_id) | (CourseModel.id == "course_calc_301")
             ).order_by(CourseModel.created_at.asc()))
         elif effective_user_id == "std_priya_88":
+            res = await db.execute(select(CourseModel).where(
+                (CourseModel.user_id == effective_user_id) | (CourseModel.id.in_(["course_econ_202", "course_econ_macro"]))
+            ).order_by(CourseModel.created_at.asc()))
+        elif effective_user_id == "std_alex_77":
             res = await db.execute(select(CourseModel).where(
                 (CourseModel.user_id == effective_user_id) | (CourseModel.id == "course_cs_210")
             ).order_by(CourseModel.created_at.asc()))

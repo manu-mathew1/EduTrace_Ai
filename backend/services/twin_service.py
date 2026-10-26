@@ -311,7 +311,7 @@ async def record_reassessment_outcome(
         evidence_weight=3.0
     )
 
-    is_improved = new_mastery > prev_mastery
+    is_improved = (new_mastery > prev_mastery) or (marks_awarded / marks_possible >= 0.7 and new_mastery >= prev_mastery)
     marks_recovered_secured = round(potential_recoverable * (marks_awarded / marks_possible), 1)
 
     celebration = (
